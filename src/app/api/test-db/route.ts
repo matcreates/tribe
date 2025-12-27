@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@vercel/postgres";
+import { Pool } from "pg";
 
 export async function GET() {
   const envCheck = {
-    POSTGRES_URL: !!process.env.POSTGRES_URL,
-    POSTGRES_URL_VALUE: process.env.POSTGRES_URL?.substring(0, 30) + "...",
+    DATABASE_URL: !!process.env.DATABASE_URL,
   };
 
-  const client = createClient();
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ 
+      success: false, 
+      envCheck,
+      error: "DATABASE_URL environment variable not set"
+    }, { status: 500 });
+  }
+
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
   
   try {
-    await client.connect();
-    const result = await client.query("SELECT NOW() as current_time");
-    await client.end();
+    const result = await pool.query("SELECT NOW() as current_time");
+    await pool.end();
     
     return NextResponse.json({ 
       success: true, 
