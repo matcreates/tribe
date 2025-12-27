@@ -2,8 +2,21 @@ import { NextResponse } from "next/server";
 import { Pool } from "pg";
 
 export async function GET() {
+  const dbUrl = process.env.DATABASE_URL || "";
+  
+  // Extract hostname from URL for debugging (hide password)
+  let hostname = "unknown";
+  try {
+    const url = new URL(dbUrl);
+    hostname = url.hostname;
+  } catch {
+    hostname = "invalid-url";
+  }
+
   const envCheck = {
-    DATABASE_URL: !!process.env.DATABASE_URL,
+    DATABASE_URL_exists: !!process.env.DATABASE_URL,
+    DATABASE_URL_hostname: hostname,
+    DATABASE_URL_length: dbUrl.length,
   };
 
   if (!process.env.DATABASE_URL) {
@@ -29,6 +42,7 @@ export async function GET() {
       time: result.rows[0].current_time 
     });
   } catch (error) {
+    await pool.end();
     return NextResponse.json(
       { 
         success: false,
