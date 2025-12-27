@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { Pool } from "pg";
 
 export async function GET() {
+  // Check ALL database-related env vars
+  const allEnvVars: Record<string, string> = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.includes('POSTGRES') || key.includes('DATABASE') || key.includes('PG')) {
+      const value = process.env[key] || "";
+      // Show first 40 chars only (hide passwords)
+      allEnvVars[key] = value.length > 40 ? value.substring(0, 40) + "..." : value;
+    }
+  }
+
   const dbUrl = process.env.DATABASE_URL || "";
   
-  // Extract hostname from URL for debugging (hide password)
   let hostname = "unknown";
   try {
     const url = new URL(dbUrl);
@@ -14,9 +23,9 @@ export async function GET() {
   }
 
   const envCheck = {
-    DATABASE_URL_exists: !!process.env.DATABASE_URL,
     DATABASE_URL_hostname: hostname,
     DATABASE_URL_length: dbUrl.length,
+    all_db_env_vars: allEnvVars,
   };
 
   if (!process.env.DATABASE_URL) {
