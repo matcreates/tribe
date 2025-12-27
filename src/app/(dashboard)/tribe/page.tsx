@@ -8,7 +8,7 @@ interface Subscriber {
   id: string;
   email: string;
   name: string | null;
-  created_at: string;
+  created_at: Date;
 }
 
 export default function TribePage() {
