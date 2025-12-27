@@ -2,17 +2,8 @@ import { NextResponse } from "next/server";
 import { Pool } from "pg";
 
 export async function GET() {
-  // Check ALL database-related env vars
-  const allEnvVars: Record<string, string> = {};
-  for (const key of Object.keys(process.env)) {
-    if (key.includes('POSTGRES') || key.includes('DATABASE') || key.includes('PG')) {
-      const value = process.env[key] || "";
-      // Show first 40 chars only (hide passwords)
-      allEnvVars[key] = value.length > 40 ? value.substring(0, 40) + "..." : value;
-    }
-  }
-
-  const dbUrl = process.env.DATABASE_URL || "";
+  // Using TRIBE_DATABASE_URL to avoid Vercel/Supabase integration overrides
+  const dbUrl = process.env.TRIBE_DATABASE_URL || "";
   
   let hostname = "unknown";
   try {
@@ -23,21 +14,21 @@ export async function GET() {
   }
 
   const envCheck = {
-    DATABASE_URL_hostname: hostname,
-    DATABASE_URL_length: dbUrl.length,
-    all_db_env_vars: allEnvVars,
+    TRIBE_DATABASE_URL_hostname: hostname,
+    TRIBE_DATABASE_URL_length: dbUrl.length,
+    TRIBE_DATABASE_URL_preview: dbUrl.length > 40 ? dbUrl.substring(0, 40) + "..." : dbUrl,
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.TRIBE_DATABASE_URL) {
     return NextResponse.json({ 
       success: false, 
       envCheck,
-      error: "DATABASE_URL environment variable not set"
+      error: "TRIBE_DATABASE_URL environment variable not set"
     }, { status: 500 });
   }
 
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.TRIBE_DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   });
   
