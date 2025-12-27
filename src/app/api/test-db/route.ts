@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { sql } from "@vercel/postgres";
+import { createClient } from "@vercel/postgres";
 
 export async function GET() {
-  // First, check if env vars exist
   const envCheck = {
     POSTGRES_URL: !!process.env.POSTGRES_URL,
-    POSTGRES_HOST: !!process.env.POSTGRES_HOST,
-    POSTGRES_DATABASE: !!process.env.POSTGRES_DATABASE,
+    POSTGRES_URL_VALUE: process.env.POSTGRES_URL?.substring(0, 30) + "...",
   };
 
+  const client = createClient();
+  
   try {
-    // Simple test query
-    const result = await sql`SELECT NOW() as current_time`;
+    await client.connect();
+    const result = await client.query("SELECT NOW() as current_time");
+    await client.end();
     
     return NextResponse.json({ 
       success: true, 
@@ -24,10 +25,8 @@ export async function GET() {
         success: false,
         envCheck,
         error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );
   }
 }
-
