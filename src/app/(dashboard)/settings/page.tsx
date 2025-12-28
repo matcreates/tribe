@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getTribeSettings, updateTribeSettings } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 
@@ -10,6 +10,8 @@ export default function SettingsPage() {
   const [ownerAvatar, setOwnerAvatar] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
@@ -26,6 +28,53 @@ export default function SettingsPage() {
       console.error("Failed to load settings:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      showToast("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      setOwnerAvatar(data.url);
+      showToast("Image uploaded successfully");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to upload image";
+      showToast(message);
+    } finally {
+      setIsUploading(false);
+      e.target.value = ""; // Reset file input
     }
   };
 
@@ -61,8 +110,8 @@ export default function SettingsPage() {
 
         {/* Profile Image */}
         <div className="mb-5">
-          <label className="block text-[12px] text-white/40 mb-2">Profile image URL</label>
-          <div className="flex items-center gap-3">
+          <label className="block text-[12px] text-white/40 mb-2">Profile image</label>
+          <div className="flex items-center gap-3 mb-2">
             {ownerAvatar && (
               <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -76,17 +125,33 @@ export default function SettingsPage() {
                 />
               </div>
             )}
+            <button
+              type="button"
+              onClick={handleFileSelect}
+              disabled={isUploading}
+              className="px-4 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.08em] text-white/70 transition-colors disabled:opacity-50 hover:bg-white/[0.08]"
+              style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.08)' }}
+            >
+              {isUploading ? "UPLOADING..." : "UPLOAD"}
+            </button>
             <input
-              type="url"
-              value={ownerAvatar}
-              onChange={(e) => setOwnerAvatar(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="flex-1 px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors"
-              style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
             />
           </div>
+          <input
+            type="url"
+            value={ownerAvatar}
+            onChange={(e) => setOwnerAvatar(e.target.value)}
+            placeholder="Or paste image URL"
+            className="w-full px-3.5 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors"
+            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+          />
           <p className="text-[11px] text-white/25 mt-1.5">
-            Paste an image URL (or leave empty to use initials)
+            Upload an image or paste a URL (leave empty to use initials)
           </p>
         </div>
 
