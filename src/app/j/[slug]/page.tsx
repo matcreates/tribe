@@ -116,19 +116,24 @@ export default function PublicJoinPage({ params }: PageProps) {
         <div className="flex flex-col items-center text-center">
           {/* Avatar */}
           <div 
-            className="w-14 h-14 rounded-full mb-2.5 flex items-center justify-center overflow-hidden"
+            className="w-14 h-14 rounded-full mb-2.5 flex items-center justify-center overflow-hidden relative"
             style={{ background: 'linear-gradient(135deg, #2d8a8a 0%, #1a5f5f 100%)' }}
           >
             {ownerAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img 
-                src={ownerAvatar} 
-                alt={ownerName}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={ownerAvatar} 
+                  alt={ownerName}
+                  className="w-full h-full object-cover absolute inset-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <span className="text-xl text-white/90 font-medium relative z-0">
+                  {ownerName.charAt(0).toUpperCase()}
+                </span>
+              </>
             ) : (
               <span className="text-xl text-white/90 font-medium">
                 {ownerName.charAt(0).toUpperCase()}
