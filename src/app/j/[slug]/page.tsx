@@ -24,7 +24,8 @@ export default function PublicJoinPage({ params }: PageProps) {
     setError("");
     
     try {
-      await joinTribe(resolvedParams.slug, email.trim());
+      const baseUrl = window.location.origin;
+      await joinTribe(resolvedParams.slug, email.trim(), baseUrl);
       setIsJoined(true);
       showToast("Verification email sent!");
     } catch (err) {

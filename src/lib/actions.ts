@@ -16,7 +16,6 @@ import {
 } from "./db";
 import { sendVerificationEmail } from "./email";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 
 async function getTribe() {
   const session = await auth();
@@ -166,44 +165,32 @@ export async function getDashboardStats() {
 }
 
 // Public action for join page
-export async function joinTribe(slug: string, email: string) {
-  try {
-    const tribe = await getTribeBySlug(slug);
-    if (!tribe) {
-      throw new Error("Tribe not found");
-    }
-    
-    const subscriber = await dbAddSubscriber(tribe.id, email);
-    if (!subscriber) {
-      throw new Error("Already subscribed");
-    }
-    
-    // Get base URL from headers
-    const headersList = await headers();
-    const host = headersList.get("host") || "localhost:3000";
-    const protocol = host.includes("localhost") ? "http" : "https";
-    const baseUrl = `${protocol}://${host}`;
-    
-    // Send verification email
-    if (subscriber.verification_token) {
-      try {
-        await sendVerificationEmail(
-          email,
-          tribe.name,
-          tribe.owner_name || "Anonymous",
-          subscriber.verification_token,
-          baseUrl
-        );
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-        // Still return success - subscriber is added, just email failed
-        return { success: true, needsVerification: true, emailError: true };
-      }
-    }
-    
-    return { success: true, needsVerification: true };
-  } catch (error) {
-    console.error("joinTribe error:", error);
-    throw error;
+export async function joinTribe(slug: string, email: string, baseUrl?: string) {
+  const tribe = await getTribeBySlug(slug);
+  if (!tribe) {
+    throw new Error("Tribe not found");
   }
+  
+  const subscriber = await dbAddSubscriber(tribe.id, email);
+  if (!subscriber) {
+    throw new Error("Already subscribed");
+  }
+  
+  // Send verification email if we have a token and base URL
+  if (subscriber.verification_token && baseUrl) {
+    try {
+      await sendVerificationEmail(
+        email,
+        tribe.name,
+        tribe.owner_name || "Anonymous",
+        subscriber.verification_token,
+        baseUrl
+      );
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Still return success - subscriber is added, just email failed
+    }
+  }
+  
+  return { success: true, needsVerification: true };
 }
