@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 import { auth } from "@/lib/auth";
 import { getTribeByUserId, updateTribe } from "@/lib/db";
 
@@ -38,28 +39,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (max 2MB for base64 storage)
-    if (file.size > 2 * 1024 * 1024) {
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "File size must be less than 2MB" },
+        { error: "File size must be less than 5MB" },
         { status: 400 }
       );
     }
 
-    // Convert file to base64 data URL
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    // Upload to Vercel Blob
+    const blob = await put(`avatars/${tribe.id}-${Date.now()}.${file.name.split('.').pop()}`, file, {
+      access: 'public',
+      contentType: file.type,
+    });
 
-    // Update tribe with new avatar URL (base64 data URL)
+    // Update tribe with new avatar URL
     await updateTribe(tribe.id, {
-      owner_avatar: dataUrl,
+      owner_avatar: blob.url,
     });
 
     return NextResponse.json({
       success: true,
-      url: dataUrl,
+      url: blob.url,
     });
   } catch (error) {
     console.error("Upload avatar error:", error);
