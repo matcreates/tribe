@@ -38,8 +38,15 @@ export async function POST(request: NextRequest) {
         tribe.owner_name || "Anonymous",
         subscriber.verification_token,
         baseUrl
-      ).catch((err) => {
+      ).then((result) => {
+        console.log("Verification email sent:", result);
+      }).catch((err) => {
         console.error("Failed to send verification email:", err);
+      });
+    } else {
+      console.log("Skipping email send - missing token or baseUrl", { 
+        hasToken: !!subscriber.verification_token, 
+        baseUrl 
       });
     }
 

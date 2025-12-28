@@ -23,7 +23,9 @@ export async function sendVerificationEmail(
   const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
 
   const client = getResendClient();
-  const { error } = await client.emails.send({
+  console.log(`Sending verification email to: ${to}, token: ${verificationToken.substring(0, 8)}...`);
+  
+  const { data, error } = await client.emails.send({
     from: "Tribe <onboarding@resend.dev>", // Use your domain once verified in Resend
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
@@ -58,9 +60,10 @@ export async function sendVerificationEmail(
 
   if (error) {
     console.error("Failed to send verification email:", error);
-    throw new Error("Failed to send verification email");
+    throw new Error(`Failed to send verification email: ${error.message || JSON.stringify(error)}`);
   }
 
-  return { success: true };
+  console.log(`Verification email sent successfully to ${to}, email ID: ${data?.id}`);
+  return { success: true, emailId: data?.id };
 }
 
