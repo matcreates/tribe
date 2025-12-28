@@ -177,19 +177,18 @@ export async function joinTribe(slug: string, email: string, baseUrl?: string) {
   }
   
   // Send verification email if we have a token and base URL
+  // Don't fail the whole operation if email fails
   if (subscriber.verification_token && baseUrl) {
-    try {
-      await sendVerificationEmail(
-        email,
-        tribe.name,
-        tribe.owner_name || "Anonymous",
-        subscriber.verification_token,
-        baseUrl
-      );
-    } catch (emailError) {
-      console.error("Failed to send verification email:", emailError);
-      // Still return success - subscriber is added, just email failed
-    }
+    // Fire and forget - don't await, don't fail if it errors
+    sendVerificationEmail(
+      email,
+      tribe.name,
+      tribe.owner_name || "Anonymous",
+      subscriber.verification_token,
+      baseUrl
+    ).catch((emailError) => {
+      console.error("Failed to send verification email (non-blocking):", emailError);
+    });
   }
   
   return { success: true, needsVerification: true };

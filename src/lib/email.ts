@@ -1,6 +1,17 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResendClient() {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY environment variable is not set");
+    }
+    resend = new Resend(apiKey);
+  }
+  return resend;
+}
 
 export async function sendVerificationEmail(
   to: string,
@@ -11,7 +22,8 @@ export async function sendVerificationEmail(
 ) {
   const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
 
-  const { error } = await resend.emails.send({
+  const client = getResendClient();
+  const { error } = await client.emails.send({
     from: "Tribe <onboarding@resend.dev>", // Use your domain once verified in Resend
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
