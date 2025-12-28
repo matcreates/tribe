@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Toast, useToast } from "@/components/Toast";
 
 interface Settings {
@@ -17,10 +18,17 @@ interface JoinPageClientProps {
 export function JoinPageClient({ settings }: JoinPageClientProps) {
   const { toast, showToast, hideToast } = useToast();
 
-  const joinUrl = `${settings.slug}.tribe.com`;
-  const fullJoinUrl = typeof window !== "undefined" 
-    ? `${window.location.origin}/j/${settings.slug}` 
-    : "";
+  // Show the real, working URL
+  const [displayUrl, setDisplayUrl] = useState("");
+  const [fullJoinUrl, setFullJoinUrl] = useState("");
+
+  useEffect(() => {
+    const origin = window.location.origin;
+    const url = `${origin}/j/${settings.slug}`;
+    setFullJoinUrl(url);
+    // Show a cleaner version without https://
+    setDisplayUrl(url.replace(/^https?:\/\//, ""));
+  }, [settings.slug]);
 
   const copyLink = async () => {
     try {
@@ -40,7 +48,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
           style={{ background: 'rgba(255, 255, 255, 0.05)' }}
         >
           <LinkIcon className="w-4 h-4 text-white/35" />
-          <span className="flex-1 text-[13px] text-white/60">{joinUrl}</span>
+          <span className="flex-1 text-[13px] text-white/60 truncate">{displayUrl}</span>
           <button
             onClick={copyLink}
             className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors"
