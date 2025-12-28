@@ -12,7 +12,7 @@ export async function sendVerificationEmail(
   const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
 
   const { error } = await resend.emails.send({
-    from: "Tribe <noreply@resend.dev>", // Use your domain once verified in Resend
+    from: "Tribe <onboarding@resend.dev>", // Use your domain once verified in Resend
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
     html: `
