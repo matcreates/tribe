@@ -27,8 +27,11 @@ export async function sendVerificationEmail(
   console.log(`Resend API key present: ${!!process.env.RESEND_API_KEY}`);
   console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
   
+  // Use RESEND_FROM_EMAIL env var, or default to Resend's test address
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>";
+  
   const { data, error } = await client.emails.send({
-    from: "Tribe <onboarding@resend.dev>", // Use your domain once verified in Resend
+    from: fromEmail,
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
     html: `
