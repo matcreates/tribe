@@ -10,7 +10,7 @@ interface Subscriber {
   name: string | null;
   verified: boolean;
   verification_token: string | null;
-  created_at: Date;
+  created_at: string;
 }
 
 export default function TribePage() {
@@ -171,6 +171,20 @@ export default function TribePage() {
               >
                 <span className="flex-1 text-[13px] text-white/60 truncate">
                   {subscriber.email}
+                </span>
+                <span 
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-[4px] ${
+                    subscriber.verified 
+                      ? 'text-[#2d8a8a]/80' 
+                      : 'text-white/40'
+                  }`}
+                  style={{ 
+                    background: subscriber.verified 
+                      ? 'rgba(45, 138, 138, 0.15)' 
+                      : 'rgba(255, 255, 255, 0.05)' 
+                  }}
+                >
+                  {subscriber.verified ? 'Verified' : 'Non-Verified'}
                 </span>
                 <button
                   onClick={() => handleCopy(subscriber.email)}

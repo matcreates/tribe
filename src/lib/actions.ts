@@ -68,8 +68,13 @@ export async function updateTribeSettings(data: {
 // Subscriber actions
 export async function getSubscribers() {
   const tribe = await getTribe();
-  // Only return verified subscribers
-  return await getVerifiedSubscribersByTribeId(tribe.id);
+  // Return all subscribers (verified and unverified)
+  const subscribers = await getSubscribersByTribeId(tribe.id);
+  // Convert Date to string for frontend
+  return subscribers.map(s => ({
+    ...s,
+    created_at: s.created_at instanceof Date ? s.created_at.toISOString() : s.created_at as unknown as string,
+  }));
 }
 
 export async function addSubscriber(email: string, name?: string) {
