@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, use } from "react";
-import { joinTribe } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 
 interface PageProps {
@@ -25,18 +24,34 @@ export default function PublicJoinPage({ params }: PageProps) {
     
     try {
       const baseUrl = window.location.origin;
-      await joinTribe(resolvedParams.slug, email.trim(), baseUrl);
+      const response = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: resolvedParams.slug,
+          email: email.trim(),
+          baseUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error === "Already subscribed") {
+          setError("You're already subscribed!");
+        } else if (data.error === "Tribe not found") {
+          setError("This tribe doesn't exist");
+        } else {
+          setError(data.error || "Something went wrong");
+        }
+        return;
+      }
+
       setIsJoined(true);
       showToast("Verification email sent!");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
-      if (message === "Already subscribed") {
-        setError("You're already subscribed!");
-      } else if (message === "Tribe not found") {
-        setError("This tribe doesn't exist");
-      } else {
-        setError(message);
-      }
+      console.error("Join error:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
