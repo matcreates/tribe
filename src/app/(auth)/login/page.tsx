@@ -17,6 +17,8 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
+    console.log("Sign in attempt:", { email });
+
     try {
       const result = await signIn("credentials", {
         email,
@@ -24,14 +26,19 @@ export default function LoginPage() {
         redirect: false,
       });
 
+      console.log("Sign in result:", result);
+
       if (result?.error) {
-        setError("Invalid email or password");
-      } else {
+        setError("Invalid email or password: " + result.error);
+      } else if (result?.ok) {
         router.push("/dashboard");
         router.refresh();
+      } else {
+        setError("Unexpected response: " + JSON.stringify(result));
       }
-    } catch {
-      setError("Something went wrong");
+    } catch (err) {
+      console.error("Sign in error:", err);
+      setError("Something went wrong: " + String(err));
     } finally {
       setIsLoading(false);
     }
