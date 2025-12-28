@@ -30,23 +30,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send verification email (non-blocking)
+    // Send verification email
     if (subscriber.verification_token && baseUrl) {
-      sendVerificationEmail(
-        email,
-        tribe.name,
-        tribe.owner_name || "Anonymous",
-        subscriber.verification_token,
-        baseUrl
-      ).then((result) => {
-        console.log("Verification email sent:", result);
-      }).catch((err) => {
-        console.error("Failed to send verification email:", err);
-      });
+      try {
+        console.log("Attempting to send verification email...", { email, hasToken: !!subscriber.verification_token, baseUrl });
+        const emailResult = await sendVerificationEmail(
+          email,
+          tribe.name,
+          tribe.owner_name || "Anonymous",
+          subscriber.verification_token,
+          baseUrl
+        );
+        console.log("Verification email sent successfully:", emailResult);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Still return success - subscriber is added, just email failed
+        // But log it so we can see what went wrong
+      }
     } else {
       console.log("Skipping email send - missing token or baseUrl", { 
         hasToken: !!subscriber.verification_token, 
-        baseUrl 
+        baseUrl,
+        email 
       });
     }
 
