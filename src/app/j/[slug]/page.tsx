@@ -1,10 +1,18 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, useEffect, use } from "react";
 import { Toast, useToast } from "@/components/Toast";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+interface TribeSettings {
+  id: string;
+  name: string;
+  slug: string;
+  ownerName: string;
+  ownerAvatar: string | null;
 }
 
 export default function PublicJoinPage({ params }: PageProps) {
@@ -13,7 +21,25 @@ export default function PublicJoinPage({ params }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [error, setError] = useState("");
+  const [tribeSettings, setTribeSettings] = useState<TribeSettings | null>(null);
   const { toast, showToast, hideToast } = useToast();
+
+  useEffect(() => {
+    // Fetch tribe settings
+    fetch(`/api/tribe/${resolvedParams.slug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          setError(data.error);
+        } else {
+          setTribeSettings(data);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load tribe:", err);
+        setError("Failed to load tribe");
+      });
+  }, [resolvedParams.slug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +83,30 @@ export default function PublicJoinPage({ params }: PageProps) {
     }
   };
 
+  if (!tribeSettings && !error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(18, 18, 18)' }}>
+        <p className="text-[13px] text-white/30">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error && !tribeSettings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+        <div 
+          className="w-full max-w-[320px] rounded-[16px] border border-white/[0.08] p-7 text-center"
+          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+        >
+          <p className="text-[13px] text-white/50">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const ownerName = tribeSettings?.ownerName || "Anonymous";
+  const ownerAvatar = tribeSettings?.ownerAvatar;
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
       <div 
@@ -69,13 +119,25 @@ export default function PublicJoinPage({ params }: PageProps) {
             className="w-14 h-14 rounded-full mb-2.5 flex items-center justify-center overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #2d8a8a 0%, #1a5f5f 100%)' }}
           >
-            <span className="text-xl text-white/90 font-medium">
-              {resolvedParams.slug.charAt(0).toUpperCase()}
-            </span>
+            {ownerAvatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img 
+                src={ownerAvatar} 
+                alt={ownerName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <span className="text-xl text-white/90 font-medium">
+                {ownerName.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
           
           {/* Name */}
-          <p className="text-[13px] text-white/50 mb-4">{resolvedParams.slug}</p>
+          <p className="text-[13px] text-white/50 mb-4">{ownerName}</p>
           
           {/* Heading */}
           <h1 className="text-[18px] font-medium text-white/90 mb-1.5">

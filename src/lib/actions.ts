@@ -45,6 +45,7 @@ export async function updateTribeSettings(data: {
   name?: string;
   slug?: string;
   ownerName?: string;
+  ownerAvatar?: string;
 }) {
   const tribe = await getTribe();
   
@@ -59,10 +60,12 @@ export async function updateTribeSettings(data: {
     name: data.name,
     slug: data.slug,
     owner_name: data.ownerName,
+    owner_avatar: data.ownerAvatar,
   });
   
   revalidatePath("/settings");
   revalidatePath("/join");
+  revalidatePath("/j/[slug]", "page");
 }
 
 // Subscriber actions
