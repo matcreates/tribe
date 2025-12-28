@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 
 // Create connection pool using TRIBE_DATABASE_URL (using custom name to avoid Vercel overrides)
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.TRIBE_DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
