@@ -3,24 +3,26 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
+  // Auth.js v5 uses different cookie names - try both secure and non-secure
   const token = await getToken({ 
     req: request, 
-    secret: process.env.AUTH_SECRET 
+    secret: process.env.AUTH_SECRET,
+    cookieName: "__Secure-authjs.session-token",
+  }) || await getToken({ 
+    req: request, 
+    secret: process.env.AUTH_SECRET,
+    cookieName: "authjs.session-token",
   });
   
   const isLoggedIn = !!token;
   const { pathname } = request.nextUrl;
   
-  // Debug logging
-  console.log("Middleware:", { pathname, isLoggedIn, hasToken: !!token, tokenEmail: token?.email });
-  
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
   const isPublicJoinPage = pathname.startsWith("/j/");
   const isApiRoute = pathname.startsWith("/api");
-  const isInitDb = pathname === "/api/init-db";
 
   // Allow API routes and public join pages
-  if (isApiRoute || isPublicJoinPage || isInitDb) {
+  if (isApiRoute || isPublicJoinPage) {
     return NextResponse.next();
   }
 
