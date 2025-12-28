@@ -45,9 +45,9 @@ export default function SettingsPage() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Image must be less than 5MB");
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Image must be less than 2MB");
       return;
     }
 

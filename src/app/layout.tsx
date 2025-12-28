@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${instrumentSerif.variable} antialiased`} style={{ fontFamily: 'var(--font-geist-sans), system-ui, sans-serif' }}>
         <SessionProvider>
-          {children}
+        {children}
         </SessionProvider>
       </body>
     </html>
