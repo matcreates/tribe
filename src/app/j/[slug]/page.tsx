@@ -26,7 +26,7 @@ export default function PublicJoinPage({ params }: PageProps) {
     try {
       await joinTribe(resolvedParams.slug, email.trim());
       setIsJoined(true);
-      showToast("Welcome to the tribe!");
+      showToast("Verification email sent!");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       if (message === "Already subscribed") {
@@ -73,8 +73,14 @@ export default function PublicJoinPage({ params }: PageProps) {
 
           {isJoined ? (
             <div className="py-3">
-              <p className="text-[13px] text-white/60">
-                You&apos;re in! Check your inbox soon.
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(45, 138, 138, 0.2)' }}>
+                <MailIcon className="w-5 h-5 text-[#2d8a8a]" />
+              </div>
+              <p className="text-[14px] text-white/80 font-medium mb-1">
+                Check your email
+              </p>
+              <p className="text-[12px] text-white/50">
+                We sent a confirmation link to verify your subscription.
               </p>
             </div>
           ) : (
@@ -118,5 +124,14 @@ export default function PublicJoinPage({ params }: PageProps) {
 
       <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
     </div>
+  );
+}
+
+function MailIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M22 7l-10 6L2 7" />
+    </svg>
   );
 }

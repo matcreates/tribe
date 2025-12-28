@@ -5,15 +5,18 @@ import {
   getTribeByUserId,
   getTribeBySlug,
   updateTribe,
+  getVerifiedSubscribersByTribeId,
   getSubscribersByTribeId,
   addSubscriber as dbAddSubscriber,
   removeSubscriber as dbRemoveSubscriber,
-  getSubscriberCount,
+  getVerifiedSubscriberCount,
   getSentEmailsByTribeId,
   createSentEmail,
   getTotalEmailsSent,
 } from "./db";
+import { sendVerificationEmail } from "./email";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 async function getTribe() {
   const session = await auth();
@@ -66,7 +69,8 @@ export async function updateTribeSettings(data: {
 // Subscriber actions
 export async function getSubscribers() {
   const tribe = await getTribe();
-  return await getSubscribersByTribeId(tribe.id);
+  // Only return verified subscribers
+  return await getVerifiedSubscribersByTribeId(tribe.id);
 }
 
 export async function addSubscriber(email: string, name?: string) {
@@ -115,7 +119,8 @@ export async function getSentEmails() {
 
 export async function sendEmail(subject: string, body: string) {
   const tribe = await getTribe();
-  const recipientCount = await getSubscriberCount(tribe.id);
+  // Only count verified subscribers
+  const recipientCount = await getVerifiedSubscriberCount(tribe.id);
   const email = await createSentEmail(tribe.id, subject, body, recipientCount);
   revalidatePath("/new-email");
   revalidatePath("/dashboard");
@@ -125,7 +130,8 @@ export async function sendEmail(subject: string, body: string) {
 // Dashboard stats
 export async function getDashboardStats() {
   const tribe = await getTribe();
-  const subscribers = await getSubscribersByTribeId(tribe.id);
+  // Only count verified subscribers
+  const subscribers = await getVerifiedSubscribersByTribeId(tribe.id);
   const sentEmails = await getSentEmailsByTribeId(tribe.id);
   
   const now = new Date();
@@ -166,10 +172,27 @@ export async function joinTribe(slug: string, email: string) {
     throw new Error("Tribe not found");
   }
   
-  const result = await dbAddSubscriber(tribe.id, email);
-  if (!result) {
+  const subscriber = await dbAddSubscriber(tribe.id, email);
+  if (!subscriber) {
     throw new Error("Already subscribed");
   }
   
-  return { success: true };
+  // Get base URL from headers
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+  
+  // Send verification email
+  if (subscriber.verification_token) {
+    await sendVerificationEmail(
+      email,
+      tribe.name,
+      tribe.owner_name || "Anonymous",
+      subscriber.verification_token,
+      baseUrl
+    );
+  }
+  
+  return { success: true, needsVerification: true };
 }

@@ -8,6 +8,8 @@ interface Subscriber {
   id: string;
   email: string;
   name: string | null;
+  verified: boolean;
+  verification_token: string | null;
   created_at: Date;
 }
 

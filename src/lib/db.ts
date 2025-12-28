@@ -45,9 +45,24 @@ export async function initDatabase() {
       tribe_id TEXT NOT NULL,
       email TEXT NOT NULL,
       name TEXT,
+      verified BOOLEAN DEFAULT FALSE,
+      verification_token TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(tribe_id, email)
     )
+  `);
+  
+  // Add columns if they don't exist (for existing databases)
+  await pool.query(`
+    DO $$ 
+    BEGIN 
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscribers' AND column_name='verified') THEN
+        ALTER TABLE subscribers ADD COLUMN verified BOOLEAN DEFAULT FALSE;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscribers' AND column_name='verification_token') THEN
+        ALTER TABLE subscribers ADD COLUMN verification_token TEXT;
+      END IF;
+    END $$;
   `);
 
   await pool.query(`
@@ -85,6 +100,8 @@ export interface DbSubscriber {
   tribe_id: string;
   email: string;
   name: string | null;
+  verified: boolean;
+  verification_token: string | null;
   created_at: Date;
 }
 
@@ -171,17 +188,35 @@ export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "na
 // Subscriber functions
 export async function addSubscriber(tribeId: string, email: string, name?: string): Promise<DbSubscriber | null> {
   const id = crypto.randomUUID();
+  const verificationToken = crypto.randomUUID();
   
   try {
     await pool.query(
-      `INSERT INTO subscribers (id, tribe_id, email, name) VALUES ($1, $2, $3, $4)`,
-      [id, tribeId, email.toLowerCase(), name || null]
+      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken]
     );
     return await getSubscriberById(id);
   } catch {
     // Duplicate email
     return null;
   }
+}
+
+export async function verifySubscriber(token: string): Promise<DbSubscriber | null> {
+  const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE verification_token = $1`, [token]);
+  if (rows.length === 0) return null;
+  
+  await pool.query(`UPDATE subscribers SET verified = TRUE, verification_token = NULL WHERE verification_token = $1`, [token]);
+  return await getSubscriberById(rows[0].id);
+}
+
+export async function getVerifiedSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
+  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE ORDER BY created_at DESC`, [tribeId]);
+}
+
+export async function getVerifiedSubscriberCount(tribeId: string): Promise<number> {
+  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE`, [tribeId]);
+  return Number(rows[0].count);
 }
 
 export async function getSubscriberById(id: string): Promise<DbSubscriber | null> {
