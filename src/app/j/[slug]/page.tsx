@@ -27,6 +27,7 @@ export default function PublicJoinPage({ params }: PageProps) {
 
   useEffect(() => {
     // Fetch tribe settings
+    setAvatarError(false);
     fetch(`/api/tribe/${resolvedParams.slug}`)
       .then(res => res.json())
       .then(data => {
