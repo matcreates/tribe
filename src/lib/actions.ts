@@ -14,7 +14,7 @@ import {
   createSentEmail,
   getTotalEmailsSent,
 } from "./db";
-import { sendVerificationEmail } from "./email";
+import { sendVerificationEmail, sendBulkEmail } from "./email";
 import { revalidatePath } from "next/cache";
 
 async function getTribe() {
@@ -128,14 +128,88 @@ export async function getSentEmails() {
   return await getSentEmailsByTribeId(tribe.id);
 }
 
-export async function sendEmail(subject: string, body: string) {
+export type RecipientFilter = "verified" | "non-verified" | "all";
+
+export async function getRecipientCounts(): Promise<{
+  verified: number;
+  nonVerified: number;
+  all: number;
+}> {
   const tribe = await getTribe();
-  // Only count verified subscribers
-  const recipientCount = await getVerifiedSubscriberCount(tribe.id);
-  const email = await createSentEmail(tribe.id, subject, body, recipientCount);
+  const allSubscribers = await getSubscribersByTribeId(tribe.id);
+  const verified = allSubscribers.filter(s => s.verified).length;
+  const nonVerified = allSubscribers.filter(s => !s.verified).length;
+  return {
+    verified,
+    nonVerified,
+    all: allSubscribers.length,
+  };
+}
+
+export async function sendEmail(
+  subject: string, 
+  body: string, 
+  filter: RecipientFilter = "verified"
+) {
+  const tribe = await getTribe();
+  const allSubscribers = await getSubscribersByTribeId(tribe.id);
+  
+  // Filter recipients based on selection
+  let recipients: string[];
+  switch (filter) {
+    case "verified":
+      recipients = allSubscribers.filter(s => s.verified).map(s => s.email);
+      break;
+    case "non-verified":
+      recipients = allSubscribers.filter(s => !s.verified).map(s => s.email);
+      break;
+    case "all":
+      recipients = allSubscribers.map(s => s.email);
+      break;
+  }
+
+  if (recipients.length === 0) {
+    throw new Error("No recipients to send to");
+  }
+
+  // Create HTML version of the email
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
+        <div style="max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
+          <div style="color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 0; text-align: center;">
+            Sent from ${tribe.owner_name || 'Anonymous'}'s Tribe
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  // Send via Resend
+  const result = await sendBulkEmail(recipients, subject, htmlBody, body);
+  
+  if (!result.success && result.sentCount === 0) {
+    throw new Error(`Failed to send emails: ${result.errors.join(", ")}`);
+  }
+
+  // Record the sent email
+  const email = await createSentEmail(tribe.id, subject, body, result.sentCount);
+  
   revalidatePath("/new-email");
   revalidatePath("/dashboard");
-  return email;
+  
+  return { 
+    ...email, 
+    sentCount: result.sentCount,
+    totalRecipients: recipients.length,
+    errors: result.errors 
+  };
 }
 
 // Dashboard stats

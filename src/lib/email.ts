@@ -13,6 +13,64 @@ function getResendClient() {
   return resend;
 }
 
+function getFromEmail() {
+  return process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>";
+}
+
+export async function sendBulkEmail(
+  recipients: string[],
+  subject: string,
+  htmlBody: string,
+  textBody: string
+): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
+  if (recipients.length === 0) {
+    return { success: true, sentCount: 0, errors: [] };
+  }
+
+  const client = getResendClient();
+  const fromEmail = getFromEmail();
+  const errors: string[] = [];
+  let sentCount = 0;
+
+  // Send emails in batches of 50 (Resend's batch limit)
+  const batchSize = 50;
+  
+  for (let i = 0; i < recipients.length; i += batchSize) {
+    const batch = recipients.slice(i, i + batchSize);
+    
+    // Use Resend's batch send for efficiency
+    const batchEmails = batch.map(to => ({
+      from: fromEmail,
+      to: [to],
+      subject,
+      html: htmlBody,
+      text: textBody,
+    }));
+
+    try {
+      const { data, error } = await client.batch.send(batchEmails);
+      
+      if (error) {
+        console.error("Batch send error:", error);
+        errors.push(`Batch ${i / batchSize + 1}: ${error.message || JSON.stringify(error)}`);
+      } else if (data) {
+        sentCount += data.data.length;
+        console.log(`Batch ${i / batchSize + 1}: Sent ${data.data.length} emails`);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Batch send exception:", msg);
+      errors.push(`Batch ${i / batchSize + 1}: ${msg}`);
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    sentCount,
+    errors,
+  };
+}
+
 export async function sendVerificationEmail(
   to: string,
   tribeName: string,
@@ -27,11 +85,8 @@ export async function sendVerificationEmail(
   console.log(`Resend API key present: ${!!process.env.RESEND_API_KEY}`);
   console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
   
-  // Use RESEND_FROM_EMAIL env var, or default to Resend's test address
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>";
-  
   const { data, error } = await client.emails.send({
-    from: fromEmail,
+    from: getFromEmail(),
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
     html: `

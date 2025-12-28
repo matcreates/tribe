@@ -1,33 +1,48 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSubscribers, sendEmail } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, RecipientFilter } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 
 export default function NewEmailPage() {
   const router = useRouter();
-  const [subscriberCount, setSubscriberCount] = useState(0);
+  const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
+  const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("verified");
   const [body, setBody] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [mode, setMode] = useState<"email" | "link">("email");
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
-    loadSubscriberCount();
+    loadCounts();
   }, []);
 
-  const loadSubscriberCount = async () => {
+  const loadCounts = async () => {
     try {
-      const subscribers = await getSubscribers();
-      setSubscriberCount(subscribers.length);
+      const result = await getRecipientCounts();
+      setCounts(result);
     } catch (error) {
-      console.error("Failed to load subscribers:", error);
+      console.error("Failed to load recipient counts:", error);
+    }
+  };
+
+  const getCurrentCount = () => {
+    switch (recipientFilter) {
+      case "verified": return counts.verified;
+      case "non-verified": return counts.nonVerified;
+      case "all": return counts.all;
     }
   };
 
   const handleSend = async () => {
     if (!body.trim() || isSending) return;
+
+    const count = getCurrentCount();
+    if (count === 0) {
+      showToast("No recipients to send to");
+      return;
+    }
 
     setIsSending(true);
     
@@ -36,13 +51,14 @@ export default function NewEmailPage() {
       const lines = body.trim().split("\n");
       const subject = lines[0].slice(0, 60) || "Untitled";
       
-      await sendEmail(subject, body);
+      const result = await sendEmail(subject, body, recipientFilter);
       
       setBody("");
-      showToast(`Email sent to ${subscriberCount} subscribers`);
+      showToast(`Email sent to ${result.sentCount} subscribers`);
       router.refresh();
-    } catch {
-      showToast("Failed to send email");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to send email";
+      showToast(msg);
     } finally {
       setIsSending(false);
     }
@@ -61,11 +77,14 @@ export default function NewEmailPage() {
           <span className="text-[13px] text-white/40">to</span>
           <div className="relative">
             <select
+              value={recipientFilter}
+              onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
               className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer"
               style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-              defaultValue="all"
             >
-              <option value="all">My whole tribe ({subscriberCount} people)</option>
+              <option value="verified">All verified ({counts.verified})</option>
+              <option value="all">All subscribers ({counts.all})</option>
+              <option value="non-verified">Non-verified only ({counts.nonVerified})</option>
             </select>
             <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/35 pointer-events-none" />
           </div>
@@ -109,16 +128,20 @@ export default function NewEmailPage() {
         {/* Send Button */}
         <button
           onClick={handleSend}
-          disabled={isSending || !body.trim() || subscriberCount === 0}
+          disabled={isSending || !body.trim() || getCurrentCount() === 0}
           className="self-start px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
           style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
         >
           {isSending ? "SENDING..." : "SEND"}
         </button>
 
-        {subscriberCount === 0 && (
+        {getCurrentCount() === 0 && (
           <p className="mt-3 text-[12px] text-white/30">
-            Add subscribers to your tribe first
+            {recipientFilter === "verified" 
+              ? "No verified subscribers yet" 
+              : recipientFilter === "non-verified"
+              ? "No non-verified subscribers"
+              : "Add subscribers to your tribe first"}
           </p>
         )}
 
