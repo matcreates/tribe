@@ -64,13 +64,14 @@ export default function PublicJoinPage({ params }: PageProps) {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         if (data.error === "Already subscribed") {
           setError("You're already subscribed!");
         } else if (data.error === "Tribe not found") {
           setError("This tribe doesn't exist");
         } else {
           setError(data.error || "Something went wrong");
+          console.error("Join error:", data);
         }
         return;
       }

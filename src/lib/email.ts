@@ -24,6 +24,8 @@ export async function sendVerificationEmail(
 
   const client = getResendClient();
   console.log(`Sending verification email to: ${to}, token: ${verificationToken.substring(0, 8)}...`);
+  console.log(`Resend API key present: ${!!process.env.RESEND_API_KEY}`);
+  console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
   
   const { data, error } = await client.emails.send({
     from: "Tribe <onboarding@resend.dev>", // Use your domain once verified in Resend
@@ -59,11 +61,18 @@ export async function sendVerificationEmail(
   });
 
   if (error) {
-    console.error("Failed to send verification email:", error);
-    throw new Error(`Failed to send verification email: ${error.message || JSON.stringify(error)}`);
+    console.error("Resend API returned an error:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
+    const errorMessage = error.message || (typeof error === 'string' ? error : JSON.stringify(error));
+    throw new Error(`Failed to send verification email: ${errorMessage}`);
   }
 
-  console.log(`Verification email sent successfully to ${to}, email ID: ${data?.id}`);
-  return { success: true, emailId: data?.id };
+  if (!data || !data.id) {
+    console.error("Resend API returned no data or email ID:", { data });
+    throw new Error("Failed to send verification email: No email ID returned from Resend");
+  }
+
+  console.log(`Verification email sent successfully to ${to}, email ID: ${data.id}`);
+  return { success: true, emailId: data.id };
 }
 

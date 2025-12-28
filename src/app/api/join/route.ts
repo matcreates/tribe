@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send verification email
+    let emailError: string | null = null;
     if (subscriber.verification_token && baseUrl) {
       try {
         console.log("Attempting to send verification email...", { email, hasToken: !!subscriber.verification_token, baseUrl });
@@ -42,17 +43,31 @@ export async function POST(request: NextRequest) {
           baseUrl
         );
         console.log("Verification email sent successfully:", emailResult);
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-        // Still return success - subscriber is added, just email failed
-        // But log it so we can see what went wrong
+      } catch (err) {
+        emailError = err instanceof Error ? err.message : String(err);
+        console.error("Failed to send verification email:", err);
+        // Log full error details
+        console.error("Email error details:", JSON.stringify(err, null, 2));
       }
     } else {
-      console.log("Skipping email send - missing token or baseUrl", { 
+      const missing = [];
+      if (!subscriber.verification_token) missing.push("token");
+      if (!baseUrl) missing.push("baseUrl");
+      emailError = `Missing: ${missing.join(", ")}`;
+      console.log("Skipping email send - missing:", { 
         hasToken: !!subscriber.verification_token, 
         baseUrl,
         email 
       });
+    }
+
+    // If email failed, return error so user knows
+    if (emailError) {
+      return NextResponse.json({ 
+        success: false,
+        error: `Failed to send verification email: ${emailError}`,
+        needsVerification: true // Subscriber was added
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 
