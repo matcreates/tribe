@@ -125,7 +125,26 @@ export async function exportSubscribers() {
 // Email actions
 export async function getSentEmails() {
   const tribe = await getTribe();
-  return await getSentEmailsByTribeId(tribe.id);
+  const emails = await getSentEmailsByTribeId(tribe.id);
+  // Convert Date to string for frontend
+  return emails.map(e => ({
+    ...e,
+    sent_at: e.sent_at instanceof Date ? e.sent_at.toISOString() : String(e.sent_at),
+  }));
+}
+
+export async function getSentEmailById(emailId: string) {
+  const tribe = await getTribe();
+  const emails = await getSentEmailsByTribeId(tribe.id);
+  const email = emails.find(e => e.id === emailId);
+  if (!email) {
+    throw new Error("Email not found");
+  }
+  // Convert Date to string for frontend
+  return {
+    ...email,
+    sent_at: email.sent_at instanceof Date ? email.sent_at.toISOString() : String(email.sent_at),
+  };
 }
 
 export type RecipientFilter = "verified" | "non-verified" | "all";

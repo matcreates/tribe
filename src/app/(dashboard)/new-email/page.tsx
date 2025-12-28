@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getRecipientCounts, sendEmail, RecipientFilter } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
+import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { useRouter } from "next/navigation";
 
 export default function NewEmailPage() {
@@ -12,6 +13,8 @@ export default function NewEmailPage() {
   const [body, setBody] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [mode, setMode] = useState<"email" | "link">("email");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [lastSentCount, setLastSentCount] = useState(0);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
@@ -54,7 +57,8 @@ export default function NewEmailPage() {
       const result = await sendEmail(subject, body, recipientFilter);
       
       setBody("");
-      showToast(`Email sent to ${result.sentCount} subscribers`);
+      setLastSentCount(result.sentCount);
+      setShowSuccess(true);
       router.refresh();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Failed to send email";
@@ -63,6 +67,15 @@ export default function NewEmailPage() {
       setIsSending(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+      <EmailSentSuccess 
+        sentCount={lastSentCount} 
+        onClose={() => setShowSuccess(false)} 
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col items-center pt-14 px-6">

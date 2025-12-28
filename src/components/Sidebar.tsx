@@ -66,13 +66,23 @@ export function Sidebar({ sentEmails }: SidebarProps) {
           Your emails
         </p>
         <ul className="space-y-0 max-h-[120px] overflow-y-auto">
-          {sentEmails.slice(0, 5).map((email) => (
-            <li key={email.id}>
-              <div className="px-2.5 py-1.5 text-[13px] text-white/55 truncate">
-                {email.subject || "Untitled"}
-              </div>
-            </li>
-          ))}
+          {sentEmails.slice(0, 5).map((email) => {
+            const isActive = pathname === `/email/${email.id}`;
+            return (
+              <li key={email.id}>
+                <Link
+                  href={`/email/${email.id}`}
+                  className={`block px-2.5 py-1.5 text-[13px] truncate rounded-md transition-colors ${
+                    isActive 
+                      ? "bg-white/[0.08] text-white/70" 
+                      : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
+                  }`}
+                >
+                  {email.subject || "Untitled"}
+                </Link>
+              </li>
+            );
+          })}
           {sentEmails.length === 0 && (
             <li className="px-2.5 py-1.5 text-[13px] text-white/25 italic">
               No emails sent yet
