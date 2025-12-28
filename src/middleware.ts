@@ -11,6 +11,9 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = !!token;
   const { pathname } = request.nextUrl;
   
+  // Debug logging
+  console.log("Middleware:", { pathname, isLoggedIn, hasToken: !!token, tokenEmail: token?.email });
+  
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
   const isPublicJoinPage = pathname.startsWith("/j/");
   const isApiRoute = pathname.startsWith("/api");
