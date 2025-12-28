@@ -15,8 +15,6 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    console.log("Sign in attempt:", { email });
-
     try {
       const result = await signIn("credentials", {
         email,
@@ -24,19 +22,15 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      console.log("Sign in result:", result);
-
       if (result?.error) {
-        setError("Invalid email or password: " + result.error);
+        setError("Invalid email or password");
       } else if (result?.ok) {
-        // Use hard redirect to ensure session cookie is picked up
         window.location.href = "/dashboard";
       } else {
-        setError("Unexpected response: " + JSON.stringify(result));
+        setError("Something went wrong");
       }
-    } catch (err) {
-      console.error("Sign in error:", err);
-      setError("Something went wrong: " + String(err));
+    } catch {
+      setError("Something went wrong");
     } finally {
       setIsLoading(false);
     }
