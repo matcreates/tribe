@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   sentEmails: { id: string; subject: string | null }[];
@@ -11,6 +12,24 @@ interface SidebarProps {
 export function Sidebar({ sentEmails }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
@@ -25,86 +44,151 @@ export function Sidebar({ sentEmails }: SidebarProps) {
   };
 
   return (
-    <aside className="w-[220px] h-screen flex flex-col fixed left-0 top-0" style={{ background: 'rgb(18, 18, 18)' }}>
-      {/* Logo */}
-      <div className="px-10 pt-12 pb-8">
-        <TribeLogo className="h-[22px] w-auto opacity-90" />
-      </div>
-
-      {/* Navigation - Centered vertically */}
-      <nav className="flex-1 px-5 flex flex-col justify-center">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] transition-colors
-                    ${isActive 
-                      ? "bg-white/[0.08] text-white/90" 
-                      : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
-                    }
-                  `}
-                >
-                  <Icon className="w-[15px] h-[15px]" />
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* Emails Sent */}
-      <div className="px-5 pb-8">
-        <p className="px-5 mb-3 text-[11px] text-white/25 tracking-wide">
-          Emails sent
-        </p>
-        <ul className="space-y-0 max-h-[120px] overflow-y-auto">
-          {sentEmails.slice(0, 5).map((email) => {
-            const isActive = pathname === `/email/${email.id}`;
-            return (
-              <li key={email.id}>
-                <Link
-                  href={`/email/${email.id}`}
-                  className={`block px-5 py-2 text-[13px] truncate rounded-md transition-colors ${
-                    isActive 
-                      ? "bg-white/[0.08] text-white/70" 
-                      : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
-                  }`}
-                >
-                  {email.subject || "Untitled"}
-                </Link>
-              </li>
-            );
-          })}
-          {sentEmails.length === 0 && (
-            <li className="px-5 py-2 text-[13px] text-white/25 italic">
-              No emails sent yet
-            </li>
-          )}
-        </ul>
-      </div>
-
-      {/* User & Logout */}
-      <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
-        <div className="px-5 mb-4">
-          <p className="text-[12px] text-white/50 truncate">
-            {session?.user?.email}
-          </p>
-        </div>
+    <>
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4" style={{ background: 'rgb(18, 18, 18)' }}>
+        <TribeLogo className="h-[18px] w-auto opacity-90" />
         <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white/70 transition-colors w-full"
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 -mr-2 text-white/70 hover:text-white/90 transition-colors"
+          aria-label="Toggle menu"
         >
-          <LogoutIcon className="w-[15px] h-[15px]" />
-          Log out
+          {isOpen ? (
+            <CloseIcon className="w-5 h-5" />
+          ) : (
+            <MenuIcon className="w-5 h-5" />
+          )}
         </button>
-      </div>
-    </aside>
+      </header>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop always visible, Mobile slide-out */}
+      <aside 
+        className={`
+          fixed top-0 right-0 lg:left-0 z-50 h-screen flex flex-col
+          w-[280px] lg:w-[220px]
+          transform transition-transform duration-300 ease-out
+          ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        `}
+        style={{ background: 'rgb(18, 18, 18)' }}
+      >
+        {/* Logo - Hidden on mobile (shown in header instead) */}
+        <div className="hidden lg:block px-10 pt-12 pb-8">
+          <TribeLogo className="h-[22px] w-auto opacity-90" />
+        </div>
+
+        {/* Mobile close button area */}
+        <div className="lg:hidden flex items-center justify-end px-5 py-4">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 -mr-2 text-white/70 hover:text-white/90 transition-colors"
+            aria-label="Close menu"
+          >
+            <CloseIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Navigation - Centered vertically */}
+        <nav className="flex-1 px-5 flex flex-col justify-center">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`
+                      flex items-center gap-3 px-5 py-3 lg:py-2.5 rounded-md text-[14px] lg:text-[13px] transition-colors
+                      ${isActive 
+                        ? "bg-white/[0.08] text-white/90" 
+                        : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
+                      }
+                    `}
+                  >
+                    <Icon className="w-[16px] h-[16px] lg:w-[15px] lg:h-[15px]" />
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Emails Sent */}
+        <div className="px-5 pb-8">
+          <p className="px-5 mb-3 text-[11px] text-white/25 tracking-wide">
+            Emails sent
+          </p>
+          <ul className="space-y-0 max-h-[120px] overflow-y-auto">
+            {sentEmails.slice(0, 5).map((email) => {
+              const isActive = pathname === `/email/${email.id}`;
+              return (
+                <li key={email.id}>
+                  <Link
+                    href={`/email/${email.id}`}
+                    className={`block px-5 py-2 text-[13px] truncate rounded-md transition-colors ${
+                      isActive 
+                        ? "bg-white/[0.08] text-white/70" 
+                        : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
+                    }`}
+                  >
+                    {email.subject || "Untitled"}
+                  </Link>
+                </li>
+              );
+            })}
+            {sentEmails.length === 0 && (
+              <li className="px-5 py-2 text-[13px] text-white/25 italic">
+                No emails sent yet
+              </li>
+            )}
+          </ul>
+        </div>
+
+        {/* User & Logout */}
+        <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
+          <div className="px-5 mb-4">
+            <p className="text-[12px] text-white/50 truncate">
+              {session?.user?.email}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white/70 transition-colors w-full"
+          >
+            <LogoutIcon className="w-[15px] h-[15px]" />
+            Log out
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+function MenuIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
   );
 }
 
