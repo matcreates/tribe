@@ -220,12 +220,23 @@ export async function verifySubscriber(token: string): Promise<DbSubscriber | nu
 }
 
 export async function getVerifiedSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
-  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE ORDER BY created_at DESC`, [tribeId]);
+  try {
+    return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE ORDER BY created_at DESC`, [tribeId]);
+  } catch {
+    // Fallback if unsubscribed column doesn't exist yet
+    return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE ORDER BY created_at DESC`, [tribeId]);
+  }
 }
 
 export async function getVerifiedSubscriberCount(tribeId: string): Promise<number> {
-  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE`, [tribeId]);
-  return Number(rows[0].count);
+  try {
+    const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE`, [tribeId]);
+    return Number(rows[0].count);
+  } catch {
+    // Fallback if unsubscribed column doesn't exist yet
+    const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE`, [tribeId]);
+    return Number(rows[0].count);
+  }
 }
 
 export async function unsubscribeByToken(token: string): Promise<{ success: boolean; email?: string }> {
@@ -247,7 +258,9 @@ export async function getSubscriberById(id: string): Promise<DbSubscriber | null
 }
 
 export async function getSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
-  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 ORDER BY created_at DESC`, [tribeId]);
+  const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 ORDER BY created_at DESC`, [tribeId]);
+  // Ensure unsubscribed field has a default value
+  return rows.map(r => ({ ...r, unsubscribed: r.unsubscribed ?? false, unsubscribe_token: r.unsubscribe_token ?? null }));
 }
 
 export async function removeSubscriber(id: string): Promise<void> {
