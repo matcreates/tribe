@@ -228,8 +228,8 @@ export async function sendEmail(
 // Dashboard stats
 export async function getDashboardStats() {
   const tribe = await getTribe();
-  // Only count verified subscribers
-  const subscribers = await getVerifiedSubscribersByTribeId(tribe.id);
+  // Count all subscribers (verified + unverified)
+  const subscribers = await getSubscribersByTribeId(tribe.id);
   const sentEmails = await getSentEmailsByTribeId(tribe.id);
   
   const now = new Date();
