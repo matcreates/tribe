@@ -24,7 +24,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
 
   useEffect(() => {
     const origin = window.location.origin;
-    const url = `${origin}/j/${settings.slug}`;
+    const url = `${origin}/@${settings.slug}`;
     setFullJoinUrl(url);
     // Show a cleaner version without https://
     setDisplayUrl(url.replace(/^https?:\/\//, ""));

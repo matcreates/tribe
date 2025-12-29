@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
-  const isPublicJoinPage = pathname.startsWith("/j/");
+  const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/@");
   const isApiRoute = pathname.startsWith("/api");
   const isPublicPage = pathname === "/verified" || pathname === "/unsubscribed";
 
