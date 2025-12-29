@@ -13,9 +13,12 @@ interface Subscriber {
   created_at: string;
 }
 
+type FilterType = "all" | "verified" | "non-verified";
+
 export default function TribePage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<FilterType>("all");
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
@@ -35,9 +38,19 @@ export default function TribePage() {
     }
   };
 
-  const filteredSubscribers = subscribers.filter((s) =>
-    s.email.toLowerCase().includes(search.toLowerCase())
-  );
+  // Apply both search and filter
+  const filteredSubscribers = subscribers.filter((s) => {
+    const matchesSearch = s.email.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = 
+      filter === "all" ? true :
+      filter === "verified" ? s.verified :
+      !s.verified;
+    return matchesSearch && matchesFilter;
+  });
+
+  // Count for each filter
+  const verifiedCount = subscribers.filter(s => s.verified).length;
+  const nonVerifiedCount = subscribers.filter(s => !s.verified).length;
 
   const handleCopy = async (email: string) => {
     try {
@@ -110,8 +123,10 @@ export default function TribePage() {
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-[20px] font-medium text-white/90">Your tribe</h1>
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="text-[20px] font-medium text-white/90">
+            Your tribe is made of <span className="text-white">{subscribers.length}</span> {subscribers.length === 1 ? 'person' : 'people'}
+          </h1>
           <div className="flex-1" />
           <button
             onClick={handleImport}
@@ -134,6 +149,40 @@ export default function TribePage() {
             onChange={handleFileChange}
             className="hidden"
           />
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-1 mb-4">
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+              filter === "all"
+                ? "bg-white/[0.08] text-white/70"
+                : "text-white/40 hover:text-white/60"
+            }`}
+          >
+            All ({subscribers.length})
+          </button>
+          <button
+            onClick={() => setFilter("verified")}
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+              filter === "verified"
+                ? "bg-white/[0.08] text-white/70"
+                : "text-white/40 hover:text-white/60"
+            }`}
+          >
+            Verified ({verifiedCount})
+          </button>
+          <button
+            onClick={() => setFilter("non-verified")}
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+              filter === "non-verified"
+                ? "bg-white/[0.08] text-white/70"
+                : "text-white/40 hover:text-white/60"
+            }`}
+          >
+            Non-verified ({nonVerifiedCount})
+          </button>
         </div>
 
         {/* Search */}
