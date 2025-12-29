@@ -196,10 +196,10 @@ export default function PublicJoinPage({ params }: PageProps) {
             href="https://madewithtribe.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="mt-6 flex items-center gap-1.5 text-[11px] text-white/30 hover:text-white/50 transition-colors"
+            className="mt-6 flex items-center gap-1 text-[11px] text-white/30 hover:text-white/50 transition-colors"
           >
             <span>made with</span>
-            <TribeLogo className="h-[11px] w-auto" />
+            <TribeLogo className="h-[11px] w-auto relative -top-[2px]" />
           </a>
         </div>
       </div>
