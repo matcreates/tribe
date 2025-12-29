@@ -199,7 +199,7 @@ export default function PublicJoinPage({ params }: PageProps) {
             className="mt-6 flex items-center gap-1 text-[11px] text-white/30 hover:text-white/50 transition-colors"
           >
             <span>made with</span>
-            <TribeLogo className="h-[11px] w-auto relative -top-[2px]" />
+            <TribeLogo className="h-[11px] w-auto relative -top-[1px]" />
           </a>
         </div>
       </div>
