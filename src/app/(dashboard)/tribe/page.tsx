@@ -115,8 +115,8 @@ export default function TribePage() {
           <div className="flex-1" />
           <button
             onClick={handleImport}
-            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
           >
             IMPORT
           </button>
