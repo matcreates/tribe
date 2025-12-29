@@ -62,6 +62,12 @@ export async function initDatabase() {
       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscribers' AND column_name='verification_token') THEN
         ALTER TABLE subscribers ADD COLUMN verification_token TEXT;
       END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscribers' AND column_name='unsubscribed') THEN
+        ALTER TABLE subscribers ADD COLUMN unsubscribed BOOLEAN DEFAULT FALSE;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscribers' AND column_name='unsubscribe_token') THEN
+        ALTER TABLE subscribers ADD COLUMN unsubscribe_token TEXT;
+      END IF;
     END $$;
   `);
 
@@ -102,6 +108,8 @@ export interface DbSubscriber {
   name: string | null;
   verified: boolean;
   verification_token: string | null;
+  unsubscribed: boolean;
+  unsubscribe_token: string | null;
   created_at: Date;
 }
 
@@ -189,11 +197,12 @@ export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "na
 export async function addSubscriber(tribeId: string, email: string, name?: string): Promise<DbSubscriber | null> {
   const id = crypto.randomUUID();
   const verificationToken = crypto.randomUUID();
+  const unsubscribeToken = crypto.randomUUID();
   
   try {
     await pool.query(
-      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken]
+      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token, unsubscribed, unsubscribe_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken, false, unsubscribeToken]
     );
     return await getSubscriberById(id);
   } catch {
@@ -211,12 +220,25 @@ export async function verifySubscriber(token: string): Promise<DbSubscriber | nu
 }
 
 export async function getVerifiedSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
-  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE ORDER BY created_at DESC`, [tribeId]);
+  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND (unsubscribed = FALSE OR unsubscribed IS NULL) ORDER BY created_at DESC`, [tribeId]);
 }
 
 export async function getVerifiedSubscriberCount(tribeId: string): Promise<number> {
-  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE`, [tribeId]);
+  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND (unsubscribed = FALSE OR unsubscribed IS NULL)`, [tribeId]);
   return Number(rows[0].count);
+}
+
+export async function unsubscribeByToken(token: string): Promise<{ success: boolean; email?: string }> {
+  const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE unsubscribe_token = $1`, [token]);
+  if (rows.length === 0) return { success: false };
+  
+  await pool.query(`UPDATE subscribers SET unsubscribed = TRUE WHERE unsubscribe_token = $1`, [token]);
+  return { success: true, email: rows[0].email };
+}
+
+export async function getSubscriberByUnsubscribeToken(token: string): Promise<DbSubscriber | null> {
+  const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE unsubscribe_token = $1`, [token]);
+  return rows[0] || null;
 }
 
 export async function getSubscriberById(id: string): Promise<DbSubscriber | null> {

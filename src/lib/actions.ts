@@ -14,7 +14,7 @@ import {
   createSentEmail,
   getTotalEmailsSent,
 } from "./db";
-import { sendVerificationEmail, sendBulkEmail } from "./email";
+import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
 import { revalidatePath } from "next/cache";
 
 async function getTribe() {
@@ -173,45 +173,39 @@ export async function sendEmail(
   const tribe = await getTribe();
   const allSubscribers = await getSubscribersByTribeId(tribe.id);
   
-  // Filter recipients based on selection
-  let recipients: string[];
+  // Filter recipients based on selection AND exclude unsubscribed
+  let filteredSubscribers = allSubscribers.filter(s => !s.unsubscribed);
+  
   switch (filter) {
     case "verified":
-      recipients = allSubscribers.filter(s => s.verified).map(s => s.email);
+      filteredSubscribers = filteredSubscribers.filter(s => s.verified);
       break;
     case "non-verified":
-      recipients = allSubscribers.filter(s => !s.verified).map(s => s.email);
+      filteredSubscribers = filteredSubscribers.filter(s => !s.verified);
       break;
     case "all":
-      recipients = allSubscribers.map(s => s.email);
+      // Keep all non-unsubscribed
       break;
   }
 
-  if (recipients.length === 0) {
+  if (filteredSubscribers.length === 0) {
     throw new Error("No recipients to send to");
   }
 
-  // Create HTML version of the email
-  const htmlBody = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-      </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
-        <div style="max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
-          <div style="color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-          <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 0; text-align: center;">
-            Sent from ${tribe.owner_name || 'Anonymous'}'s Tribe
-          </p>
-        </div>
-      </body>
-    </html>
-  `;
+  // Get base URL from environment or default
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
+  const ownerName = tribe.owner_name || 'Anonymous';
+  const escapedBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Send via Resend
-  const result = await sendBulkEmail(recipients, subject, htmlBody, body);
+  // Send emails with personalized unsubscribe links
+  const result = await sendBulkEmailWithUnsubscribe(
+    filteredSubscribers.map(s => ({ email: s.email, unsubscribeToken: s.unsubscribe_token || '' })),
+    subject,
+    escapedBody,
+    body,
+    ownerName,
+    baseUrl
+  );
   
   if (!result.success && result.sentCount === 0) {
     throw new Error(`Failed to send emails: ${result.errors.join(", ")}`);
@@ -226,7 +220,7 @@ export async function sendEmail(
   return { 
     ...email, 
     sentCount: result.sentCount,
-    totalRecipients: recipients.length,
+    totalRecipients: filteredSubscribers.length,
     errors: result.errors 
   };
 }

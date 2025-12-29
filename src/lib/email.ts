@@ -17,11 +17,18 @@ function getFromEmail() {
   return process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>";
 }
 
-export async function sendBulkEmail(
-  recipients: string[],
+interface RecipientWithToken {
+  email: string;
+  unsubscribeToken: string;
+}
+
+export async function sendBulkEmailWithUnsubscribe(
+  recipients: RecipientWithToken[],
   subject: string,
-  htmlBody: string,
-  textBody: string
+  escapedBody: string,
+  plainTextBody: string,
+  ownerName: string,
+  baseUrl: string
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
   if (recipients.length === 0) {
     return { success: true, sentCount: 0, errors: [] };
@@ -38,14 +45,43 @@ export async function sendBulkEmail(
   for (let i = 0; i < recipients.length; i += batchSize) {
     const batch = recipients.slice(i, i + batchSize);
     
-    // Use Resend's batch send for efficiency
-    const batchEmails = batch.map(to => ({
-      from: fromEmail,
-      to: [to],
-      subject,
-      html: htmlBody,
-      text: textBody,
-    }));
+    // Create personalized emails with unsubscribe links
+    const batchEmails = batch.map(recipient => {
+      const unsubscribeUrl = `${baseUrl}/api/unsubscribe?token=${recipient.unsubscribeToken}`;
+      
+      const htmlBody = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
+            <div style="max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
+              <div style="color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${escapedBody}</div>
+              <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 0 0 8px;">
+                  Sent from ${ownerName}'s Tribe
+                </p>
+                <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.25); font-size: 11px; text-decoration: underline;">
+                  Unsubscribe
+                </a>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const textBody = `${plainTextBody}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
+
+      return {
+        from: fromEmail,
+        to: [recipient.email],
+        subject,
+        html: htmlBody,
+        text: textBody,
+      };
+    });
 
     try {
       const { data, error } = await client.batch.send(batchEmails);

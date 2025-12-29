@@ -20,9 +20,10 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
   const isPublicJoinPage = pathname.startsWith("/j/");
   const isApiRoute = pathname.startsWith("/api");
+  const isPublicPage = pathname === "/verified" || pathname === "/unsubscribed";
 
-  // Allow API routes and public join pages
-  if (isApiRoute || isPublicJoinPage) {
+  // Allow API routes, public join pages, and other public pages
+  if (isApiRoute || isPublicJoinPage || isPublicPage) {
     return NextResponse.next();
   }
 
