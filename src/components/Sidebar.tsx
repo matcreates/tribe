@@ -61,7 +61,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
       {/* Sent Emails */}
       <div className="px-2.5 pb-4">
         <p className="px-2.5 mb-1.5 text-[11px] text-white/25 tracking-wide">
-          Your emails
+          Sent emails
         </p>
         <ul className="space-y-0 max-h-[120px] overflow-y-auto">
           {sentEmails.slice(0, 5).map((email) => {

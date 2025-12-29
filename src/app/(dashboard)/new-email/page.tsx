@@ -245,8 +245,8 @@ export default function NewEmailPage() {
             <select
               value={recipientFilter}
               onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
-              className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer"
-              style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+              className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
             >
               <option value="verified">All verified ({counts.verified})</option>
               <option value="all">All subscribers ({counts.all})</option>
@@ -265,8 +265,8 @@ export default function NewEmailPage() {
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             onBlur={handleBlur}
-            className="w-full min-h-[200px] px-4 py-3 rounded-[10px] text-[14px] leading-relaxed text-white/70 focus:outline-none transition-colors whitespace-pre-wrap break-words"
-            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            className="w-full min-h-[200px] px-4 py-3 rounded-[10px] text-[14px] leading-relaxed text-white/70 focus:outline-none transition-colors whitespace-pre-wrap break-words border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             suppressContentEditableWarning
           />
           {isEmpty && (

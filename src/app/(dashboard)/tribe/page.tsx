@@ -122,8 +122,8 @@ export default function TribePage() {
           </button>
           <button
             onClick={handleExport}
-            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
           >
             EXPORT
           </button>
@@ -144,8 +144,8 @@ export default function TribePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search"
-            className="w-full pl-10 pr-4 py-2.5 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+            className="w-full pl-10 pr-4 py-2.5 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           />
         </div>
 
@@ -166,8 +166,8 @@ export default function TribePage() {
             filteredSubscribers.map((subscriber) => (
               <div
                 key={subscriber.id}
-                className="flex items-center gap-2 px-4 py-3 rounded-[10px] hover:bg-white/[0.02] transition-colors group"
-                style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+                className="flex items-center gap-2 px-4 py-3 rounded-[10px] hover:bg-white/[0.04] transition-colors group border border-white/[0.06]"
+                style={{ background: 'rgba(255, 255, 255, 0.02)' }}
               >
                 <span className="flex-1 text-[13px] text-white/60 truncate">
                   {subscriber.email}

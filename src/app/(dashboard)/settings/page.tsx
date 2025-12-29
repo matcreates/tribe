@@ -147,8 +147,8 @@ export default function SettingsPage() {
             value={ownerAvatar}
             onChange={(e) => setOwnerAvatar(e.target.value)}
             placeholder="Or paste image URL"
-            className="w-full px-3.5 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+            className="w-full px-3.5 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           />
           <p className="text-[11px] text-white/25 mt-1.5">
             Upload an image or paste a URL (leave empty to use initials)
@@ -162,8 +162,8 @@ export default function SettingsPage() {
             type="text"
             value={ownerName}
             onChange={(e) => setOwnerName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+            className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           />
         </div>
 
@@ -175,8 +175,8 @@ export default function SettingsPage() {
               type="text"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              className="flex-1 px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
-              style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+              className="flex-1 px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             />
             <span className="text-[13px] text-white/35">.tribe.com</span>
           </div>
