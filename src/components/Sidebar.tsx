@@ -25,15 +25,15 @@ export function Sidebar({ sentEmails }: SidebarProps) {
   };
 
   return (
-    <aside className="w-[200px] h-screen flex flex-col fixed left-0 top-0" style={{ background: 'rgb(18, 18, 18)' }}>
+    <aside className="w-[220px] h-screen flex flex-col fixed left-0 top-0" style={{ background: 'rgb(18, 18, 18)' }}>
       {/* Logo */}
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-10 pt-12 pb-8">
         <TribeLogo className="h-[22px] w-auto opacity-90" />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-2.5">
-        <ul className="space-y-0.5">
+      {/* Navigation - Centered vertically */}
+      <nav className="flex-1 px-5 flex flex-col justify-center">
+        <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -42,7 +42,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
                 <Link
                   href={item.href}
                   className={`
-                    flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors
+                    flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] transition-colors
                     ${isActive 
                       ? "bg-white/[0.08] text-white/90" 
                       : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
@@ -58,10 +58,10 @@ export function Sidebar({ sentEmails }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Sent Emails */}
-      <div className="px-2.5 pb-4">
-        <p className="px-2.5 mb-1.5 text-[11px] text-white/25 tracking-wide">
-          Sent emails
+      {/* Emails Sent */}
+      <div className="px-5 pb-8">
+        <p className="px-5 mb-3 text-[11px] text-white/25 tracking-wide">
+          Emails sent
         </p>
         <ul className="space-y-0 max-h-[120px] overflow-y-auto">
           {sentEmails.slice(0, 5).map((email) => {
@@ -70,7 +70,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
               <li key={email.id}>
                 <Link
                   href={`/email/${email.id}`}
-                  className={`block px-2.5 py-1.5 text-[13px] truncate rounded-md transition-colors ${
+                  className={`block px-5 py-2 text-[13px] truncate rounded-md transition-colors ${
                     isActive 
                       ? "bg-white/[0.08] text-white/70" 
                       : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
@@ -82,7 +82,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
             );
           })}
           {sentEmails.length === 0 && (
-            <li className="px-2.5 py-1.5 text-[13px] text-white/25 italic">
+            <li className="px-5 py-2 text-[13px] text-white/25 italic">
               No emails sent yet
             </li>
           )}
@@ -90,15 +90,15 @@ export function Sidebar({ sentEmails }: SidebarProps) {
       </div>
 
       {/* User & Logout */}
-      <div className="px-2.5 pb-5 border-t border-white/[0.06] pt-3 mt-2">
-        <div className="px-2.5 mb-2">
+      <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
+        <div className="px-5 mb-4">
           <p className="text-[12px] text-white/50 truncate">
             {session?.user?.email}
           </p>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white/70 transition-colors w-full"
+          className="flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white/70 transition-colors w-full"
         >
           <LogoutIcon className="w-[15px] h-[15px]" />
           Log out

@@ -11,7 +11,7 @@ export function Shell({ children, sentEmails }: ShellProps) {
   return (
     <div className="min-h-screen" style={{ background: 'rgb(24, 24, 24)' }}>
       <Sidebar sentEmails={sentEmails} />
-      <main className="ml-[200px] min-h-screen">
+      <main className="ml-[220px] min-h-screen">
         {children}
       </main>
     </div>
