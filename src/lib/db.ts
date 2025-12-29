@@ -220,11 +220,11 @@ export async function verifySubscriber(token: string): Promise<DbSubscriber | nu
 }
 
 export async function getVerifiedSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
-  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND (unsubscribed = FALSE OR unsubscribed IS NULL) ORDER BY created_at DESC`, [tribeId]);
+  return await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE ORDER BY created_at DESC`, [tribeId]);
 }
 
 export async function getVerifiedSubscriberCount(tribeId: string): Promise<number> {
-  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND (unsubscribed = FALSE OR unsubscribed IS NULL)`, [tribeId]);
+  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = TRUE AND COALESCE(unsubscribed, FALSE) = FALSE`, [tribeId]);
   return Number(rows[0].count);
 }
 
