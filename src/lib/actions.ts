@@ -13,6 +13,7 @@ import {
   getSentEmailsByTribeId,
   createSentEmail,
   getTotalEmailsSent,
+  updateSentEmailRecipientCount,
 } from "./db";
 import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
 import { revalidatePath } from "next/cache";
@@ -197,22 +198,26 @@ export async function sendEmail(
   const ownerName = tribe.owner_name || 'Anonymous';
   const escapedBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Send emails with personalized unsubscribe links
+  // Create email record FIRST to get the emailId for tracking pixel
+  const email = await createSentEmail(tribe.id, subject, body, 0);
+
+  // Send emails with personalized unsubscribe links and tracking pixel
   const result = await sendBulkEmailWithUnsubscribe(
     filteredSubscribers.map(s => ({ email: s.email, unsubscribeToken: s.unsubscribe_token || '' })),
     subject,
     escapedBody,
     body,
     ownerName,
-    baseUrl
+    baseUrl,
+    email.id // Pass emailId for open tracking
   );
   
   if (!result.success && result.sentCount === 0) {
     throw new Error(`Failed to send emails: ${result.errors.join(", ")}`);
   }
 
-  // Record the sent email
-  const email = await createSentEmail(tribe.id, subject, body, result.sentCount);
+  // Update the recipient count after sending
+  await updateSentEmailRecipientCount(email.id, result.sentCount);
   
   revalidatePath("/new-email");
   revalidatePath("/dashboard");
@@ -249,6 +254,11 @@ export async function getDashboardStats() {
   const todayRecipients = todayEmails.reduce((sum, e) => sum + e.recipient_count, 0);
   const weekRecipients = weekEmails.reduce((sum, e) => sum + e.recipient_count, 0);
 
+  // Calculate real open rate from all sent emails
+  const totalOpens = sentEmails.reduce((sum, e) => sum + (e.open_count || 0), 0);
+  const totalSent = sentEmails.reduce((sum, e) => sum + e.recipient_count, 0);
+  const openRate = totalSent > 0 ? Math.round((totalOpens / totalSent) * 100 * 10) / 10 : 0;
+
   return {
     totalSubscribers: subscribers.length,
     todaySubscribers: todaySubs,
@@ -256,8 +266,7 @@ export async function getDashboardStats() {
     totalEmailsSent: totalRecipients,
     todayEmailsSent: todayRecipients,
     weekEmailsSent: weekRecipients,
-    // Mock opening rates for V2
-    openingRate: sentEmails.length > 0 ? 46.2 : 0,
+    openingRate: openRate,
     todayOpeningRate: todayEmails.length > 0 ? 52.8 : 0,
     weekOpeningRate: weekEmails.length > 0 ? 48.4 : 0,
   };

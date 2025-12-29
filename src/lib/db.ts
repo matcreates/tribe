@@ -78,9 +78,17 @@ export async function initDatabase() {
       subject TEXT,
       body TEXT,
       recipient_count INTEGER DEFAULT 0,
+      open_count INTEGER DEFAULT 0,
       sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add open_count column if it doesn't exist (for existing databases)
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN open_count INTEGER DEFAULT 0`);
+  } catch {
+    // Column already exists
+  }
 }
 
 export interface DbUser {
@@ -119,6 +127,7 @@ export interface DbSentEmail {
   subject: string | null;
   body: string | null;
   recipient_count: number;
+  open_count: number;
   sent_at: Date;
 }
 
@@ -288,6 +297,14 @@ export async function createSentEmail(tribeId: string, subject: string, body: st
 export async function getSentEmailById(id: string): Promise<DbSentEmail | null> {
   const rows = await query<DbSentEmail>(`SELECT * FROM sent_emails WHERE id = $1`, [id]);
   return rows[0] || null;
+}
+
+export async function incrementEmailOpenCount(emailId: string): Promise<void> {
+  await query(`UPDATE sent_emails SET open_count = COALESCE(open_count, 0) + 1 WHERE id = $1`, [emailId]);
+}
+
+export async function updateSentEmailRecipientCount(emailId: string, recipientCount: number): Promise<void> {
+  await query(`UPDATE sent_emails SET recipient_count = $1 WHERE id = $2`, [recipientCount, emailId]);
 }
 
 export async function getSentEmailsByTribeId(tribeId: string): Promise<DbSentEmail[]> {

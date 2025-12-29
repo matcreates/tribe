@@ -28,7 +28,8 @@ export async function sendBulkEmailWithUnsubscribe(
   escapedBody: string,
   plainTextBody: string,
   ownerName: string,
-  baseUrl: string
+  baseUrl: string,
+  emailId?: string
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
   if (recipients.length === 0) {
     return { success: true, sentCount: 0, errors: [] };
@@ -49,6 +50,11 @@ export async function sendBulkEmailWithUnsubscribe(
     const batchEmails = batch.map(recipient => {
       const unsubscribeUrl = `${baseUrl}/api/unsubscribe?token=${recipient.unsubscribeToken}`;
       
+      // Tracking pixel for open rate
+      const trackingPixel = emailId 
+        ? `<img src="${baseUrl}/api/track/${emailId}/pixel.gif" width="1" height="1" alt="" style="display:none;" />`
+        : '';
+
       const htmlBody = `
         <!DOCTYPE html>
         <html>
@@ -68,6 +74,7 @@ export async function sendBulkEmailWithUnsubscribe(
                 </a>
               </div>
             </div>
+            ${trackingPixel}
           </body>
         </html>
       `;

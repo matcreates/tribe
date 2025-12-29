@@ -13,6 +13,7 @@ interface SentEmail {
   subject: string | null;
   body: string | null;
   recipient_count: number;
+  open_count: number;
   sent_at: string;
 }
 
@@ -74,11 +75,11 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
     minute: "2-digit",
   });
 
-  // Mock data for insights (will be real in V2 with tracking)
-  const openRate = Math.round(40 + Math.random() * 25);
-  const clickRate = Math.round(openRate * 0.3 + Math.random() * 10);
-  const uniqueOpens = Math.round(email.recipient_count * (openRate / 100));
-  const uniqueClicks = Math.round(email.recipient_count * (clickRate / 100));
+  // Calculate real open rate from tracked data
+  const uniqueOpens = email.open_count || 0;
+  const openRate = email.recipient_count > 0 
+    ? Math.round((uniqueOpens / email.recipient_count) * 100) 
+    : 0;
 
   return (
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
@@ -170,11 +171,11 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
               </div>
               <span className="text-[12px] text-white/40">Click rate</span>
             </div>
-            <p className="text-[28px] font-medium text-white/90">
-              {clickRate}%
+            <p className="text-[28px] font-medium text-white/50">
+              —
             </p>
             <p className="text-[11px] text-white/30 mt-1">
-              {uniqueClicks} unique clicks
+              Coming soon
             </p>
           </div>
 
@@ -204,35 +205,39 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
           </div>
         </div>
 
-        {/* Engagement Timeline */}
+        {/* Engagement Summary */}
         <div 
           className="rounded-[12px] p-5 border border-white/[0.06] mb-8"
           style={{ background: 'rgba(255, 255, 255, 0.02)' }}
         >
-          <h3 className="text-[13px] font-medium text-white/70 mb-4">Engagement over time</h3>
-          <div className="h-[100px] flex items-end gap-1">
-            {[...Array(24)].map((_, i) => {
-              const height = i < 2 ? 0 : Math.max(8, Math.random() * 100 * Math.exp(-((i - 3) ** 2) / 20));
-              return (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t-sm transition-all"
+          <h3 className="text-[13px] font-medium text-white/70 mb-4">Engagement summary</h3>
+          {uniqueOpens > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-white/50">Opens</span>
+                <span className="text-[12px] text-white/70">{uniqueOpens} of {email.recipient_count}</span>
+              </div>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                <div 
+                  className="h-full rounded-full transition-all"
                   style={{ 
-                    height: `${height}%`,
-                    background: height > 0 ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.05)',
-                    minHeight: '4px',
+                    width: `${Math.min(100, openRate)}%`,
+                    background: 'rgba(34, 197, 94, 0.6)',
                   }}
                 />
-              );
-            })}
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-[10px] text-white/25">0h</span>
-            <span className="text-[10px] text-white/25">6h</span>
-            <span className="text-[10px] text-white/25">12h</span>
-            <span className="text-[10px] text-white/25">18h</span>
-            <span className="text-[10px] text-white/25">24h</span>
-          </div>
+              </div>
+              <p className="text-[11px] text-white/30">
+                {openRate}% of recipients opened this email
+              </p>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-[13px] text-white/40">No opens recorded yet</p>
+              <p className="text-[11px] text-white/25 mt-1">
+                Opens are tracked when recipients view the email
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Email Preview */}
