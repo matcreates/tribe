@@ -142,16 +142,8 @@ export default function SettingsPage() {
               className="hidden"
             />
           </div>
-          <input
-            type="url"
-            value={ownerAvatar}
-            onChange={(e) => setOwnerAvatar(e.target.value)}
-            placeholder="Or paste image URL"
-            className="w-full px-3.5 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-          />
-          <p className="text-[11px] text-white/25 mt-1.5">
-            Upload an image or paste a URL (leave empty to use initials)
+          <p className="text-[11px] text-white/25 mt-1">
+            Leave empty to use your initials
           </p>
         </div>
 
@@ -169,8 +161,9 @@ export default function SettingsPage() {
 
         {/* Slug */}
         <div className="mb-6">
-          <label className="block text-[12px] text-white/40 mb-2">Your tribe URL</label>
+          <label className="block text-[12px] text-white/40 mb-2">Your username</label>
           <div className="flex items-center gap-2">
+            <span className="text-[13px] text-white/35">madewithtribe.com/@</span>
             <input
               type="text"
               value={slug}
@@ -178,7 +171,6 @@ export default function SettingsPage() {
               className="flex-1 px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors border border-white/[0.06]"
               style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             />
-            <span className="text-[13px] text-white/35">.tribe.com</span>
           </div>
         </div>
 
