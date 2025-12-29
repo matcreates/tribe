@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getRecipientCounts, sendEmail, RecipientFilter } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
@@ -10,12 +10,12 @@ export default function NewEmailPage() {
   const router = useRouter();
   const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
   const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("verified");
-  const [body, setBody] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [mode, setMode] = useState<"email" | "link">("email");
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastSentCount, setLastSentCount] = useState(0);
+  const [isEmpty, setIsEmpty] = useState(true);
   const { toast, showToast, hideToast } = useToast();
+  const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadCounts();
@@ -38,7 +38,157 @@ export default function NewEmailPage() {
     }
   };
 
+  // Get plain text content from editor
+  const getPlainText = useCallback(() => {
+    if (!editorRef.current) return "";
+    return editorRef.current.innerText || "";
+  }, []);
+
+  // Get HTML content from editor
+  const getHtmlContent = useCallback(() => {
+    if (!editorRef.current) return "";
+    return editorRef.current.innerHTML || "";
+  }, []);
+
+  // Handle input and auto-format
+  const handleInput = useCallback(() => {
+    if (!editorRef.current) return;
+    
+    const text = getPlainText();
+    setIsEmpty(!text.trim());
+  }, [getPlainText]);
+
+  // Handle key events for smart formatting
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!editorRef.current) return;
+
+    // Handle Enter key for list continuation
+    if (e.key === "Enter") {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+      
+      const range = selection.getRangeAt(0);
+      const node = range.startContainer;
+      const textContent = node.textContent || "";
+      
+      // Check if current line starts with bullet
+      const lines = textContent.split("\n");
+      const cursorPos = range.startOffset;
+      let charCount = 0;
+      let currentLineIndex = 0;
+      
+      for (let i = 0; i < lines.length; i++) {
+        if (charCount + lines[i].length >= cursorPos) {
+          currentLineIndex = i;
+          break;
+        }
+        charCount += lines[i].length + 1;
+      }
+      
+      const currentLine = lines[currentLineIndex] || "";
+      const bulletMatch = currentLine.match(/^(\s*[-•*]\s*)/);
+      
+      if (bulletMatch) {
+        // If line only has bullet, remove it
+        if (currentLine.trim() === "-" || currentLine.trim() === "•" || currentLine.trim() === "*") {
+          e.preventDefault();
+          document.execCommand("delete");
+          document.execCommand("delete");
+          document.execCommand("insertLineBreak");
+          return;
+        }
+        
+        // Continue bullet on next line
+        e.preventDefault();
+        document.execCommand("insertLineBreak");
+        document.execCommand("insertText", false, bulletMatch[1].trim() + " ");
+      }
+    }
+
+    // Auto-format bullets when typing "- " at start of line
+    if (e.key === " ") {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+      
+      const range = selection.getRangeAt(0);
+      const node = range.startContainer;
+      
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        const offset = range.startOffset;
+        
+        // Check if we just typed "- " at start or after newline
+        const beforeCursor = text.slice(0, offset);
+        const lastNewline = beforeCursor.lastIndexOf("\n");
+        const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+        const lineText = beforeCursor.slice(lineStart);
+        
+        if (lineText === "-" || lineText === "*") {
+          e.preventDefault();
+          // Replace with bullet
+          const before = text.slice(0, lineStart);
+          const after = text.slice(offset);
+          node.textContent = before + "• " + after;
+          
+          // Move cursor after bullet
+          const newRange = document.createRange();
+          newRange.setStart(node, lineStart + 2);
+          newRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+    }
+  }, []);
+
+  // Paste as plain text and auto-detect links
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    
+    // Insert plain text
+    document.execCommand("insertText", false, text);
+    
+    // Trigger input handler
+    handleInput();
+  }, [handleInput]);
+
+  // Format content for display (linkify URLs)
+  const formatContent = useCallback((html: string) => {
+    // URL regex
+    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+    
+    // Replace URLs with underlined spans
+    return html.replace(urlRegex, '<span class="underline text-white/70">$1</span>');
+  }, []);
+
+  // Handle blur to format links
+  const handleBlur = useCallback(() => {
+    if (!editorRef.current) return;
+    
+    const selection = window.getSelection();
+    const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+    
+    const content = editorRef.current.innerHTML;
+    const formatted = formatContent(content);
+    
+    if (formatted !== content) {
+      editorRef.current.innerHTML = formatted;
+    }
+    
+    // Restore cursor position if possible
+    if (savedRange && selection) {
+      try {
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+      } catch {
+        // Cursor restore failed, that's ok
+      }
+    }
+  }, [formatContent]);
+
   const handleSend = async () => {
+    const body = getPlainText();
     if (!body.trim() || isSending) return;
 
     const count = getCurrentCount();
@@ -56,7 +206,10 @@ export default function NewEmailPage() {
       
       const result = await sendEmail(subject, body, recipientFilter);
       
-      setBody("");
+      if (editorRef.current) {
+        editorRef.current.innerHTML = "";
+      }
+      setIsEmpty(true);
       setLastSentCount(result.sentCount);
       setShowSuccess(true);
       router.refresh();
@@ -86,7 +239,7 @@ export default function NewEmailPage() {
         </h1>
 
         {/* Recipient Selector */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <span className="text-[13px] text-white/40">to</span>
           <div className="relative">
             <select
@@ -103,45 +256,35 @@ export default function NewEmailPage() {
           </div>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex gap-0.5 mb-3 p-0.5 rounded-[8px] w-fit" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
-          <button
-            onClick={() => setMode("email")}
-            className={`p-2 rounded-[6px] transition-colors ${
-              mode === "email"
-                ? "bg-white/[0.08] text-white/70"
-                : "text-white/30 hover:text-white/50"
-            }`}
-            aria-label="Email mode"
-          >
-            <EmailIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setMode("link")}
-            className={`p-2 rounded-[6px] transition-colors ${
-              mode === "link"
-                ? "bg-white/[0.08] text-white/70"
-                : "text-white/30 hover:text-white/50"
-            }`}
-            aria-label="Link mode"
-          >
-            <LinkIcon className="w-4 h-4" />
-          </button>
+        {/* Smart Editor */}
+        <div className="relative mb-5">
+          <div
+            ref={editorRef}
+            contentEditable
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            onBlur={handleBlur}
+            className="w-full min-h-[200px] px-4 py-3 rounded-[10px] text-[14px] leading-relaxed text-white/70 focus:outline-none transition-colors whitespace-pre-wrap break-words"
+            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            suppressContentEditableWarning
+          />
+          {isEmpty && (
+            <div className="absolute left-4 top-3 text-[14px] text-white/25 pointer-events-none">
+              Write your email...
+            </div>
+          )}
         </div>
 
-        {/* Email Body */}
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder={mode === "email" ? "Write your email..." : "Paste your link..."}
-          className="w-full h-[180px] px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 resize-none focus:outline-none transition-colors mb-5"
-          style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-        />
+        {/* Helper text */}
+        <p className="text-[11px] text-white/25 mb-5">
+          Links are auto-detected • Type <span className="text-white/35">-</span> for bullet lists
+        </p>
 
         {/* Send Button */}
         <button
           onClick={handleSend}
-          disabled={isSending || !body.trim() || getCurrentCount() === 0}
+          disabled={isSending || isEmpty || getCurrentCount() === 0}
           className="self-start px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
           style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
         >
@@ -168,25 +311,6 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 6l4 4 4-4" />
-    </svg>
-  );
-}
-
-function EmailIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
-      <path d="M2 5.5l6 3.5 6-3.5" />
-    </svg>
-  );
-}
-
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6.5 9.5l3-3" />
-      <path d="M9.5 6l1.25-1.25a2.12 2.12 0 013 3L12.5 9" />
-      <path d="M6.5 10l-1.25 1.25a2.12 2.12 0 01-3-3L3.5 7" />
     </svg>
   );
 }
