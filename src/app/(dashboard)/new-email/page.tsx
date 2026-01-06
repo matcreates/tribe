@@ -280,7 +280,7 @@ export default function NewEmailPage() {
       <div className="w-full max-w-[540px]">
         {/* Header */}
         <h1 className="text-[20px] font-medium text-white/90 mb-5">
-          Send an email
+          New email
         </h1>
 
         {/* Recipient Selector */}
