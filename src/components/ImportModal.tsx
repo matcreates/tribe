@@ -106,18 +106,18 @@ export function ImportModal({
             <button
               onClick={onImportWithVerification}
               disabled={isImporting}
-              className="flex-1 px-4 py-3 rounded-lg text-[13px] font-medium border border-white/[0.12] text-white/70 hover:text-white/90 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-5 py-2.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/60 hover:text-white/80 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.03)' }}
             >
-              {isImporting ? "Importing..." : "Add with verification"}
+              {isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}
             </button>
             <button
               onClick={onImportWithoutVerification}
               disabled={isImporting}
-              className="flex-1 px-4 py-3 rounded-lg text-[13px] font-medium text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-5 py-2.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.12)' }}
             >
-              {isImporting ? "Importing..." : "Add without verification"}
+              {isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}
             </button>
           </div>
         ) : (
@@ -132,9 +132,9 @@ export function ImportModal({
         <button
           onClick={onClose}
           disabled={isImporting}
-          className="w-full py-2.5 text-[13px] text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
+          className="w-full py-2.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
         >
-          Cancel
+          CANCEL
         </button>
 
         {/* Importing overlay */}
