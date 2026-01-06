@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 export interface ImportPreview {
-  totalFound: number;
+  totalInFile: number;
   duplicates: number;
   invalid: number;
   toImport: number;
@@ -58,28 +58,30 @@ export function ImportModal({
         className="relative w-full max-w-[420px] mx-4 rounded-2xl border border-white/[0.08] p-6"
         style={{ background: 'rgb(24, 24, 24)' }}
       >
-        {/* Header */}
+        {/* Header - Show NEW people count */}
         <p className="text-center text-[15px] text-white/80 mb-5">
-          We found <span className="font-semibold text-white">{preview.totalFound} {preview.totalFound === 1 ? 'person' : 'people'}</span> in your file.
+          We found <span className="font-semibold text-white">{preview.toImport} new {preview.toImport === 1 ? 'person' : 'people'}</span> in your file.
         </p>
 
-        {/* Stats (if there are issues) */}
-        {(preview.duplicates > 0 || preview.invalid > 0) && (
-          <div className="mb-5 p-4 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-            {preview.duplicates > 0 && (
-              <p className="text-[13px] text-white/50 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/70" />
-                {preview.duplicates} already in your tribe (skipped)
-              </p>
-            )}
-            {preview.invalid > 0 && (
-              <p className="text-[13px] text-white/50 flex items-center gap-2 mt-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500/70" />
-                {preview.invalid} invalid email{preview.invalid > 1 ? 's' : ''} (skipped)
-              </p>
-            )}
-          </div>
-        )}
+        {/* Stats - Always show details */}
+        <div className="mb-5 p-4 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+          <p className="text-[13px] text-white/50 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+            {preview.totalInFile} total in file
+          </p>
+          {preview.duplicates > 0 && (
+            <p className="text-[13px] text-white/50 flex items-center gap-2 mt-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/70" />
+              {preview.duplicates} already in your tribe
+            </p>
+          )}
+          {preview.invalid > 0 && (
+            <p className="text-[13px] text-white/50 flex items-center gap-2 mt-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500/70" />
+              {preview.invalid} invalid email{preview.invalid > 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
 
         {/* Main info box */}
         <div 

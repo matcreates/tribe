@@ -110,7 +110,7 @@ function isValidEmail(email: string): boolean {
 }
 
 export interface ImportPreviewResult {
-  totalFound: number;
+  totalInFile: number;
   duplicates: number;
   invalid: number;
   toImport: number;
@@ -135,7 +135,7 @@ export async function previewImport(rawEmails: string[]): Promise<ImportPreviewR
     }
   }
   
-  const totalFound = allParsed.length;
+  const totalInFile = allParsed.length;
   
   // Separate valid and invalid emails
   const validEmails: string[] = [];
@@ -164,7 +164,7 @@ export async function previewImport(rawEmails: string[]): Promise<ImportPreviewR
   }
   
   return {
-    totalFound,
+    totalInFile,
     duplicates: duplicateEmails.length,
     invalid: invalidEmails.length,
     toImport: newEmails.length,

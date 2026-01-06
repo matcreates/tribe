@@ -146,7 +146,7 @@ export default function TribePage() {
       const preview = await previewImport(emails);
       
       setImportPreview({
-        totalFound: preview.totalFound,
+        totalInFile: preview.totalInFile,
         duplicates: preview.duplicates,
         invalid: preview.invalid,
         toImport: preview.toImport,
