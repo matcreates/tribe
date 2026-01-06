@@ -390,7 +390,7 @@ export default function NewEmailPage() {
               <div 
                 className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap [&_a]:text-white/50 [&_a]:underline"
                 dangerouslySetInnerHTML={{ 
-                  __html: signature
+                  __html: (signature || '')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')
                     .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
