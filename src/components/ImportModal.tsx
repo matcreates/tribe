@@ -55,37 +55,37 @@ export function ImportModal({
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-[420px] mx-4 rounded-2xl border border-white/[0.08] p-6"
+        className="relative w-full max-w-[520px] mx-4 rounded-2xl border border-white/[0.08] p-8"
         style={{ background: 'rgb(24, 24, 24)' }}
       >
         {/* Header - Show NEW people count */}
-        <p className="text-center text-[15px] text-white/80 mb-5">
+        <p className="text-center text-[16px] text-white/80 mb-6">
           We found <span className="font-semibold text-white">{preview.toImport} new {preview.toImport === 1 ? 'person' : 'people'}</span> in your file.
         </p>
 
         {/* Stats - Always show details */}
-        <div className="mb-5 p-4 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-          <p className="text-[13px] text-white/50 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
-            {preview.totalInFile} total in file
+        <div className="mb-6 p-5 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+          <p className="text-[13px] text-white/50 flex items-center gap-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+            {preview.totalInFile} {preview.totalInFile === 1 ? 'email' : 'emails'} found in the file
           </p>
           {preview.duplicates > 0 && (
-            <p className="text-[13px] text-white/50 flex items-center gap-2 mt-2">
+            <p className="text-[13px] text-white/50 flex items-center gap-2.5 mt-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/70" />
               {preview.duplicates} already in your tribe
             </p>
           )}
           {preview.invalid > 0 && (
-            <p className="text-[13px] text-white/50 flex items-center gap-2 mt-2">
+            <p className="text-[13px] text-white/50 flex items-center gap-2.5 mt-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500/70" />
-              {preview.invalid} invalid email{preview.invalid > 1 ? 's' : ''}
+              {preview.invalid} invalid {preview.invalid === 1 ? 'email' : 'emails'}
             </p>
           )}
         </div>
 
         {/* Main info box */}
         <div 
-          className="p-5 rounded-xl border border-white/[0.08] mb-5"
+          className="p-5 rounded-xl border border-white/[0.08] mb-6"
           style={{ background: 'rgba(255, 255, 255, 0.03)' }}
         >
           <div className="flex items-start gap-3">
@@ -102,11 +102,11 @@ export function ImportModal({
 
         {/* Action Buttons */}
         {hasEmailsToImport ? (
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3 mb-5">
             <button
               onClick={onImportWithVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-2.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/60 hover:text-white/80 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/60 hover:text-white/80 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.03)' }}
             >
               {isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}
@@ -114,14 +114,14 @@ export function ImportModal({
             <button
               onClick={onImportWithoutVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-2.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.12)' }}
             >
               {isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}
             </button>
           </div>
         ) : (
-          <div className="mb-4 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-center">
+          <div className="mb-5 p-5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-center">
             <p className="text-[13px] text-amber-200/70">
               No new emails to import. All emails are either duplicates or invalid.
             </p>
@@ -132,7 +132,7 @@ export function ImportModal({
         <button
           onClick={onClose}
           disabled={isImporting}
-          className="w-full py-2.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
+          className="w-full py-3 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
         >
           CANCEL
         </button>

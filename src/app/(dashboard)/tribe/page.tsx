@@ -17,6 +17,40 @@ interface Subscriber {
 type FilterType = "all" | "verified" | "non-verified";
 type SortType = "newest" | "oldest" | "a-z" | "z-a" | "verified-first" | "unverified-first";
 
+// Email regex for extraction
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+// Smart email extraction that handles CSV files with multiple columns
+function extractEmailsFromText(text: string): string[] {
+  const emails: string[] = [];
+  const seen = new Set<string>();
+  
+  // Split by lines first
+  const lines = text.split(/[\r\n]+/).filter(line => line.trim().length > 0);
+  
+  for (const line of lines) {
+    // Skip common header rows
+    const lowerLine = line.toLowerCase();
+    if (lowerLine.includes('email') && (lowerLine.includes('name') || lowerLine.includes('first') || lowerLine.includes('last') || lowerLine.includes('date'))) {
+      continue; // This looks like a header row
+    }
+    
+    // Extract all email addresses from this line using regex
+    const matches = line.match(EMAIL_PATTERN);
+    if (matches) {
+      for (const email of matches) {
+        const normalized = email.toLowerCase().trim();
+        if (!seen.has(normalized)) {
+          seen.add(normalized);
+          emails.push(normalized);
+        }
+      }
+    }
+  }
+  
+  return emails;
+}
+
 export default function TribePage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
@@ -171,11 +205,8 @@ export default function TribePage() {
     try {
       const text = await file.text();
       
-      // Parse emails - support various delimiters
-      const emails = text
-        .split(/[\n\r,;|\t]+/)
-        .map(e => e.trim())
-        .filter(e => e.length > 0);
+      // Smart email extraction from CSV/TXT files
+      const emails = extractEmailsFromText(text);
       
       if (emails.length === 0) {
         showToast("No emails found in file");
