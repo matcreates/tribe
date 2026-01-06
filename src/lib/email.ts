@@ -29,7 +29,8 @@ export async function sendBulkEmailWithUnsubscribe(
   plainTextBody: string,
   ownerName: string,
   baseUrl: string,
-  emailId?: string
+  emailId?: string,
+  emailSignature?: string
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
   if (recipients.length === 0) {
     return { success: true, sentCount: 0, errors: [] };
@@ -55,6 +56,24 @@ export async function sendBulkEmailWithUnsubscribe(
         ? `<img src="${baseUrl}/api/track/${emailId}/pixel.gif" width="1" height="1" alt="" style="display:none;" />`
         : '';
 
+      // Format signature for HTML (convert links and line breaks)
+      let signatureHtml = '';
+      let signatureText = '';
+      if (emailSignature && emailSignature.trim()) {
+        const escapedSig = emailSignature.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Auto-link URLs in signature
+        const linkedSig = escapedSig.replace(
+          /(https?:\/\/[^\s]+)/g,
+          '<a href="$1" style="color: rgba(255,255,255,0.5); text-decoration: underline;">$1</a>'
+        );
+        signatureHtml = `
+          <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; white-space: pre-wrap;">${linkedSig}</div>
+          </div>
+        `;
+        signatureText = `\n\n---\n${emailSignature}`;
+      }
+
       const htmlBody = `
         <!DOCTYPE html>
         <html>
@@ -65,6 +84,7 @@ export async function sendBulkEmailWithUnsubscribe(
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
             <div style="max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
               <div style="color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${escapedBody}</div>
+              ${signatureHtml}
               <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
                 <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 0 0 8px;">
                   Sent from ${ownerName}'s Tribe
@@ -79,7 +99,7 @@ export async function sendBulkEmailWithUnsubscribe(
         </html>
       `;
 
-      const textBody = `${plainTextBody}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
+      const textBody = `${plainTextBody}${signatureText}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
 
       return {
         from: fromEmail,

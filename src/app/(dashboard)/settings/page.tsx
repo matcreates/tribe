@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [ownerName, setOwnerName] = useState("");
   const [slug, setSlug] = useState("");
   const [ownerAvatar, setOwnerAvatar] = useState("");
+  const [emailSignature, setEmailSignature] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -24,6 +25,7 @@ export default function SettingsPage() {
       setOwnerName(settings.ownerName);
       setSlug(settings.slug);
       setOwnerAvatar(settings.ownerAvatar || "");
+      setEmailSignature(settings.emailSignature || "");
     } catch (error) {
       console.error("Failed to load settings:", error);
     } finally {
@@ -85,6 +87,7 @@ export default function SettingsPage() {
         ownerName: ownerName.trim() || "Anonymous",
         slug: slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "") || "my-tribe",
         ownerAvatar: ownerAvatar.trim() || undefined,
+        emailSignature: emailSignature.trim() || undefined,
       });
       showToast("Settings saved");
     } catch (error) {
@@ -172,6 +175,22 @@ export default function SettingsPage() {
               style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             />
           </div>
+        </div>
+
+        {/* Email Signature */}
+        <div className="mb-6">
+          <label className="block text-[12px] text-white/40 mb-2">Email signature</label>
+          <textarea
+            value={emailSignature}
+            onChange={(e) => setEmailSignature(e.target.value)}
+            placeholder="Add your signature here..."
+            rows={4}
+            className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors resize-none border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+          />
+          <p className="text-[11px] text-white/25 mt-1.5">
+            This signature will be automatically added at the end of every email you send. Links will be auto-detected.
+          </p>
         </div>
 
         {/* Save */}

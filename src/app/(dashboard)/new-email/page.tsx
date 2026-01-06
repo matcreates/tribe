@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, RecipientFilter } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, RecipientFilter } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function NewEmailPage() {
   const router = useRouter();
@@ -17,11 +18,13 @@ export default function NewEmailPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastSentCount, setLastSentCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [hasSignature, setHasSignature] = useState(true);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadCounts();
+    loadSignature();
   }, []);
 
   const loadCounts = async () => {
@@ -30,6 +33,15 @@ export default function NewEmailPage() {
       setCounts(result);
     } catch (error) {
       console.error("Failed to load recipient counts:", error);
+    }
+  };
+
+  const loadSignature = async () => {
+    try {
+      const signature = await getEmailSignature();
+      setHasSignature(!!signature.trim());
+    } catch (error) {
+      console.error("Failed to load signature:", error);
     }
   };
 
@@ -357,6 +369,31 @@ export default function NewEmailPage() {
           </p>
         )}
 
+        {/* Signature Prompt */}
+        {!hasSignature && (
+          <div 
+            className="mt-6 p-4 rounded-[10px] border border-white/[0.06] flex items-center justify-between gap-4"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                <SignatureIcon className="w-4 h-4 text-white/40" />
+              </div>
+              <div>
+                <p className="text-[13px] text-white/60">Add your email signature</p>
+                <p className="text-[11px] text-white/30">Automatically added to every email</p>
+              </div>
+            </div>
+            <Link
+              href="/settings"
+              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            >
+              SETUP
+            </Link>
+          </div>
+        )}
+
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
 
@@ -384,6 +421,15 @@ function ClockIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="8" cy="8" r="6.5" />
       <path d="M8 4v4l2.5 2.5" />
+    </svg>
+  );
+}
+
+function SignatureIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12c1.5-2 3-4.5 4-4.5s2 3 3 3 2.5-3 4-5" />
+      <line x1="2" y1="14" x2="14" y2="14" />
     </svg>
   );
 }

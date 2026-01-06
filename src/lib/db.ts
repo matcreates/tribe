@@ -35,9 +35,17 @@ export async function initDatabase() {
       slug TEXT UNIQUE NOT NULL,
       owner_name TEXT,
       owner_avatar TEXT,
+      email_signature TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add email_signature column if it doesn't exist (for existing databases)
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN email_signature TEXT`);
+  } catch {
+    // Column already exists
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS subscribers (
@@ -123,6 +131,7 @@ export interface DbTribe {
   slug: string;
   owner_name: string | null;
   owner_avatar: string | null;
+  email_signature: string | null;
   created_at: Date;
 }
 
@@ -207,7 +216,7 @@ export async function getTribeByUserId(userId: string): Promise<DbTribe | null> 
   return rows[0] || null;
 }
 
-export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "name" | "slug" | "owner_name" | "owner_avatar">>): Promise<void> {
+export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "name" | "slug" | "owner_name" | "owner_avatar" | "email_signature">>): Promise<void> {
   if (updates.name !== undefined) {
     await pool.query(`UPDATE tribes SET name = $1 WHERE id = $2`, [updates.name, id]);
   }
@@ -219,6 +228,9 @@ export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "na
   }
   if (updates.owner_avatar !== undefined) {
     await pool.query(`UPDATE tribes SET owner_avatar = $1 WHERE id = $2`, [updates.owner_avatar, id]);
+  }
+  if (updates.email_signature !== undefined) {
+    await pool.query(`UPDATE tribes SET email_signature = $1 WHERE id = $2`, [updates.email_signature, id]);
   }
 }
 

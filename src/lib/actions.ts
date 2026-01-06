@@ -42,6 +42,7 @@ export async function getTribeSettings() {
     slug: tribe.slug,
     ownerName: tribe.owner_name || "Anonymous",
     ownerAvatar: tribe.owner_avatar,
+    emailSignature: tribe.email_signature || "",
   };
 }
 
@@ -50,6 +51,7 @@ export async function updateTribeSettings(data: {
   slug?: string;
   ownerName?: string;
   ownerAvatar?: string;
+  emailSignature?: string;
 }) {
   const tribe = await getTribe();
   
@@ -65,6 +67,7 @@ export async function updateTribeSettings(data: {
     slug: data.slug,
     owner_name: data.ownerName,
     owner_avatar: data.ownerAvatar,
+    email_signature: data.emailSignature,
   });
   
   revalidatePath("/settings");
@@ -259,6 +262,11 @@ export async function getSentEmailById(emailId: string) {
 
 export type RecipientFilter = "verified" | "non-verified" | "all";
 
+export async function getEmailSignature(): Promise<string> {
+  const tribe = await getTribe();
+  return tribe.email_signature || "";
+}
+
 export async function getRecipientCounts(): Promise<{
   verified: number;
   nonVerified: number;
@@ -306,6 +314,7 @@ export async function sendEmail(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
   const ownerName = tribe.owner_name || 'Anonymous';
   const escapedBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const emailSignature = tribe.email_signature || '';
 
   // Create email record FIRST to get the emailId for tracking pixel
   const email = await createSentEmail(tribe.id, subject, body, 0);
@@ -318,7 +327,8 @@ export async function sendEmail(
     body,
     ownerName,
     baseUrl,
-    email.id // Pass emailId for open tracking
+    email.id, // Pass emailId for open tracking
+    emailSignature // Pass email signature
   );
   
   if (!result.success && result.sentCount === 0) {
