@@ -387,9 +387,15 @@ export default function NewEmailPage() {
               className="p-4 rounded-[10px] border border-white/[0.06]"
               style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             >
-              <div className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap">
-                {signature}
-              </div>
+              <div 
+                className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap [&_a]:text-white/50 [&_a]:underline"
+                dangerouslySetInnerHTML={{ 
+                  __html: signature
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+                }}
+              />
             </div>
             <p className="text-[10px] text-white/20 mt-2">
               This will be added at the end of your email

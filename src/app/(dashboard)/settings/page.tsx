@@ -191,6 +191,27 @@ export default function SettingsPage() {
           <p className="text-[11px] text-white/25 mt-1.5">
             This signature will be automatically added at the end of every email you send. Links will be auto-detected.
           </p>
+          
+          {/* Live Preview */}
+          {emailSignature.trim() && (
+            <div className="mt-4">
+              <p className="text-[10px] text-white/30 uppercase tracking-[0.08em] mb-2">Preview</p>
+              <div 
+                className="p-3 rounded-[8px] border border-white/[0.06]"
+                style={{ background: 'rgba(255, 255, 255, 0.015)' }}
+              >
+                <div 
+                  className="text-[13px] text-white/50 leading-relaxed whitespace-pre-wrap [&_a]:text-white/60 [&_a]:underline"
+                  dangerouslySetInnerHTML={{ 
+                    __html: emailSignature
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Save */}
