@@ -8,6 +8,8 @@ import {
   getVerifiedSubscribersByTribeId,
   getSubscribersByTribeId,
   addSubscriber as dbAddSubscriber,
+  addSubscriberBulk as dbAddSubscriberBulk,
+  getExistingEmailsInTribe,
   removeSubscriber as dbRemoveSubscriber,
   getVerifiedSubscriberCount,
   getSentEmailsByTribeId,
@@ -100,21 +102,127 @@ export async function removeSubscriber(id: string) {
   revalidatePath("/dashboard");
 }
 
-export async function importSubscribers(emails: string[]) {
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim().toLowerCase());
+}
+
+export interface ImportPreviewResult {
+  totalFound: number;
+  duplicates: number;
+  invalid: number;
+  toImport: number;
+  emails: string[];
+  invalidEmails: string[];
+  duplicateEmails: string[];
+}
+
+// Preview import - returns counts and valid emails without adding them
+export async function previewImport(rawEmails: string[]): Promise<ImportPreviewResult> {
+  const tribe = await getTribe();
+  
+  // Parse and deduplicate emails from input
+  const allParsed: string[] = [];
+  const seen = new Set<string>();
+  
+  for (const email of rawEmails) {
+    const trimmed = email.trim().toLowerCase();
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      allParsed.push(trimmed);
+    }
+  }
+  
+  const totalFound = allParsed.length;
+  
+  // Separate valid and invalid emails
+  const validEmails: string[] = [];
+  const invalidEmails: string[] = [];
+  
+  for (const email of allParsed) {
+    if (isValidEmail(email)) {
+      validEmails.push(email);
+    } else {
+      invalidEmails.push(email);
+    }
+  }
+  
+  // Check for existing emails in tribe (duplicates)
+  const existingEmails = await getExistingEmailsInTribe(tribe.id, validEmails);
+  
+  const newEmails: string[] = [];
+  const duplicateEmails: string[] = [];
+  
+  for (const email of validEmails) {
+    if (existingEmails.has(email)) {
+      duplicateEmails.push(email);
+    } else {
+      newEmails.push(email);
+    }
+  }
+  
+  return {
+    totalFound,
+    duplicates: duplicateEmails.length,
+    invalid: invalidEmails.length,
+    toImport: newEmails.length,
+    emails: newEmails,
+    invalidEmails,
+    duplicateEmails,
+  };
+}
+
+// Import subscribers with or without auto-verification
+export async function importSubscribers(
+  emails: string[], 
+  sendVerification: boolean = false
+): Promise<{ added: number; errors: string[] }> {
   const tribe = await getTribe();
   let added = 0;
+  const errors: string[] = [];
+  
+  // Get base URL for verification emails
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
   
   for (const email of emails) {
     const trimmed = email.trim().toLowerCase();
-    if (trimmed && trimmed.includes("@")) {
-      const result = await dbAddSubscriber(tribe.id, trimmed);
-      if (result) added++;
+    if (!trimmed || !isValidEmail(trimmed)) continue;
+    
+    try {
+      // Add subscriber - verified = true if NOT sending verification (they're pre-verified)
+      // verified = false if sending verification (they need to click the link)
+      const result = await dbAddSubscriberBulk(tribe.id, trimmed, !sendVerification);
+      
+      if (result) {
+        added++;
+        
+        // Send verification email if requested and subscriber was added
+        if (sendVerification && result.verification_token) {
+          try {
+            await sendVerificationEmail(
+              trimmed,
+              tribe.name,
+              tribe.owner_name || "Anonymous",
+              result.verification_token,
+              baseUrl
+            );
+          } catch (emailError) {
+            console.error(`Failed to send verification to ${trimmed}:`, emailError);
+            errors.push(`Failed to send verification to ${trimmed}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to add ${trimmed}:`, error);
+      errors.push(`Failed to add ${trimmed}`);
     }
   }
   
   revalidatePath("/tribe");
   revalidatePath("/dashboard");
-  return added;
+  return { added, errors };
 }
 
 export async function exportSubscribers() {

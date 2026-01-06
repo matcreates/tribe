@@ -220,6 +220,48 @@ export async function addSubscriber(tribeId: string, email: string, name?: strin
   }
 }
 
+// Add subscriber with optional pre-verification (for imports)
+export async function addSubscriberBulk(
+  tribeId: string, 
+  email: string, 
+  verified: boolean = false,
+  name?: string
+): Promise<DbSubscriber | null> {
+  const id = crypto.randomUUID();
+  const verificationToken = verified ? null : crypto.randomUUID();
+  const unsubscribeToken = crypto.randomUUID();
+  
+  try {
+    await pool.query(
+      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token, unsubscribed, unsubscribe_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, tribeId, email.toLowerCase(), name || null, verified, verificationToken, false, unsubscribeToken]
+    );
+    return await getSubscriberById(id);
+  } catch {
+    // Duplicate email
+    return null;
+  }
+}
+
+// Check if email already exists in tribe
+export async function subscriberExistsInTribe(tribeId: string, email: string): Promise<boolean> {
+  const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND email = $2`, [tribeId, email.toLowerCase()]);
+  return Number(rows[0].count) > 0;
+}
+
+// Get multiple existing emails in one query (for bulk checking)
+export async function getExistingEmailsInTribe(tribeId: string, emails: string[]): Promise<Set<string>> {
+  if (emails.length === 0) return new Set();
+  
+  const lowerEmails = emails.map(e => e.toLowerCase());
+  const placeholders = lowerEmails.map((_, i) => `$${i + 2}`).join(', ');
+  const rows = await query<{ email: string }>(
+    `SELECT email FROM subscribers WHERE tribe_id = $1 AND email IN (${placeholders})`,
+    [tribeId, ...lowerEmails]
+  );
+  return new Set(rows.map(r => r.email.toLowerCase()));
+}
+
 export async function verifySubscriber(token: string): Promise<DbSubscriber | null> {
   const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE verification_token = $1`, [token]);
   if (rows.length === 0) return null;

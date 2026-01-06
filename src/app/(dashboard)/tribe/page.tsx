@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSubscribers, removeSubscriber, importSubscribers, exportSubscribers } from "@/lib/actions";
+import { getSubscribers, removeSubscriber, previewImport, importSubscribers, exportSubscribers } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
+import { ImportModal, ImportPreview } from "@/components/ImportModal";
 
 interface Subscriber {
   id: string;
@@ -22,6 +23,12 @@ export default function TribePage() {
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
+
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [pendingEmails, setPendingEmails] = useState<string[]>([]);
 
   useEffect(() => {
     loadSubscribers();
@@ -87,7 +94,7 @@ export default function TribePage() {
     }
   };
 
-  const handleImport = () => {
+  const handleImportClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -95,20 +102,117 @@ export default function TribePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const text = event.target?.result as string;
-      const emails = text.split(/[\n,;]/).filter(Boolean);
-      try {
-        const added = await importSubscribers(emails);
-        await loadSubscribers();
-        showToast(`Imported ${added} new subscribers`);
-      } catch {
-        showToast("Failed to import");
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("File too large. Max 5MB allowed.");
+      e.target.value = "";
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ['.csv', '.txt', 'text/csv', 'text/plain', 'application/vnd.ms-excel'];
+    const isValidType = validTypes.some(type => 
+      file.name.toLowerCase().endsWith(type) || file.type === type
+    );
+    if (!isValidType) {
+      showToast("Invalid file type. Use CSV or TXT files.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      
+      // Parse emails - support various delimiters
+      const emails = text
+        .split(/[\n\r,;|\t]+/)
+        .map(e => e.trim())
+        .filter(e => e.length > 0);
+      
+      if (emails.length === 0) {
+        showToast("No emails found in file");
+        e.target.value = "";
+        return;
       }
-    };
-    reader.readAsText(file);
+
+      // Limit to prevent abuse
+      if (emails.length > 10000) {
+        showToast("Too many emails. Max 10,000 per import.");
+        e.target.value = "";
+        return;
+      }
+
+      // Get preview with duplicate checking
+      const preview = await previewImport(emails);
+      
+      setImportPreview({
+        totalFound: preview.totalFound,
+        duplicates: preview.duplicates,
+        invalid: preview.invalid,
+        toImport: preview.toImport,
+        emails: preview.emails,
+        invalidEmails: preview.invalidEmails,
+        duplicateEmails: preview.duplicateEmails,
+      });
+      setPendingEmails(preview.emails);
+      setShowImportModal(true);
+      
+    } catch (error) {
+      console.error("Error reading file:", error);
+      showToast("Failed to read file");
+    }
+    
     e.target.value = "";
+  };
+
+  const handleImportWithVerification = async () => {
+    if (pendingEmails.length === 0) return;
+    
+    setIsImporting(true);
+    try {
+      const result = await importSubscribers(pendingEmails, true);
+      await loadSubscribers();
+      
+      if (result.errors.length > 0) {
+        showToast(`Imported ${result.added}. ${result.errors.length} failed to send verification.`);
+      } else {
+        showToast(`Imported ${result.added} subscribers. Verification emails sent!`);
+      }
+    } catch (error) {
+      console.error("Import failed:", error);
+      showToast("Import failed. Please try again.");
+    } finally {
+      setIsImporting(false);
+      setShowImportModal(false);
+      setImportPreview(null);
+      setPendingEmails([]);
+    }
+  };
+
+  const handleImportWithoutVerification = async () => {
+    if (pendingEmails.length === 0) return;
+    
+    setIsImporting(true);
+    try {
+      const result = await importSubscribers(pendingEmails, false);
+      await loadSubscribers();
+      showToast(`Imported ${result.added} subscribers as verified`);
+    } catch (error) {
+      console.error("Import failed:", error);
+      showToast("Import failed. Please try again.");
+    } finally {
+      setIsImporting(false);
+      setShowImportModal(false);
+      setImportPreview(null);
+      setPendingEmails([]);
+    }
+  };
+
+  const handleCloseModal = () => {
+    if (isImporting) return;
+    setShowImportModal(false);
+    setImportPreview(null);
+    setPendingEmails([]);
   };
 
   if (isLoading) {
@@ -123,39 +227,41 @@ export default function TribePage() {
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <h1 className="text-[20px] font-medium text-white/90">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
             Your tribe is made of <span className="text-white">{subscribers.length}</span> {subscribers.length === 1 ? 'person' : 'people'}
           </h1>
           <div className="flex-1" />
-          <button
-            onClick={handleImport}
-            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-          >
-            IMPORT
-          </button>
-          <button
-            onClick={handleExport}
-            className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-          >
-            EXPORT
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleImportClick}
+              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            >
+              IMPORT
+            </button>
+            <button
+              onClick={handleExport}
+              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            >
+              EXPORT
+            </button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,.txt"
+            accept=".csv,.txt,text/csv,text/plain"
             onChange={handleFileChange}
             className="hidden"
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-1 mb-4">
+        <div className="flex gap-1 mb-4 overflow-x-auto">
           <button
             onClick={() => setFilter("all")}
-            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "all"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
@@ -165,7 +271,7 @@ export default function TribePage() {
           </button>
           <button
             onClick={() => setFilter("verified")}
-            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "verified"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
@@ -175,7 +281,7 @@ export default function TribePage() {
           </button>
           <button
             onClick={() => setFilter("non-verified")}
-            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors ${
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "non-verified"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
@@ -222,7 +328,7 @@ export default function TribePage() {
                   {subscriber.email}
                 </span>
                 <span 
-                  className={`text-[10px] font-medium px-2 py-0.5 rounded-[4px] ${
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-[4px] hidden sm:inline-block ${
                     subscriber.verified 
                       ? 'text-[#2d8a8a]/80' 
                       : 'text-white/40'
@@ -256,6 +362,16 @@ export default function TribePage() {
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={showImportModal}
+        preview={importPreview}
+        isImporting={isImporting}
+        onClose={handleCloseModal}
+        onImportWithVerification={handleImportWithVerification}
+        onImportWithoutVerification={handleImportWithoutVerification}
+      />
     </div>
   );
 }
