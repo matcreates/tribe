@@ -18,9 +18,11 @@ export default function NewEmailPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastSentCount, setLastSentCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
-  const [hasSignature, setHasSignature] = useState(true);
+  const [signature, setSignature] = useState<string | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
+
+  const hasSignature = !!signature?.trim();
 
   useEffect(() => {
     loadCounts();
@@ -38,8 +40,8 @@ export default function NewEmailPage() {
 
   const loadSignature = async () => {
     try {
-      const signature = await getEmailSignature();
-      setHasSignature(!!signature.trim());
+      const sig = await getEmailSignature();
+      setSignature(sig);
     } catch (error) {
       console.error("Failed to load signature:", error);
     }
@@ -369,8 +371,31 @@ export default function NewEmailPage() {
           </p>
         )}
 
-        {/* Signature Prompt */}
-        {!hasSignature && (
+        {/* Signature Preview or Prompt */}
+        {hasSignature ? (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] text-white/30 uppercase tracking-[0.08em]">Your signature</p>
+              <Link
+                href="/settings"
+                className="text-[11px] text-white/40 hover:text-white/60 transition-colors underline"
+              >
+                Edit
+              </Link>
+            </div>
+            <div 
+              className="p-4 rounded-[10px] border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            >
+              <div className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap">
+                {signature}
+              </div>
+            </div>
+            <p className="text-[10px] text-white/20 mt-2">
+              This will be added at the end of your email
+            </p>
+          </div>
+        ) : (
           <div 
             className="mt-6 p-4 rounded-[10px] border border-white/[0.06] flex items-center justify-between gap-4"
             style={{ background: 'rgba(255, 255, 255, 0.02)' }}
