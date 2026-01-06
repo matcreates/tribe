@@ -20,19 +20,19 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
   const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/@");
   const isApiRoute = pathname.startsWith("/api");
-  const isPublicPage = pathname === "/verified" || pathname === "/unsubscribed";
+  const isPublicPage = pathname === "/" || pathname === "/verified" || pathname === "/unsubscribed";
 
-  // Allow API routes, public join pages, and other public pages
+  // Allow API routes, public join pages, landing page, and other public pages
   if (isApiRoute || isPublicJoinPage || isPublicPage) {
     return NextResponse.next();
   }
 
-  // Redirect logged-in users away from auth pages
+  // Redirect logged-in users away from auth pages to dashboard
   if (isLoggedIn && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Redirect non-logged-in users to login
+  // Redirect non-logged-in users to login (except for public pages)
   if (!isLoggedIn && !isAuthPage) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
