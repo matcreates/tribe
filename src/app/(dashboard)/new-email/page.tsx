@@ -331,18 +331,18 @@ export default function NewEmailPage() {
           <button
             onClick={handleSend}
             disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
-            className="px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
-            style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+            className="px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
           >
             {isSending ? "SENDING..." : "SEND"}
           </button>
           <button
             onClick={() => setShowScheduleModal(true)}
             disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
-            className="flex items-center gap-2 px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
-            style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+            className="flex items-center gap-2 px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
           >
-            <ClockIcon className="w-3.5 h-3.5" />
+            <ClockIcon className="w-3 h-3" />
             SCHEDULE
           </button>
         </div>

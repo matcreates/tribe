@@ -129,8 +129,8 @@ export default function SettingsPage() {
               type="button"
               onClick={handleFileSelect}
               disabled={isUploading}
-              className="px-4 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.08em] text-white/70 transition-colors disabled:opacity-50 hover:bg-white/[0.08]"
-              style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.08)' }}
+              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
             >
               {isUploading ? "UPLOADING..." : "UPLOAD"}
             </button>
@@ -178,8 +178,8 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
-          style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+          className="px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40"
+          style={{ background: 'rgba(255, 255, 255, 0.04)' }}
         >
           {isSaving ? "SAVING..." : "SAVE"}
         </button>
