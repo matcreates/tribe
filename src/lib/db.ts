@@ -89,6 +89,23 @@ export async function initDatabase() {
   } catch {
     // Column already exists
   }
+
+  // Add scheduled_at and status columns for scheduled emails
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN scheduled_at TIMESTAMP`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN status TEXT DEFAULT 'sent'`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN recipient_filter TEXT DEFAULT 'verified'`);
+  } catch {
+    // Column already exists
+  }
 }
 
 export interface DbUser {
@@ -129,6 +146,9 @@ export interface DbSentEmail {
   recipient_count: number;
   open_count: number;
   sent_at: Date;
+  scheduled_at: Date | null;
+  status: 'sent' | 'scheduled' | 'processing';
+  recipient_filter: string;
 }
 
 // User functions
@@ -184,6 +204,11 @@ export async function getTribeBySlug(slug: string): Promise<DbTribe | null> {
 
 export async function getTribeByUserId(userId: string): Promise<DbTribe | null> {
   const rows = await query<DbTribe>(`SELECT * FROM tribes WHERE user_id = $1 LIMIT 1`, [userId]);
+  return rows[0] || null;
+}
+
+export async function getTribeById(id: string): Promise<DbTribe | null> {
+  const rows = await query<DbTribe>(`SELECT * FROM tribes WHERE id = $1`, [id]);
   return rows[0] || null;
 }
 
@@ -328,12 +353,52 @@ export async function createSentEmail(tribeId: string, subject: string, body: st
   const id = crypto.randomUUID();
   
   await pool.query(
-    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count) VALUES ($1, $2, $3, $4, $5)`,
-    [id, tribeId, subject, body, recipientCount]
+    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count, status) VALUES ($1, $2, $3, $4, $5, $6)`,
+    [id, tribeId, subject, body, recipientCount, 'sent']
   );
   
   const email = await getSentEmailById(id);
   return email!;
+}
+
+export async function createScheduledEmail(
+  tribeId: string, 
+  subject: string, 
+  body: string, 
+  scheduledAt: Date,
+  recipientFilter: string
+): Promise<DbSentEmail> {
+  const id = crypto.randomUUID();
+  
+  await pool.query(
+    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count, scheduled_at, status, recipient_filter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [id, tribeId, subject, body, 0, scheduledAt.toISOString(), 'scheduled', recipientFilter]
+  );
+  
+  const email = await getSentEmailById(id);
+  return email!;
+}
+
+export async function getScheduledEmailsToSend(): Promise<DbSentEmail[]> {
+  const now = new Date().toISOString();
+  return await query<DbSentEmail>(
+    `SELECT * FROM sent_emails WHERE status = 'scheduled' AND scheduled_at <= $1 ORDER BY scheduled_at ASC`,
+    [now]
+  );
+}
+
+export async function updateScheduledEmailStatus(id: string, status: 'sent' | 'processing', recipientCount?: number): Promise<void> {
+  if (recipientCount !== undefined) {
+    await pool.query(
+      `UPDATE sent_emails SET status = $1, recipient_count = $2, sent_at = CURRENT_TIMESTAMP WHERE id = $3`,
+      [status, recipientCount, id]
+    );
+  } else {
+    await pool.query(
+      `UPDATE sent_emails SET status = $1 WHERE id = $2`,
+      [status, id]
+    );
+  }
 }
 
 export async function getSentEmailById(id: string): Promise<DbSentEmail | null> {

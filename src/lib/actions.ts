@@ -14,6 +14,7 @@ import {
   getVerifiedSubscriberCount,
   getSentEmailsByTribeId,
   createSentEmail,
+  createScheduledEmail,
   getTotalEmailsSent,
   updateSentEmailRecipientCount,
 } from "./db";
@@ -335,6 +336,47 @@ export async function sendEmail(
     sentCount: result.sentCount,
     totalRecipients: filteredSubscribers.length,
     errors: result.errors 
+  };
+}
+
+// Schedule email for later
+export async function scheduleEmail(
+  subject: string,
+  body: string,
+  scheduledAt: Date,
+  filter: RecipientFilter = "verified"
+) {
+  const tribe = await getTribe();
+  const allSubscribers = await getSubscribersByTribeId(tribe.id);
+  
+  // Calculate recipient count for preview (same logic as sendEmail)
+  let filteredSubscribers = allSubscribers.filter(s => !s.unsubscribed);
+  
+  switch (filter) {
+    case "verified":
+      filteredSubscribers = filteredSubscribers.filter(s => s.verified);
+      break;
+    case "non-verified":
+      filteredSubscribers = filteredSubscribers.filter(s => !s.verified);
+      break;
+    case "all":
+      break;
+  }
+
+  if (filteredSubscribers.length === 0) {
+    throw new Error("No recipients to send to");
+  }
+
+  // Create scheduled email record
+  const email = await createScheduledEmail(tribe.id, subject, body, scheduledAt, filter);
+  
+  revalidatePath("/new-email");
+  revalidatePath("/dashboard");
+  
+  return {
+    id: email.id,
+    scheduledAt: email.scheduled_at,
+    recipientCount: filteredSubscribers.length,
   };
 }
 

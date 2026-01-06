@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, RecipientFilter } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, RecipientFilter } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
+import { ScheduleModal } from "@/components/ScheduleModal";
 import { useRouter } from "next/navigation";
 
 export default function NewEmailPage() {
@@ -11,6 +12,8 @@ export default function NewEmailPage() {
   const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
   const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("verified");
   const [isSending, setIsSending] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastSentCount, setLastSentCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
@@ -221,6 +224,48 @@ export default function NewEmailPage() {
     }
   };
 
+  const handleSchedule = async (scheduledAt: Date) => {
+    const body = getPlainText();
+    if (!body.trim() || isScheduling) return;
+
+    const count = getCurrentCount();
+    if (count === 0) {
+      showToast("No recipients to send to");
+      return;
+    }
+
+    setIsScheduling(true);
+    
+    try {
+      // Extract first line as subject
+      const lines = body.trim().split("\n");
+      const subject = lines[0].slice(0, 60) || "Untitled";
+      
+      await scheduleEmail(subject, body, scheduledAt, recipientFilter);
+      
+      if (editorRef.current) {
+        editorRef.current.innerHTML = "";
+      }
+      setIsEmpty(true);
+      setShowScheduleModal(false);
+      
+      // Format the scheduled time for toast
+      const formattedDate = scheduledAt.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      showToast(`Email scheduled for ${formattedDate}`);
+      router.refresh();
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to schedule email";
+      showToast(msg);
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   if (showSuccess) {
     return (
       <EmailSentSuccess 
@@ -281,15 +326,26 @@ export default function NewEmailPage() {
           Links are auto-detected • Type <span className="text-white/35">-</span> for bullet lists
         </p>
 
-        {/* Send Button */}
-        <button
-          onClick={handleSend}
-          disabled={isSending || isEmpty || getCurrentCount() === 0}
-          className="self-start px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
-          style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
-        >
-          {isSending ? "SENDING..." : "SEND"}
-        </button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSend}
+            disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
+            className="px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
+            style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+          >
+            {isSending ? "SENDING..." : "SEND"}
+          </button>
+          <button
+            onClick={() => setShowScheduleModal(true)}
+            disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
+            className="flex items-center gap-2 px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08]"
+            style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+          >
+            <ClockIcon className="w-3.5 h-3.5" />
+            SCHEDULE
+          </button>
+        </div>
 
         {getCurrentCount() === 0 && (
           <p className="mt-3 text-[12px] text-white/30">
@@ -303,6 +359,14 @@ export default function NewEmailPage() {
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
+
+      {/* Schedule Modal */}
+      <ScheduleModal
+        isOpen={showScheduleModal}
+        isScheduling={isScheduling}
+        onClose={() => setShowScheduleModal(false)}
+        onSchedule={handleSchedule}
+      />
     </div>
   );
 }
@@ -311,6 +375,15 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 6l4 4 4-4" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M8 4v4l2.5 2.5" />
     </svg>
   );
 }
