@@ -207,11 +207,6 @@ export async function getTribeByUserId(userId: string): Promise<DbTribe | null> 
   return rows[0] || null;
 }
 
-export async function getTribeById(id: string): Promise<DbTribe | null> {
-  const rows = await query<DbTribe>(`SELECT * FROM tribes WHERE id = $1`, [id]);
-  return rows[0] || null;
-}
-
 export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "name" | "slug" | "owner_name" | "owner_avatar">>): Promise<void> {
   if (updates.name !== undefined) {
     await pool.query(`UPDATE tribes SET name = $1 WHERE id = $2`, [updates.name, id]);
