@@ -15,13 +15,17 @@ interface Subscriber {
 }
 
 type FilterType = "all" | "verified" | "non-verified";
+type SortType = "newest" | "oldest" | "a-z" | "z-a" | "verified-first" | "unverified-first";
 
 export default function TribePage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
+  const [sort, setSort] = useState<SortType>("newest");
   const [isLoading, setIsLoading] = useState(true);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
   // Import modal state
@@ -32,6 +36,17 @@ export default function TribePage() {
 
   useEffect(() => {
     loadSubscribers();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setShowSortDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const loadSubscribers = async () => {
@@ -45,15 +60,48 @@ export default function TribePage() {
     }
   };
 
-  // Apply both search and filter
-  const filteredSubscribers = subscribers.filter((s) => {
-    const matchesSearch = s.email.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = 
-      filter === "all" ? true :
-      filter === "verified" ? s.verified :
-      !s.verified;
-    return matchesSearch && matchesFilter;
-  });
+  // Sort options config
+  const sortOptions: { value: SortType; label: string }[] = [
+    { value: "newest", label: "Newest to oldest" },
+    { value: "oldest", label: "Oldest to newest" },
+    { value: "a-z", label: "Alphabetical: A to Z" },
+    { value: "z-a", label: "Alphabetical: Z to A" },
+    { value: "verified-first", label: "Verified first" },
+    { value: "unverified-first", label: "Unverified first" },
+  ];
+
+  const currentSortLabel = sortOptions.find(o => o.value === sort)?.label || "Sort";
+
+  // Apply search, filter, and sort
+  const filteredAndSortedSubscribers = subscribers
+    .filter((s) => {
+      const matchesSearch = s.email.toLowerCase().includes(search.toLowerCase());
+      const matchesFilter = 
+        filter === "all" ? true :
+        filter === "verified" ? s.verified :
+        !s.verified;
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      switch (sort) {
+        case "a-z":
+          return a.email.localeCompare(b.email);
+        case "z-a":
+          return b.email.localeCompare(a.email);
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "verified-first":
+          if (a.verified === b.verified) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          return a.verified ? -1 : 1;
+        case "unverified-first":
+          if (a.verified === b.verified) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          return a.verified ? 1 : -1;
+        default:
+          return 0;
+      }
+    });
 
   // Count for each filter
   const verifiedCount = subscribers.filter(s => s.verified).length;
@@ -291,22 +339,62 @@ export default function TribePage() {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-5">
-          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search"
-            className="w-full pl-10 pr-4 py-2.5 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-          />
+        {/* Search and Sort Row */}
+        <div className="flex gap-3 mb-5">
+          {/* Search */}
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search"
+              className="w-full pl-10 pr-4 py-2.5 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 focus:outline-none transition-colors border border-white/[0.06]"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            />
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="relative" ref={sortDropdownRef}>
+            <button
+              onClick={() => setShowSortDropdown(!showSortDropdown)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[12px] text-white/50 hover:text-white/70 transition-colors border border-white/[0.06] whitespace-nowrap"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            >
+              <SortIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{currentSortLabel}</span>
+              <ChevronDownIcon className={`w-3 h-3 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showSortDropdown && (
+              <div 
+                className="absolute right-0 top-full mt-1 w-48 py-1 rounded-[10px] border border-white/[0.08] z-20 shadow-xl"
+                style={{ background: 'rgb(32, 32, 32)' }}
+              >
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSort(option.value);
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-[12px] transition-colors ${
+                      sort === option.value 
+                        ? 'text-white/80 bg-white/[0.06]' 
+                        : 'text-white/50 hover:text-white/70 hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Subscriber List */}
         <div className="space-y-1.5">
-          {filteredSubscribers.length === 0 ? (
+          {filteredAndSortedSubscribers.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-[13px] text-white/35">
                 {search ? "No subscribers found" : "No subscribers yet"}
@@ -318,7 +406,7 @@ export default function TribePage() {
               )}
             </div>
           ) : (
-            filteredSubscribers.map((subscriber) => (
+            filteredAndSortedSubscribers.map((subscriber) => (
               <div
                 key={subscriber.id}
                 className="flex items-center gap-2 px-4 py-3 rounded-[10px] hover:bg-white/[0.04] transition-colors group border border-white/[0.06]"
@@ -397,6 +485,23 @@ function TrashIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 10 11" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M2.5 1.5C2.5 0.671575 3.17158 0 4 0H6C6.82845 0 7.5 0.671575 7.5 1.5V2H9.5C9.77615 2 10 2.22386 10 2.5C10 2.77614 9.77615 3 9.5 3H8.9697L8.55765 9.59355C8.5082 10.3841 7.85265 11 7.06055 11H2.93945C2.14736 11 1.49178 10.3841 1.44237 9.59355L1.03028 3H0.5C0.22386 3 0 2.77614 0 2.5C0 2.22386 0.22386 2 0.5 2H2.5V1.5ZM3.5 2H6.5V1.5C6.5 1.22386 6.27615 1 6 1H4C3.72386 1 3.5 1.22386 3.5 1.5V2ZM2.03222 3L2.44042 9.5312C2.45689 9.7947 2.67542 10 2.93945 10H7.06055C7.3246 10 7.5431 9.7947 7.55955 9.5312L7.96775 3H2.03222Z" />
+    </svg>
+  );
+}
+
+function SortIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 4L6 1L9 4" />
+      <path d="M3 8L6 11L9 8" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 4.5L6 7.5L9 4.5" />
     </svg>
   );
 }
