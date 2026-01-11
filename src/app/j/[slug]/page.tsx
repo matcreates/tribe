@@ -183,10 +183,9 @@ export default function PublicJoinPage({ params }: PageProps) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.1em] text-white/70 transition-colors disabled:opacity-50 hover:bg-white/[0.08]"
-                style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.08)' }}
+                className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
               >
-                {isSubmitting ? "..." : "JOIN"}
+                <span className="btn-glass-text">{isSubmitting ? "..." : "JOIN"}</span>
               </button>
             </form>
           )}

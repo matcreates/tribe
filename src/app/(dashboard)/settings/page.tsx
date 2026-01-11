@@ -132,10 +132,9 @@ export default function SettingsPage() {
               type="button"
               onClick={handleFileSelect}
               disabled={isUploading}
-              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              {isUploading ? "UPLOADING..." : "UPLOAD"}
+              <span className="btn-glass-text">{isUploading ? "UPLOADING..." : "UPLOAD"}</span>
             </button>
             <input
               ref={fileInputRef}
@@ -197,10 +196,9 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40"
-          style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+          className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
         >
-          {isSaving ? "SAVING..." : "SAVE"}
+          <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE"}</span>
         </button>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />

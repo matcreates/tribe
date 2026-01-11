@@ -261,18 +261,16 @@ export function ScheduleModal({
           <button
             onClick={onClose}
             disabled={isScheduling}
-            className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/60 hover:text-white/80 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
           >
-            CANCEL
+            <span className="btn-glass-text">CANCEL</span>
           </button>
           <button
             onClick={handleSchedule}
             disabled={isScheduling || !selectedDate || !selectedTime}
-            className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: 'rgba(255, 255, 255, 0.12)' }}
+            className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
           >
-            {isScheduling ? "SCHEDULING..." : "SCHEDULE"}
+            <span className="btn-glass-text">{isScheduling ? "SCHEDULING..." : "SCHEDULE"}</span>
           </button>
         </div>
 

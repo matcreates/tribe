@@ -106,18 +106,16 @@ export function ImportModal({
             <button
               onClick={onImportWithVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/60 hover:text-white/80 hover:bg-white/[0.05] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
             >
-              {isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}
+              <span className="btn-glass-text">{isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}</span>
             </button>
             <button
               onClick={onImportWithoutVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-3 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/90 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'rgba(255, 255, 255, 0.12)' }}
+              className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              {isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}
+              <span className="btn-glass-text">{isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}</span>
             </button>
           </div>
         ) : (
@@ -132,9 +130,9 @@ export function ImportModal({
         <button
           onClick={onClose}
           disabled={isImporting}
-          className="w-full py-3 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
+          className="w-full py-3 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors"
         >
-          CANCEL
+          <span className="btn-glass-text">CANCEL</span>
         </button>
 
         {/* Importing overlay */}

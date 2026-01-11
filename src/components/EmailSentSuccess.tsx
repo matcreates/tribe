@@ -131,15 +131,11 @@ export function EmailSentSuccess({ sentCount, onClose }: EmailSentSuccessProps) 
         {/* Done button */}
         <button
           onClick={handleDone}
-          className={`px-8 py-3 rounded-[10px] text-[12px] font-medium tracking-[0.15em] text-white/80 transition-all duration-500 delay-600 hover:scale-105 ${
+          className={`px-8 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass transition-all duration-500 delay-600 hover:scale-105 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
-          style={{ 
-            background: 'rgba(34, 197, 94, 0.15)',
-            border: '1px solid rgba(34, 197, 94, 0.25)',
-          }}
         >
-          DONE
+          <span className="btn-glass-text">DONE</span>
         </button>
       </div>
 

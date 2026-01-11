@@ -85,10 +85,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 rounded-[8px] text-[12px] font-medium tracking-[0.08em] text-white/80 transition-colors disabled:opacity-50 hover:bg-white/[0.12]"
-              style={{ background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+              className="w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              {isLoading ? "SIGNING IN..." : "SIGN IN"}
+              <span className="btn-glass-text">{isLoading ? "SIGNING IN..." : "SIGN IN"}</span>
             </button>
           </form>
 

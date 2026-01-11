@@ -314,17 +314,15 @@ export default function TribePage() {
           <div className="flex gap-2">
             <button
               onClick={handleImportClick}
-              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              IMPORT
+              <span className="btn-glass-text">IMPORT</span>
             </button>
             <button
               onClick={handleExport}
-              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
             >
-              EXPORT
+              <span className="btn-glass-text">EXPORT</span>
             </button>
           </div>
           <input

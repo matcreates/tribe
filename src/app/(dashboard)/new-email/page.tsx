@@ -345,19 +345,17 @@ export default function NewEmailPage() {
           <button
             onClick={handleSend}
             disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
-            className="px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
           >
-            {isSending ? "SENDING..." : "SEND"}
+            <span className="btn-glass-text">{isSending ? "SENDING..." : "SEND"}</span>
           </button>
           <button
             onClick={() => setShowScheduleModal(true)}
             disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
-            className="flex items-center gap-2 px-5 py-2 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
           >
-            <ClockIcon className="w-3 h-3" />
-            SCHEDULE
+            <ClockIcon className="w-3 h-3 text-white/60" />
+            <span className="btn-glass-text">SCHEDULE</span>
           </button>
         </div>
 
@@ -417,10 +415,9 @@ export default function NewEmailPage() {
             </div>
             <Link
               href="/settings"
-              className="px-4 py-1.5 rounded-[20px] text-[10px] font-medium tracking-[0.12em] uppercase text-white/55 hover:text-white/70 transition-colors border border-white/[0.06]"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              SETUP
+              <span className="btn-glass-text">SETUP</span>
             </Link>
           </div>
         )}
