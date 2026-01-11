@@ -22,6 +22,11 @@ interface RecipientWithToken {
   unsubscribeToken: string;
 }
 
+// Get the reply-to domain (should match your verified Resend domain)
+function getReplyDomain() {
+  return process.env.RESEND_REPLY_DOMAIN || "madewithtribe.com";
+}
+
 export async function sendBulkEmailWithUnsubscribe(
   recipients: RecipientWithToken[],
   subject: string,
@@ -101,8 +106,16 @@ export async function sendBulkEmailWithUnsubscribe(
 
       const textBody = `${plainTextBody}${signatureText}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
 
+      // Create unique reply-to address for tracking replies
+      // Format: reply+{emailId}+{subscriberToken}@domain.com
+      const replyDomain = getReplyDomain();
+      const replyTo = emailId 
+        ? `reply+${emailId}+${recipient.unsubscribeToken}@${replyDomain}`
+        : fromEmail;
+
       return {
         from: fromEmail,
+        replyTo: replyTo,
         to: [recipient.email],
         subject,
         html: htmlBody,

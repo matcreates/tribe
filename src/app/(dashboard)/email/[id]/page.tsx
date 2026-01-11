@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { getSentEmailById } from "@/lib/actions";
+import { getSentEmailById, getEmailReplies } from "@/lib/actions";
 import Link from "next/link";
 
 interface EmailInsightsPageProps {
@@ -17,14 +17,24 @@ interface SentEmail {
   sent_at: string;
 }
 
+interface EmailReply {
+  id: string;
+  email_id: string;
+  subscriber_email: string;
+  reply_text: string;
+  received_at: string;
+}
+
 export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
   const resolvedParams = use(params);
   const [email, setEmail] = useState<SentEmail | null>(null);
+  const [replies, setReplies] = useState<EmailReply[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     loadEmail();
+    loadReplies();
   }, [resolvedParams.id]);
 
   const loadEmail = async () => {
@@ -36,6 +46,15 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
       setError("Email not found");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadReplies = async () => {
+    try {
+      const data = await getEmailReplies(resolvedParams.id);
+      setReplies(data);
+    } catch (err) {
+      console.error("Failed to load replies:", err);
     }
   };
 
@@ -242,7 +261,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
 
         {/* Email Preview */}
         <div 
-          className="rounded-[12px] border border-white/[0.06] overflow-hidden"
+          className="rounded-[12px] border border-white/[0.06] overflow-hidden mb-8"
           style={{ background: 'rgba(255, 255, 255, 0.02)' }}
         >
           <div className="px-5 py-3 border-b border-white/[0.06]">
@@ -257,8 +276,85 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
             </div>
           </div>
         </div>
+
+        {/* Replies Section */}
+        <div 
+          className="rounded-[12px] border border-white/[0.06] overflow-hidden"
+          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+        >
+          <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <h3 className="text-[13px] font-medium text-white/70">Replies</h3>
+            {replies.length > 0 && (
+              <span className="text-[11px] text-white/40">{replies.length} {replies.length === 1 ? 'reply' : 'replies'}</span>
+            )}
+          </div>
+          <div className="p-5">
+            {replies.length === 0 ? (
+              <div className="text-center py-8">
+                <div 
+                  className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+                >
+                  <ReplyIcon className="w-5 h-5 text-white/30" />
+                </div>
+                <p className="text-[13px] text-white/40">No replies yet</p>
+                <p className="text-[11px] text-white/25 mt-1">
+                  When subscribers reply to this email, their responses will appear here
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {replies.map((reply) => {
+                  const replyDate = new Date(reply.received_at);
+                  const replyFormatted = replyDate.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  }) + " at " + replyDate.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  });
+                  
+                  return (
+                    <div 
+                      key={reply.id}
+                      className="rounded-[10px] border border-white/[0.06] overflow-hidden"
+                      style={{ background: 'rgba(0, 0, 0, 0.15)' }}
+                    >
+                      <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white/70"
+                            style={{ background: 'rgba(45, 138, 138, 0.3)' }}
+                          >
+                            {reply.subscriber_email.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-[12px] text-white/60">{reply.subscriber_email}</span>
+                        </div>
+                        <span className="text-[10px] text-white/30">{replyFormatted}</span>
+                      </div>
+                      <div className="px-4 py-3">
+                        <p className="text-[13px] text-white/50 leading-relaxed whitespace-pre-wrap">
+                          {reply.reply_text}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function ReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 6L3 10l4 4" />
+      <path d="M3 10h10a4 4 0 0 1 4 4v2" />
+    </svg>
   );
 }
 

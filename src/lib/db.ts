@@ -114,6 +114,17 @@ export async function initDatabase() {
   } catch {
     // Column already exists
   }
+
+  // Email replies table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS email_replies (
+      id TEXT PRIMARY KEY,
+      email_id TEXT NOT NULL,
+      subscriber_email TEXT NOT NULL,
+      reply_text TEXT NOT NULL,
+      received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 }
 
 export interface DbUser {
@@ -158,6 +169,14 @@ export interface DbSentEmail {
   scheduled_at: Date | null;
   status: 'sent' | 'scheduled' | 'processing';
   recipient_filter: string;
+}
+
+export interface DbEmailReply {
+  id: string;
+  email_id: string;
+  subscriber_email: string;
+  reply_text: string;
+  received_at: Date;
 }
 
 // User functions
@@ -428,4 +447,41 @@ export async function getSentEmailsByTribeId(tribeId: string): Promise<DbSentEma
 export async function getTotalEmailsSent(tribeId: string): Promise<number> {
   const rows = await query<{ total: string | null }>(`SELECT COALESCE(SUM(recipient_count), 0) as total FROM sent_emails WHERE tribe_id = $1`, [tribeId]);
   return Number(rows[0].total || 0);
+}
+
+// Email reply functions
+export async function createEmailReply(
+  emailId: string,
+  subscriberEmail: string,
+  replyText: string
+): Promise<DbEmailReply> {
+  const id = crypto.randomUUID();
+  
+  await pool.query(
+    `INSERT INTO email_replies (id, email_id, subscriber_email, reply_text) VALUES ($1, $2, $3, $4)`,
+    [id, emailId, subscriberEmail.toLowerCase(), replyText]
+  );
+  
+  const reply = await getEmailReplyById(id);
+  return reply!;
+}
+
+export async function getEmailReplyById(id: string): Promise<DbEmailReply | null> {
+  const rows = await query<DbEmailReply>(`SELECT * FROM email_replies WHERE id = $1`, [id]);
+  return rows[0] || null;
+}
+
+export async function getEmailRepliesByEmailId(emailId: string): Promise<DbEmailReply[]> {
+  return await query<DbEmailReply>(
+    `SELECT * FROM email_replies WHERE email_id = $1 ORDER BY received_at DESC`,
+    [emailId]
+  );
+}
+
+export async function getReplyCountByEmailId(emailId: string): Promise<number> {
+  const rows = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM email_replies WHERE email_id = $1`,
+    [emailId]
+  );
+  return Number(rows[0].count);
 }

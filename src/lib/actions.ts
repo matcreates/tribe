@@ -17,6 +17,7 @@ import {
   createScheduledEmail,
   getTotalEmailsSent,
   updateSentEmailRecipientCount,
+  getEmailRepliesByEmailId,
 } from "./db";
 import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
 import { revalidatePath } from "next/cache";
@@ -258,6 +259,26 @@ export async function getSentEmailById(emailId: string) {
     ...email,
     sent_at: email.sent_at instanceof Date ? email.sent_at.toISOString() : String(email.sent_at),
   };
+}
+
+export async function getEmailReplies(emailId: string) {
+  // First verify the user owns this email
+  const tribe = await getTribe();
+  const emails = await getSentEmailsByTribeId(tribe.id);
+  const email = emails.find(e => e.id === emailId);
+  if (!email) {
+    throw new Error("Email not found");
+  }
+  
+  const replies = await getEmailRepliesByEmailId(emailId);
+  
+  // Convert dates to strings for frontend
+  return replies.map(reply => ({
+    ...reply,
+    received_at: reply.received_at instanceof Date 
+      ? reply.received_at.toISOString() 
+      : String(reply.received_at),
+  }));
 }
 
 export type RecipientFilter = "verified" | "non-verified" | "all";
