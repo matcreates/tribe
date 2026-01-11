@@ -47,6 +47,33 @@ export async function initDatabase() {
     // Column already exists
   }
 
+  // Add subscription columns to tribes table
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN stripe_customer_id TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN stripe_subscription_id TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN subscription_status TEXT DEFAULT 'free'`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN subscription_plan TEXT`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN subscription_ends_at TIMESTAMP`);
+  } catch {
+    // Column already exists
+  }
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS subscribers (
       id TEXT PRIMARY KEY,
@@ -148,6 +175,11 @@ export interface DbTribe {
   owner_name: string | null;
   owner_avatar: string | null;
   email_signature: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: 'free' | 'active' | 'canceled' | 'past_due';
+  subscription_plan: 'monthly' | 'yearly' | null;
+  subscription_ends_at: Date | null;
   created_at: Date;
 }
 
@@ -257,6 +289,42 @@ export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "na
   if (updates.email_signature !== undefined) {
     await pool.query(`UPDATE tribes SET email_signature = $1 WHERE id = $2`, [updates.email_signature, id]);
   }
+}
+
+// Subscription functions
+export async function updateTribeSubscription(
+  tribeId: string,
+  data: {
+    stripe_customer_id?: string;
+    stripe_subscription_id?: string;
+    subscription_status?: 'free' | 'active' | 'canceled' | 'past_due';
+    subscription_plan?: 'monthly' | 'yearly' | null;
+    subscription_ends_at?: Date | null;
+  }
+): Promise<void> {
+  if (data.stripe_customer_id !== undefined) {
+    await pool.query(`UPDATE tribes SET stripe_customer_id = $1 WHERE id = $2`, [data.stripe_customer_id, tribeId]);
+  }
+  if (data.stripe_subscription_id !== undefined) {
+    await pool.query(`UPDATE tribes SET stripe_subscription_id = $1 WHERE id = $2`, [data.stripe_subscription_id, tribeId]);
+  }
+  if (data.subscription_status !== undefined) {
+    await pool.query(`UPDATE tribes SET subscription_status = $1 WHERE id = $2`, [data.subscription_status, tribeId]);
+  }
+  if (data.subscription_plan !== undefined) {
+    await pool.query(`UPDATE tribes SET subscription_plan = $1 WHERE id = $2`, [data.subscription_plan, tribeId]);
+  }
+  if (data.subscription_ends_at !== undefined) {
+    await pool.query(`UPDATE tribes SET subscription_ends_at = $1 WHERE id = $2`, [
+      data.subscription_ends_at ? data.subscription_ends_at.toISOString() : null,
+      tribeId
+    ]);
+  }
+}
+
+export async function getTribeByStripeCustomerId(customerId: string): Promise<DbTribe | null> {
+  const rows = await query<DbTribe>(`SELECT * FROM tribes WHERE stripe_customer_id = $1`, [customerId]);
+  return rows[0] || null;
 }
 
 // Subscriber functions

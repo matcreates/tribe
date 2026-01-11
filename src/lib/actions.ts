@@ -294,6 +294,37 @@ export async function getEmailSignature(): Promise<string> {
   return tribe.email_signature || "";
 }
 
+export interface SubscriptionStatus {
+  status: 'free' | 'active' | 'canceled' | 'past_due';
+  plan: 'monthly' | 'yearly' | null;
+  endsAt: string | null;
+  canSendEmails: boolean;
+}
+
+export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
+  const tribe = await getTribe();
+  
+  const status = (tribe.subscription_status || 'free') as 'free' | 'active' | 'canceled' | 'past_due';
+  const plan = tribe.subscription_plan as 'monthly' | 'yearly' | null;
+  const endsAt = tribe.subscription_ends_at ? tribe.subscription_ends_at.toISOString() : null;
+  
+  // User can send emails if they have an active subscription
+  // or if their subscription is canceled but hasn't ended yet
+  let canSendEmails = false;
+  if (status === 'active') {
+    canSendEmails = true;
+  } else if (status === 'canceled' && tribe.subscription_ends_at) {
+    canSendEmails = new Date(tribe.subscription_ends_at) > new Date();
+  }
+  
+  return {
+    status,
+    plan,
+    endsAt,
+    canSendEmails,
+  };
+}
+
 export async function getRecipientCounts(): Promise<{
   verified: number;
   nonVerified: number;

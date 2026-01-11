@@ -87,7 +87,7 @@ export default async function LandingPage() {
 
           {/* Social proof hint */}
           <p className="mt-16 text-[12px] text-white/25">
-            Free forever • No credit card required
+            Free to explore • Starts at $3/month
           </p>
         </div>
 
@@ -157,6 +157,101 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section className="relative py-32 px-6" id="pricing">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-[15px] text-white/40 max-w-lg mx-auto">
+              Explore all features for free. Subscribe when you&apos;re ready to send.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Monthly Plan */}
+            <div 
+              className="p-8 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12]"
+              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            >
+              <p className="text-[13px] text-white/50 uppercase tracking-wider mb-2">Monthly</p>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-[42px] font-medium text-white/90">$5</span>
+                <span className="text-[15px] text-white/40">/month</span>
+              </div>
+              <p className="text-[14px] text-white/40 mb-6">Billed monthly. Cancel anytime.</p>
+              <div className="space-y-3 mb-8">
+                {[
+                  "Unlimited email sends",
+                  "Email scheduling",
+                  "Open rate analytics",
+                  "Reply management",
+                  "Custom email signatures",
+                ].map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400/80" />
+                    <span className="text-[13px] text-white/60">{feature}</span>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/signup"
+                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase border border-white/[0.1] text-white/70 hover:bg-white/[0.05] transition-colors"
+              >
+                Get started
+              </Link>
+            </div>
+
+            {/* Yearly Plan */}
+            <div 
+              className="relative p-8 rounded-2xl border border-[#E8B84A]/30 transition-colors"
+              style={{ background: 'linear-gradient(180deg, rgba(232, 184, 74, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)' }}
+            >
+              {/* Best Value Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="px-4 py-1 rounded-full text-[10px] font-medium tracking-[0.08em] uppercase bg-[#E8B84A] text-black">
+                  Save 40%
+                </span>
+              </div>
+              
+              <p className="text-[13px] text-[#E8B84A]/80 uppercase tracking-wider mb-2">Yearly</p>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-[42px] font-medium text-white/90">$36</span>
+                <span className="text-[15px] text-white/40">/year</span>
+              </div>
+              <p className="text-[14px] text-[#E8B84A]/70 mb-6">Just $3/month. Best value.</p>
+              <div className="space-y-3 mb-8">
+                {[
+                  "Unlimited email sends",
+                  "Email scheduling",
+                  "Open rate analytics",
+                  "Reply management",
+                  "Custom email signatures",
+                ].map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400/80" />
+                    <span className="text-[13px] text-white/60">{feature}</span>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/signup"
+                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase transition-all hover:opacity-90"
+                style={{ background: '#E8B84A', color: '#000' }}
+              >
+                Get started
+              </Link>
+            </div>
+          </div>
+
+          {/* Free tier info */}
+          <p className="text-center text-[13px] text-white/30 mt-8">
+            ✨ Free accounts can explore all features — subscription only required to send emails
+          </p>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="relative py-32 px-6">
         <div 
@@ -197,6 +292,15 @@ export default async function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function CheckCircle({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

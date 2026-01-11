@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getTribeSettings, updateTribeSettings } from "@/lib/actions";
+import { getTribeSettings, updateTribeSettings, getSubscriptionStatus, SubscriptionStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 
 export default function SettingsPage() {
@@ -12,11 +12,14 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     loadSettings();
+    loadSubscription();
   }, []);
 
   const loadSettings = async () => {
@@ -30,6 +33,35 @@ export default function SettingsPage() {
       console.error("Failed to load settings:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadSubscription = async () => {
+    try {
+      const status = await getSubscriptionStatus();
+      setSubscription(status);
+    } catch (error) {
+      console.error("Failed to load subscription:", error);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch("/api/stripe/create-portal", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast(data.error || "Failed to open billing portal");
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      showToast("Failed to open billing portal");
+    } finally {
+      setIsLoadingPortal(false);
     }
   };
 
@@ -190,6 +222,78 @@ export default function SettingsPage() {
           <p className="text-[11px] text-white/25 mt-1.5">
             This signature will be automatically added at the end of every email you send. Links will be auto-detected and underlined.
           </p>
+        </div>
+
+        {/* Subscription */}
+        <div className="mb-8">
+          <label className="block text-[12px] text-white/40 mb-3">Subscription</label>
+          <div 
+            className="p-5 rounded-[12px] border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+          >
+            {subscription?.status === 'active' || (subscription?.status === 'canceled' && subscription.canSendEmails) ? (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="text-[13px] text-white/70 font-medium">
+                      {subscription.status === 'canceled' ? 'Active until cancellation' : 'Active'}
+                    </span>
+                  </div>
+                  <span className="text-[12px] text-white/40 capitalize">
+                    {subscription.plan} plan
+                  </span>
+                </div>
+                {subscription.endsAt && (
+                  <p className="text-[12px] text-white/40 mb-4">
+                    {subscription.status === 'canceled' ? 'Access until' : 'Renews'}: {new Date(subscription.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                )}
+                <button
+                  onClick={handleManageSubscription}
+                  disabled={isLoadingPortal}
+                  className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
+                >
+                  <span className="btn-glass-text">{isLoadingPortal ? "Loading..." : "Manage billing"}</span>
+                </button>
+              </>
+            ) : subscription?.status === 'past_due' ? (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="text-[13px] text-white/70 font-medium">Payment issue</span>
+                </div>
+                <p className="text-[12px] text-white/40 mb-4">
+                  Your payment failed. Please update your payment method to continue sending emails.
+                </p>
+                <button
+                  onClick={handleManageSubscription}
+                  disabled={isLoadingPortal}
+                  className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
+                  style={{ background: '#E8B84A', color: '#000' }}
+                >
+                  {isLoadingPortal ? "Loading..." : "Update payment"}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-white/30" />
+                  <span className="text-[13px] text-white/70 font-medium">Free plan</span>
+                </div>
+                <p className="text-[12px] text-white/40 mb-4">
+                  Subscribe to unlock email sending. Starts at $3/month.
+                </p>
+                <a
+                  href="/new-email"
+                  className="inline-block px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
+                  style={{ background: '#E8B84A', color: '#000' }}
+                >
+                  Upgrade
+                </a>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Save */}

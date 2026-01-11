@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, RecipientFilter } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, RecipientFilter, SubscriptionStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
-import { useRouter } from "next/navigation";
+import { PaywallModal } from "@/components/PaywallModal";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function NewEmailPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
   const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("verified");
   const [isSending, setIsSending] = useState(false);
@@ -20,6 +22,8 @@ export default function NewEmailPage() {
   const [isEmpty, setIsEmpty] = useState(true);
   const [signature, setSignature] = useState<string | null>(null);
   const [allowReplies, setAllowReplies] = useState(true);
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +32,15 @@ export default function NewEmailPage() {
   useEffect(() => {
     loadCounts();
     loadSignature();
+    loadSubscription();
+    
+    // Check for subscription success/cancel from Stripe redirect
+    const subscriptionParam = searchParams.get('subscription');
+    if (subscriptionParam === 'success') {
+      showToast("Subscription activated! You can now send emails.");
+      // Remove the query param
+      router.replace('/new-email');
+    }
   }, []);
 
   const loadCounts = async () => {
@@ -45,6 +58,19 @@ export default function NewEmailPage() {
       setSignature(sig);
     } catch (error) {
       console.error("Failed to load signature:", error);
+    }
+  };
+
+  const loadSubscription = async () => {
+    try {
+      const status = await getSubscriptionStatus();
+      setSubscription(status);
+      // Show paywall if user can't send emails
+      if (!status.canSendEmails) {
+        setShowPaywall(true);
+      }
+    } catch (error) {
+      console.error("Failed to load subscription:", error);
     }
   };
 
@@ -291,11 +317,18 @@ export default function NewEmailPage() {
   }
 
   return (
-    <div className="flex flex-col items-center pt-14 px-6">
-      <div className="w-full max-w-[540px]">
-        {/* Header */}
-        <h1 className="text-[20px] font-medium text-white/90 mb-5">
-          New email
+    <>
+      {/* Paywall Modal */}
+      <PaywallModal 
+        isOpen={showPaywall} 
+        onClose={subscription?.canSendEmails ? () => setShowPaywall(false) : undefined}
+      />
+
+      <div className="flex flex-col items-center pt-14 px-6">
+        <div className="w-full max-w-[540px]">
+          {/* Header */}
+          <h1 className="text-[20px] font-medium text-white/90 mb-5">
+            New email
         </h1>
 
         {/* Recipient Selector */}
@@ -465,7 +498,8 @@ export default function NewEmailPage() {
         onClose={() => setShowScheduleModal(false)}
         onSchedule={handleSchedule}
       />
-    </div>
+      </div>
+    </>
   );
 }
 
