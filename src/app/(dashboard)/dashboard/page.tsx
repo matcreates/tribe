@@ -232,9 +232,13 @@ export default function DashboardPage() {
           <div className="flex justify-between mt-2">
             {stats.chartLabels.map((label, i) => {
               // Only show some labels to avoid crowding
-              const showLabel = period === "30d" 
-                ? i % 5 === 0 || i === stats.chartLabels.length - 1
-                : true;
+              let showLabel = true;
+              if (period === "30d") {
+                showLabel = i % 5 === 0 || i === stats.chartLabels.length - 1;
+              } else if (period === "24h") {
+                // Show every 4 hours: 12AM, 4AM, 8AM, 12PM, 4PM, 8PM, and current
+                showLabel = i % 4 === 0 || i === stats.chartLabels.length - 1;
+              }
               return (
                 <span key={i} className="text-[10px] text-white/25 flex-1 text-center">
                   {showLabel ? label : ''}

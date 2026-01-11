@@ -538,6 +538,30 @@ export async function getDailySubscriberCounts(tribeId: string, days: number): P
   return results;
 }
 
+// Get hourly subscriber counts for 24h chart
+export async function getHourlySubscriberCounts(tribeId: string): Promise<{ hour: string; count: number }[]> {
+  const results: { hour: string; count: number }[] = [];
+  const now = new Date();
+  
+  for (let i = 23; i >= 0; i--) {
+    const date = new Date(now);
+    date.setHours(date.getHours() - i, 59, 59, 999);
+    
+    // Count subscribers created on or before this hour
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at <= $2`,
+      [tribeId, date.toISOString()]
+    );
+    
+    results.push({
+      hour: date.toISOString(),
+      count: Number(rows[0].count),
+    });
+  }
+  
+  return results;
+}
+
 // Get subscriber count at a specific point in time
 export async function getSubscriberCountSince(tribeId: string, since: Date): Promise<number> {
   const rows = await query<{ count: string }>(

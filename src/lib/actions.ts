@@ -20,6 +20,7 @@ import {
   getEmailRepliesByEmailId,
   getTribeReplyCount,
   getDailySubscriberCounts,
+  getHourlySubscriberCounts,
   getSubscriberCountSince,
   getEmailsSentSince,
   getOpenRateSince,
@@ -464,8 +465,31 @@ export async function getDashboardStats(period: TimePeriod = "7d") {
   const totalEmailsSent = await getTotalEmailsSent(tribe.id);
   const totalReplies = await getTribeReplyCount(tribe.id);
   
-  // Get chart data (daily subscriber counts)
-  const chartData = await getDailySubscriberCounts(tribe.id, chartDays);
+  // Get chart data - hourly for 24h, daily for 7d/30d
+  let chartCounts: number[];
+  let chartLabels: string[];
+  
+  if (period === "24h") {
+    const hourlyData = await getHourlySubscriberCounts(tribe.id);
+    chartCounts = hourlyData.map(d => d.count);
+    chartLabels = hourlyData.map(d => {
+      const date = new Date(d.hour);
+      const hours = date.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = hours % 12 || 12;
+      return `${hour12}${ampm}`;
+    });
+  } else {
+    const dailyData = await getDailySubscriberCounts(tribe.id, chartDays);
+    chartCounts = dailyData.map(d => d.count);
+    chartLabels = dailyData.map(d => {
+      const date = new Date(d.date);
+      if (period === "7d") {
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+      }
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+  }
 
   // Get sent emails count in period
   const sentEmails = await getSentEmailsByTribeId(tribe.id);
@@ -482,14 +506,8 @@ export async function getDashboardStats(period: TimePeriod = "7d") {
     periodCampaigns,
     totalReplies,
     periodReplies,
-    chartData: chartData.map(d => d.count),
-    chartLabels: chartData.map(d => {
-      const date = new Date(d.date);
-      if (period === "24h" || period === "7d") {
-        return date.toLocaleDateString('en-US', { weekday: 'short' });
-      }
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }),
+    chartData: chartCounts,
+    chartLabels,
     period,
   };
 }
