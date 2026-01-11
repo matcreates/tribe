@@ -61,10 +61,10 @@ export async function sendBulkEmailWithUnsubscribe(
       let signatureText = '';
       if (emailSignature && emailSignature.trim()) {
         const escapedSig = emailSignature.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        // Auto-link URLs in signature
+        // Auto-link URLs in signature (yellow color for visibility)
         const linkedSig = escapedSig.replace(
           /(https?:\/\/[^\s]+)/g,
-          '<a href="$1" style="color: rgba(255,255,255,0.5); text-decoration: underline;">$1</a>'
+          '<a href="$1" style="color: #E8B84A; text-decoration: underline;">$1</a>'
         );
         signatureHtml = `
           <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">

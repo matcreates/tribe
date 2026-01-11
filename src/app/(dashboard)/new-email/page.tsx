@@ -388,7 +388,7 @@ export default function NewEmailPage() {
               style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             >
               <div 
-                className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap [&_a]:text-white/50 [&_a]:underline"
+                className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap [&_a]:text-[#E8B84A] [&_a]:underline"
                 dangerouslySetInnerHTML={{ 
                   __html: (signature || '')
                     .replace(/</g, '&lt;')
