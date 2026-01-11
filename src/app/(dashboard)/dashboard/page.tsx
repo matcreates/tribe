@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getDashboardStats, getSentEmails, TimePeriod } from "@/lib/actions";
+import Link from "next/link";
 
 interface DashboardStats {
   totalSubscribers: number;
@@ -257,9 +258,10 @@ export default function DashboardPage() {
             <h3 className="text-[13px] font-medium text-white/70 mb-3">Recent emails</h3>
             <div className="space-y-2">
               {sentEmails.slice(0, 3).map((email) => (
-                <div 
-                  key={email.id} 
-                  className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0"
+                <Link 
+                  key={email.id}
+                  href={`/email/${email.id}`}
+                  className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] text-white/60 truncate">
@@ -272,7 +274,7 @@ export default function DashboardPage() {
                   <span className="text-[11px] text-white/25 ml-3">
                     {formatRelativeTime(email.sent_at)}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
