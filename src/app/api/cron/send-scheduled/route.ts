@@ -66,7 +66,9 @@ export async function GET(request: Request) {
         // Get base URL
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
         const ownerName = tribe.owner_name || 'Anonymous';
+        const emailSignature = tribe.email_signature || '';
         const escapedBody = (email.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const allowReplies = email.allow_replies !== false; // Default to true
 
         // Send emails
         const result = await sendBulkEmailWithUnsubscribe(
@@ -76,7 +78,9 @@ export async function GET(request: Request) {
           email.body || '',
           ownerName,
           baseUrl,
-          email.id
+          email.id,
+          emailSignature,
+          allowReplies
         );
 
         // Update status to sent

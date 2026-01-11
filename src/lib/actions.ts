@@ -18,6 +18,11 @@ import {
   getTotalEmailsSent,
   updateSentEmailRecipientCount,
   getEmailRepliesByEmailId,
+  getTribeReplyCount,
+  getDailySubscriberCounts,
+  getSubscriberCountSince,
+  getEmailsSentSince,
+  getOpenRateSince,
 } from "./db";
 import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
 import { revalidatePath } from "next/cache";
@@ -307,7 +312,8 @@ export async function getRecipientCounts(): Promise<{
 export async function sendEmail(
   subject: string, 
   body: string, 
-  filter: RecipientFilter = "verified"
+  filter: RecipientFilter = "verified",
+  allowReplies: boolean = true
 ) {
   const tribe = await getTribe();
   const allSubscribers = await getSubscribersByTribeId(tribe.id);
@@ -349,7 +355,8 @@ export async function sendEmail(
     ownerName,
     baseUrl,
     email.id, // Pass emailId for open tracking
-    emailSignature // Pass email signature
+    emailSignature, // Pass email signature
+    allowReplies // Pass allowReplies flag
   );
   
   if (!result.success && result.sentCount === 0) {
@@ -375,7 +382,8 @@ export async function scheduleEmail(
   subject: string,
   body: string,
   scheduledAt: Date,
-  filter: RecipientFilter = "verified"
+  filter: RecipientFilter = "verified",
+  allowReplies: boolean = true
 ) {
   const tribe = await getTribe();
   const allSubscribers = await getSubscribersByTribeId(tribe.id);
@@ -399,7 +407,7 @@ export async function scheduleEmail(
   }
 
   // Create scheduled email record
-  const email = await createScheduledEmail(tribe.id, subject, body, scheduledAt, filter);
+  const email = await createScheduledEmail(tribe.id, subject, body, scheduledAt, filter, allowReplies);
   
   revalidatePath("/new-email");
   revalidatePath("/dashboard");
@@ -412,44 +420,77 @@ export async function scheduleEmail(
 }
 
 // Dashboard stats
-export async function getDashboardStats() {
+export type TimePeriod = "24h" | "7d" | "30d";
+
+export async function getDashboardStats(period: TimePeriod = "7d") {
   const tribe = await getTribe();
-  // Count all subscribers (verified + unverified)
-  const subscribers = await getSubscribersByTribeId(tribe.id);
-  const sentEmails = await getSentEmailsByTribeId(tribe.id);
   
+  // Calculate time boundaries based on period
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const weekStart = new Date(todayStart);
-  weekStart.setDate(weekStart.getDate() - 7);
-
-  // Subscriber stats
-  const todaySubs = subscribers.filter(s => new Date(s.created_at) >= todayStart).length;
-  const weekSubs = subscribers.filter(s => new Date(s.created_at) >= weekStart).length;
-
-  // Email stats
-  const todayEmails = sentEmails.filter(e => new Date(e.sent_at) >= todayStart);
-  const weekEmails = sentEmails.filter(e => new Date(e.sent_at) >= weekStart);
+  let since: Date;
+  let chartDays: number;
   
-  const totalRecipients = await getTotalEmailsSent(tribe.id);
-  const todayRecipients = todayEmails.reduce((sum, e) => sum + e.recipient_count, 0);
-  const weekRecipients = weekEmails.reduce((sum, e) => sum + e.recipient_count, 0);
+  switch (period) {
+    case "24h":
+      since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      chartDays = 24; // Show hourly for 24h (we'll show daily points still)
+      break;
+    case "30d":
+      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      chartDays = 30;
+      break;
+    case "7d":
+    default:
+      since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      chartDays = 7;
+  }
 
-  // Calculate real open rate from all sent emails
-  const totalOpens = sentEmails.reduce((sum, e) => sum + (e.open_count || 0), 0);
-  const totalSent = sentEmails.reduce((sum, e) => sum + e.recipient_count, 0);
-  const openRate = totalSent > 0 ? Math.round((totalOpens / totalSent) * 100 * 10) / 10 : 0;
+  // Get all subscribers for total count
+  const subscribers = await getSubscribersByTribeId(tribe.id);
+  const totalSubscribers = subscribers.length;
+  
+  // Get period-specific stats
+  const periodSubscribers = await getSubscriberCountSince(tribe.id, since);
+  const periodEmailsSent = await getEmailsSentSince(tribe.id, since);
+  const periodOpenStats = await getOpenRateSince(tribe.id, since);
+  const periodReplies = await getTribeReplyCount(tribe.id, since);
+  
+  // Calculate open rate for the period
+  const openRate = periodOpenStats.sent > 0 
+    ? Math.round((periodOpenStats.opens / periodOpenStats.sent) * 100 * 10) / 10 
+    : 0;
+
+  // Get total stats
+  const totalEmailsSent = await getTotalEmailsSent(tribe.id);
+  const totalReplies = await getTribeReplyCount(tribe.id);
+  
+  // Get chart data (daily subscriber counts)
+  const chartData = await getDailySubscriberCounts(tribe.id, chartDays);
+
+  // Get sent emails count in period
+  const sentEmails = await getSentEmailsByTribeId(tribe.id);
+  const periodCampaigns = sentEmails.filter(e => new Date(e.sent_at) >= since).length;
 
   return {
-    totalSubscribers: subscribers.length,
-    todaySubscribers: todaySubs,
-    weekSubscribers: weekSubs,
-    totalEmailsSent: totalRecipients,
-    todayEmailsSent: todayRecipients,
-    weekEmailsSent: weekRecipients,
-    openingRate: openRate,
-    todayOpeningRate: todayEmails.length > 0 ? 52.8 : 0,
-    weekOpeningRate: weekEmails.length > 0 ? 48.4 : 0,
+    totalSubscribers,
+    periodSubscribers,
+    totalEmailsSent,
+    periodEmailsSent,
+    openRate,
+    periodOpens: periodOpenStats.opens,
+    totalCampaigns: sentEmails.length,
+    periodCampaigns,
+    totalReplies,
+    periodReplies,
+    chartData: chartData.map(d => d.count),
+    chartLabels: chartData.map(d => {
+      const date = new Date(d.date);
+      if (period === "24h" || period === "7d") {
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+      }
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }),
+    period,
   };
 }
 

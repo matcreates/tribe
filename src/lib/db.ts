@@ -114,6 +114,11 @@ export async function initDatabase() {
   } catch {
     // Column already exists
   }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN allow_replies BOOLEAN DEFAULT true`);
+  } catch {
+    // Column already exists
+  }
 
   // Email replies table
   await pool.query(`
@@ -169,6 +174,7 @@ export interface DbSentEmail {
   scheduled_at: Date | null;
   status: 'sent' | 'scheduled' | 'processing';
   recipient_filter: string;
+  allow_replies: boolean;
 }
 
 export interface DbEmailReply {
@@ -392,13 +398,14 @@ export async function createScheduledEmail(
   subject: string, 
   body: string, 
   scheduledAt: Date,
-  recipientFilter: string
+  recipientFilter: string,
+  allowReplies: boolean = true
 ): Promise<DbSentEmail> {
   const id = crypto.randomUUID();
   
   await pool.query(
-    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count, scheduled_at, status, recipient_filter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [id, tribeId, subject, body, 0, scheduledAt.toISOString(), 'scheduled', recipientFilter]
+    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count, scheduled_at, status, recipient_filter, allow_replies) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [id, tribeId, subject, body, 0, scheduledAt.toISOString(), 'scheduled', recipientFilter, allowReplies]
   );
   
   const email = await getSentEmailById(id);
@@ -484,4 +491,80 @@ export async function getReplyCountByEmailId(emailId: string): Promise<number> {
     [emailId]
   );
   return Number(rows[0].count);
+}
+
+// Get total reply count for a tribe within a time period
+export async function getTribeReplyCount(tribeId: string, since?: Date): Promise<number> {
+  if (since) {
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM email_replies er 
+       INNER JOIN sent_emails se ON er.email_id = se.id 
+       WHERE se.tribe_id = $1 AND er.received_at >= $2`,
+      [tribeId, since.toISOString()]
+    );
+    return Number(rows[0].count);
+  }
+  const rows = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM email_replies er 
+     INNER JOIN sent_emails se ON er.email_id = se.id 
+     WHERE se.tribe_id = $1`,
+    [tribeId]
+  );
+  return Number(rows[0].count);
+}
+
+// Get daily subscriber counts for chart
+export async function getDailySubscriberCounts(tribeId: string, days: number): Promise<{ date: string; count: number }[]> {
+  const results: { date: string; count: number }[] = [];
+  const now = new Date();
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    date.setHours(23, 59, 59, 999);
+    
+    // Count subscribers created on or before this date
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at <= $2`,
+      [tribeId, date.toISOString()]
+    );
+    
+    results.push({
+      date: date.toISOString().split('T')[0],
+      count: Number(rows[0].count),
+    });
+  }
+  
+  return results;
+}
+
+// Get subscriber count at a specific point in time
+export async function getSubscriberCountSince(tribeId: string, since: Date): Promise<number> {
+  const rows = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at >= $2`,
+    [tribeId, since.toISOString()]
+  );
+  return Number(rows[0].count);
+}
+
+// Get emails sent since a date
+export async function getEmailsSentSince(tribeId: string, since: Date): Promise<number> {
+  const rows = await query<{ total: string }>(
+    `SELECT COALESCE(SUM(recipient_count), 0) as total FROM sent_emails WHERE tribe_id = $1 AND sent_at >= $2`,
+    [tribeId, since.toISOString()]
+  );
+  return Number(rows[0].total);
+}
+
+// Get open rate for emails sent since a date
+export async function getOpenRateSince(tribeId: string, since: Date): Promise<{ opens: number; sent: number }> {
+  const rows = await query<{ opens: string; sent: string }>(
+    `SELECT COALESCE(SUM(open_count), 0) as opens, COALESCE(SUM(recipient_count), 0) as sent 
+     FROM sent_emails WHERE tribe_id = $1 AND sent_at >= $2`,
+    [tribeId, since.toISOString()]
+  );
+  return {
+    opens: Number(rows[0].opens),
+    sent: Number(rows[0].sent),
+  };
 }

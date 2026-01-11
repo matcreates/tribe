@@ -1,24 +1,96 @@
-import { getDashboardStats, getSentEmails } from "@/lib/actions";
+"use client";
 
-export default async function DashboardPage() {
-  const stats = await getDashboardStats();
-  const sentEmails = await getSentEmails();
+import { useState, useEffect } from "react";
+import { getDashboardStats, getSentEmails, TimePeriod } from "@/lib/actions";
 
-  // Calculate real chart data from subscriber growth (last 7 days)
-  const chartData = Array.from({ length: 7 }, (_, i) => {
-    // Create descending pattern based on week subscribers
-    const base = stats.totalSubscribers;
-    const dailyGrowth = stats.weekSubscribers / 7;
-    return Math.max(0, Math.round(base - dailyGrowth * (6 - i)));
-  });
+interface DashboardStats {
+  totalSubscribers: number;
+  periodSubscribers: number;
+  totalEmailsSent: number;
+  periodEmailsSent: number;
+  openRate: number;
+  periodOpens: number;
+  totalCampaigns: number;
+  periodCampaigns: number;
+  totalReplies: number;
+  periodReplies: number;
+  chartData: number[];
+  chartLabels: string[];
+  period: TimePeriod;
+}
+
+interface SentEmail {
+  id: string;
+  subject: string | null;
+  recipient_count: number;
+  sent_at: string;
+}
+
+export default function DashboardPage() {
+  const [period, setPeriod] = useState<TimePeriod>("7d");
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, [period]);
+
+  const loadData = async () => {
+    try {
+      const [statsData, emailsData] = await Promise.all([
+        getDashboardStats(period),
+        getSentEmails(),
+      ]);
+      setStats(statsData);
+      setSentEmails(emailsData);
+    } catch (error) {
+      console.error("Failed to load dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const periodLabels = {
+    "24h": "Last 24 hours",
+    "7d": "Last 7 days",
+    "30d": "Last 30 days",
+  };
+
+  if (isLoading || !stats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-[13px] text-white/30">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
-        {/* Header */}
-        <h1 className="text-[20px] font-medium text-white/90 mb-6">
-          Dashboard
-        </h1>
+        {/* Header with Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h1 className="text-[20px] font-medium text-white/90">
+            Dashboard
+          </h1>
+          
+          {/* Time Period Filters */}
+          <div className="flex gap-1 p-1 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+            {(["24h", "7d", "30d"] as TimePeriod[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1.5 rounded-[8px] text-[11px] font-medium tracking-[0.05em] uppercase transition-all ${
+                  period === p
+                    ? "bg-white/[0.1] text-white/80"
+                    : "text-white/40 hover:text-white/60"
+                }`}
+              >
+                {p === "24h" ? "24H" : p === "7d" ? "7D" : "30D"}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -40,9 +112,9 @@ export default async function DashboardPage() {
               {stats.totalSubscribers}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[11px] text-white/30">This week</span>
-              <span className={`text-[11px] font-medium ${stats.weekSubscribers > 0 ? 'text-emerald-400' : 'text-white/50'}`}>
-                {stats.weekSubscribers > 0 ? `+${stats.weekSubscribers}` : '0'}
+              <span className="text-[11px] text-white/30">{periodLabels[period]}</span>
+              <span className={`text-[11px] font-medium ${stats.periodSubscribers > 0 ? 'text-emerald-400' : 'text-white/50'}`}>
+                {stats.periodSubscribers > 0 ? `+${stats.periodSubscribers}` : '0'}
               </span>
             </div>
           </div>
@@ -65,9 +137,9 @@ export default async function DashboardPage() {
               {stats.totalEmailsSent}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[11px] text-white/30">This week</span>
-              <span className={`text-[11px] font-medium ${stats.weekEmailsSent > 0 ? 'text-emerald-400' : 'text-white/50'}`}>
-                {stats.weekEmailsSent > 0 ? `+${stats.weekEmailsSent}` : '0'}
+              <span className="text-[11px] text-white/30">{periodLabels[period]}</span>
+              <span className={`text-[11px] font-medium ${stats.periodEmailsSent > 0 ? 'text-emerald-400' : 'text-white/50'}`}>
+                {stats.periodEmailsSent > 0 ? `+${stats.periodEmailsSent}` : '0'}
               </span>
             </div>
           </div>
@@ -87,14 +159,14 @@ export default async function DashboardPage() {
               <span className="text-[12px] text-white/40">Open rate</span>
             </div>
             <p className="text-[28px] font-medium text-white/90">
-              {stats.openingRate > 0 ? `${stats.openingRate}%` : '—'}
+              {stats.openRate > 0 ? `${stats.openRate}%` : '—'}
             </p>
             <p className="text-[11px] text-white/30 mt-1">
-              {stats.openingRate > 0 ? 'Average across all emails' : 'No data yet'}
+              {stats.periodOpens > 0 ? `${stats.periodOpens} opens ${periodLabels[period].toLowerCase()}` : 'No data yet'}
             </p>
           </div>
 
-          {/* Campaigns */}
+          {/* Replies */}
           <div 
             className="rounded-[12px] p-5 border border-white/[0.06]"
             style={{ background: 'rgba(255, 255, 255, 0.02)' }}
@@ -104,16 +176,19 @@ export default async function DashboardPage() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ background: 'rgba(251, 191, 36, 0.15)' }}
               >
-                <CampaignIcon className="w-4 h-4 text-amber-400" />
+                <ReplyIcon className="w-4 h-4 text-amber-400" />
               </div>
-              <span className="text-[12px] text-white/40">Campaigns</span>
+              <span className="text-[12px] text-white/40">Replies</span>
             </div>
             <p className="text-[28px] font-medium text-white/90">
-              {sentEmails.length}
+              {stats.totalReplies}
             </p>
-            <p className="text-[11px] text-white/30 mt-1">
-              Total emails composed
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[11px] text-white/30">{periodLabels[period]}</span>
+              <span className={`text-[11px] font-medium ${stats.periodReplies > 0 ? 'text-emerald-400' : 'text-white/50'}`}>
+                {stats.periodReplies > 0 ? `+${stats.periodReplies}` : '0'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -124,33 +199,48 @@ export default async function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[13px] font-medium text-white/70">Tribe growth</h3>
-            <span className="text-[11px] text-white/30">Last 7 days</span>
+            <span className="text-[11px] text-white/30">{periodLabels[period]}</span>
           </div>
           <div className="h-[100px] flex items-end gap-1.5">
-            {chartData.map((value, i) => {
-              const maxValue = Math.max(...chartData, 1);
-              const height = (value / maxValue) * 100;
-              const isToday = i === chartData.length - 1;
+            {stats.chartData.map((value, i) => {
+              const maxValue = Math.max(...stats.chartData, 1);
+              const minValue = Math.min(...stats.chartData);
+              const range = maxValue - minValue || 1;
+              const height = ((value - minValue) / range) * 80 + 20; // Min 20% height for visibility
+              const isLast = i === stats.chartData.length - 1;
               return (
                 <div
                   key={i}
-                  className="flex-1 rounded-t-sm transition-all"
+                  className="flex-1 rounded-t-sm transition-all relative group"
                   style={{ 
-                    height: `${Math.max(height, 4)}%`,
-                    background: isToday 
+                    height: `${height}%`,
+                    background: isLast 
                       ? 'rgba(59, 130, 246, 0.6)' 
                       : 'rgba(59, 130, 246, 0.25)',
                   }}
-                />
+                >
+                  {/* Tooltip on hover */}
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="bg-white/10 backdrop-blur-sm px-2 py-1 rounded text-[10px] text-white/80 whitespace-nowrap">
+                      {value}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
           <div className="flex justify-between mt-2">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'].map((day, i) => (
-              <span key={i} className="text-[10px] text-white/25 flex-1 text-center">
-                {day}
-              </span>
-            ))}
+            {stats.chartLabels.map((label, i) => {
+              // Only show some labels to avoid crowding
+              const showLabel = period === "30d" 
+                ? i % 5 === 0 || i === stats.chartLabels.length - 1
+                : true;
+              return (
+                <span key={i} className="text-[10px] text-white/25 flex-1 text-center">
+                  {showLabel ? label : ''}
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -231,10 +321,11 @@ function EyeIcon({ className }: { className?: string }) {
   );
 }
 
-function CampaignIcon({ className }: { className?: string }) {
+function ReplyIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 3v10l3-2 4 2 3-2V1l-3 2-4-2-3 2z" />
+      <path d="M6 5L2 8l4 3" />
+      <path d="M2 8h8a4 4 0 0 1 4 4v1" />
     </svg>
   );
 }

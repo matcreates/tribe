@@ -19,6 +19,7 @@ export default function NewEmailPage() {
   const [lastSentCount, setLastSentCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const [signature, setSignature] = useState<string | null>(null);
+  const [allowReplies, setAllowReplies] = useState(true);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -221,7 +222,7 @@ export default function NewEmailPage() {
       const lines = body.trim().split("\n");
       const subject = lines[0].slice(0, 60) || "Untitled";
       
-      const result = await sendEmail(subject, body, recipientFilter);
+      const result = await sendEmail(subject, body, recipientFilter, allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
@@ -255,7 +256,7 @@ export default function NewEmailPage() {
       const lines = body.trim().split("\n");
       const subject = lines[0].slice(0, 60) || "Untitled";
       
-      await scheduleEmail(subject, body, scheduledAt, recipientFilter);
+      await scheduleEmail(subject, body, scheduledAt, recipientFilter, allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
@@ -339,6 +340,38 @@ export default function NewEmailPage() {
         <p className="text-[11px] text-white/25 mb-5">
           Links are auto-detected • Type <span className="text-white/35">-</span> for bullet lists
         </p>
+
+        {/* Allow Replies Toggle */}
+        <div 
+          className="flex items-center justify-between p-4 rounded-[10px] border border-white/[0.06] mb-5"
+          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ background: allowReplies ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)' }}
+            >
+              <ReplyToggleIcon className={`w-4 h-4 ${allowReplies ? 'text-emerald-400' : 'text-white/40'}`} />
+            </div>
+            <div>
+              <p className="text-[13px] text-white/70">Allow replies</p>
+              <p className="text-[11px] text-white/30">Subscribers can reply to this email</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAllowReplies(!allowReplies)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${
+              allowReplies ? 'bg-emerald-500/60' : 'bg-white/10'
+            }`}
+          >
+            <span 
+              className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                allowReplies ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
@@ -458,6 +491,15 @@ function SignatureIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 12c1.5-2 3-4.5 4-4.5s2 3 3 3 2.5-3 4-5" />
       <line x1="2" y1="14" x2="14" y2="14" />
+    </svg>
+  );
+}
+
+function ReplyToggleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 5L2 8l4 3" />
+      <path d="M2 8h8a3 3 0 0 1 3 3v2" />
     </svg>
   );
 }

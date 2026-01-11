@@ -35,7 +35,8 @@ export async function sendBulkEmailWithUnsubscribe(
   ownerName: string,
   baseUrl: string,
   emailId?: string,
-  emailSignature?: string
+  emailSignature?: string,
+  allowReplies: boolean = true
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
   if (recipients.length === 0) {
     return { success: true, sentCount: 0, errors: [] };
@@ -106,12 +107,13 @@ export async function sendBulkEmailWithUnsubscribe(
 
       const textBody = `${plainTextBody}${signatureText}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
 
-      // Create unique reply-to address for tracking replies
+      // Create unique reply-to address for tracking replies (only if replies are enabled)
       // Format: reply+{emailId}+{subscriberToken}@domain.com
-      const replyDomain = getReplyDomain();
-      const replyTo = emailId 
-        ? `reply+${emailId}+${recipient.unsubscribeToken}@${replyDomain}`
-        : fromEmail;
+      let replyTo: string | undefined;
+      if (allowReplies && emailId) {
+        const replyDomain = getReplyDomain();
+        replyTo = `reply+${emailId}+${recipient.unsubscribeToken}@${replyDomain}`;
+      }
 
       return {
         from: fromEmail,
