@@ -172,3 +172,80 @@ select option {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* Primary CTA button - white/cream with glass effect */
+.btn-glass-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(245, 240, 230, 0.95) 50%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  color: rgb(12, 12, 12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    0 1px 1px rgba(255, 255, 255, 0.8) inset,
+    0 -1px 1px rgba(0, 0, 0, 0.05) inset;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 25px rgba(0, 0, 0, 0.25),
+    0 1px 1px rgba(255, 255, 255, 0.9) inset,
+    0 -1px 1px rgba(0, 0, 0, 0.05) inset;
+}
+
+.btn-glass-primary .btn-glass-text::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Gold accent button */
+.btn-glass-gold {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    #E8B84A 0%,
+    #D4A43A 50%,
+    #E8B84A 100%
+  );
+  color: rgb(12, 12, 12);
+  border: 1px solid rgba(232, 184, 74, 0.5);
+  box-shadow: 
+    0 4px 20px rgba(232, 184, 74, 0.3),
+    0 1px 1px rgba(255, 255, 255, 0.3) inset;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 25px rgba(232, 184, 74, 0.4),
+    0 1px 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+.btn-glass-gold .btn-glass-text::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}

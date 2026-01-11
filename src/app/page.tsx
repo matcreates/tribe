@@ -15,7 +15,7 @@ export default async function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <TribeLogo className="h-[22px] w-auto text-white/90" />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/login"
               className="px-5 py-2 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
@@ -24,10 +24,9 @@ export default async function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="px-5 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase text-white/90 hover:opacity-90 transition-opacity border border-white/10"
-              style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+              className="px-5 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
             >
-              Get started
+              <span className="btn-glass-text">Get started</span>
             </Link>
           </div>
         </div>
@@ -71,17 +70,15 @@ export default async function LandingPage() {
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="group px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase transition-all hover:scale-[1.02]"
-              style={{ background: 'rgba(255, 255, 255, 0.95)', color: 'rgb(12, 12, 12)' }}
+              className="px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
             >
-              Start for free
+              <span className="btn-glass-text">Start for free</span>
             </Link>
             <Link
               href="/login"
-              className="px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase text-white/70 hover:text-white/90 transition-colors border border-white/10"
-              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              className="px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              Sign in
+              <span className="btn-glass-text">Sign in</span>
             </Link>
           </div>
 
@@ -197,9 +194,9 @@ export default async function LandingPage() {
               </div>
               <Link
                 href="/signup"
-                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase border border-white/[0.1] text-white/70 hover:bg-white/[0.05] transition-colors"
+                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
               >
-                Get started
+                <span className="btn-glass-text">Get started</span>
               </Link>
             </div>
 
@@ -237,10 +234,9 @@ export default async function LandingPage() {
               </div>
               <Link
                 href="/signup"
-                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase transition-all hover:opacity-90"
-                style={{ background: '#E8B84A', color: '#000' }}
+                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase btn-glass-gold"
               >
-                Get started
+                <span className="btn-glass-text">Get started</span>
               </Link>
             </div>
           </div>
@@ -266,10 +262,9 @@ export default async function LandingPage() {
           </p>
           <Link
             href="/signup"
-            className="inline-block px-10 py-4 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase transition-all hover:scale-[1.02]"
-            style={{ background: 'rgba(255, 255, 255, 0.95)', color: 'rgb(12, 12, 12)' }}
+            className="inline-block px-10 py-4 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
           >
-            Get started for free
+            <span className="btn-glass-text">Get started for free</span>
           </Link>
         </div>
       </section>
