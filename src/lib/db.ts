@@ -47,6 +47,13 @@ export async function initDatabase() {
     // Column already exists
   }
 
+  // Add join_description column for customizable join page
+  try {
+    await query(`ALTER TABLE tribes ADD COLUMN join_description TEXT`);
+  } catch {
+    // Column already exists
+  }
+
   // Add subscription columns to tribes table
   try {
     await query(`ALTER TABLE tribes ADD COLUMN stripe_customer_id TEXT`);
@@ -175,6 +182,7 @@ export interface DbTribe {
   owner_name: string | null;
   owner_avatar: string | null;
   email_signature: string | null;
+  join_description: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_status: 'free' | 'active' | 'canceled' | 'past_due';
@@ -273,7 +281,7 @@ export async function getTribeByUserId(userId: string): Promise<DbTribe | null> 
   return rows[0] || null;
 }
 
-export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "name" | "slug" | "owner_name" | "owner_avatar" | "email_signature">>): Promise<void> {
+export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "name" | "slug" | "owner_name" | "owner_avatar" | "email_signature" | "join_description">>): Promise<void> {
   if (updates.name !== undefined) {
     await pool.query(`UPDATE tribes SET name = $1 WHERE id = $2`, [updates.name, id]);
   }
@@ -288,6 +296,9 @@ export async function updateTribe(id: string, updates: Partial<Pick<DbTribe, "na
   }
   if (updates.email_signature !== undefined) {
     await pool.query(`UPDATE tribes SET email_signature = $1 WHERE id = $2`, [updates.email_signature, id]);
+  }
+  if (updates.join_description !== undefined) {
+    await pool.query(`UPDATE tribes SET join_description = $1 WHERE id = $2`, [updates.join_description, id]);
   }
 }
 
@@ -525,6 +536,15 @@ export async function updateSentEmailRecipientCount(emailId: string, recipientCo
 
 export async function getSentEmailsByTribeId(tribeId: string): Promise<DbSentEmail[]> {
   return await query<DbSentEmail>(`SELECT * FROM sent_emails WHERE tribe_id = $1 ORDER BY sent_at DESC`, [tribeId]);
+}
+
+export async function deleteSentEmail(emailId: string, tribeId: string): Promise<boolean> {
+  // Delete email only if it belongs to the tribe (security check)
+  const result = await pool.query(
+    `DELETE FROM sent_emails WHERE id = $1 AND tribe_id = $2`,
+    [emailId, tribeId]
+  );
+  return (result.rowCount ?? 0) > 0;
 }
 
 export async function getTotalEmailsSent(tribeId: string): Promise<number> {

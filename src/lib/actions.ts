@@ -24,6 +24,7 @@ import {
   getSubscriberCountSince,
   getEmailsSentSince,
   getOpenRateSince,
+  deleteSentEmail as dbDeleteSentEmail,
 } from "./db";
 import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
 import { revalidatePath } from "next/cache";
@@ -40,6 +41,9 @@ async function getTribe() {
   return tribe;
 }
 
+// Default join page description
+const DEFAULT_JOIN_DESCRIPTION = "Join my tribe to receive exclusive updates, insights, and content directly in your inbox. Be part of a community that values meaningful connections.";
+
 // Tribe actions
 export async function getTribeSettings() {
   const tribe = await getTribe();
@@ -50,6 +54,7 @@ export async function getTribeSettings() {
     ownerName: tribe.owner_name || "Anonymous",
     ownerAvatar: tribe.owner_avatar,
     emailSignature: tribe.email_signature || "",
+    joinDescription: tribe.join_description || DEFAULT_JOIN_DESCRIPTION,
   };
 }
 
@@ -59,6 +64,7 @@ export async function updateTribeSettings(data: {
   ownerName?: string;
   ownerAvatar?: string;
   emailSignature?: string;
+  joinDescription?: string;
 }) {
   const tribe = await getTribe();
   
@@ -75,11 +81,25 @@ export async function updateTribeSettings(data: {
     owner_name: data.ownerName,
     owner_avatar: data.ownerAvatar,
     email_signature: data.emailSignature,
+    join_description: data.joinDescription,
   });
   
   revalidatePath("/settings");
   revalidatePath("/join");
   revalidatePath("/j/[slug]", "page");
+}
+
+// Get join page data (for public join page)
+export async function getJoinPageData(slug: string) {
+  const tribe = await getTribeBySlug(slug);
+  if (!tribe) return null;
+  
+  return {
+    name: tribe.name,
+    ownerName: tribe.owner_name || "Anonymous",
+    ownerAvatar: tribe.owner_avatar,
+    description: tribe.join_description || DEFAULT_JOIN_DESCRIPTION,
+  };
 }
 
 // Subscriber actions
@@ -251,6 +271,16 @@ export async function getSentEmails() {
     ...e,
     sent_at: e.sent_at instanceof Date ? e.sent_at.toISOString() : String(e.sent_at),
   }));
+}
+
+export async function deleteSentEmail(emailId: string) {
+  const tribe = await getTribe();
+  const deleted = await dbDeleteSentEmail(emailId, tribe.id);
+  if (!deleted) {
+    throw new Error("Email not found or already deleted");
+  }
+  revalidatePath("/dashboard");
+  return { success: true };
 }
 
 export async function getSentEmailById(emailId: string) {

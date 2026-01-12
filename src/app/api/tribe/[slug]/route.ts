@@ -16,12 +16,15 @@ export async function GET(
       );
     }
 
+    const defaultDescription = "Join my tribe to receive exclusive updates, insights, and content directly in your inbox. Be part of a community that values meaningful connections.";
+    
     return NextResponse.json({
       id: tribe.id,
       name: tribe.name,
       slug: tribe.slug,
       ownerName: tribe.owner_name || "Anonymous",
       ownerAvatar: tribe.owner_avatar,
+      description: tribe.join_description || defaultDescription,
     });
   } catch (error) {
     console.error("Get tribe by slug error:", error);

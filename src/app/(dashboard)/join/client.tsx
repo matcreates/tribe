@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Toast, useToast } from "@/components/Toast";
+import { updateTribeSettings } from "@/lib/actions";
 
 interface Settings {
   id: string;
@@ -9,6 +10,7 @@ interface Settings {
   slug: string;
   ownerName: string;
   ownerAvatar: string | null;
+  joinDescription: string;
 }
 
 interface JoinPageClientProps {
@@ -21,6 +23,9 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
   // Show the real, working URL
   const [displayUrl, setDisplayUrl] = useState("");
   const [fullJoinUrl, setFullJoinUrl] = useState("");
+  const [description, setDescription] = useState(settings.joinDescription);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     const origin = window.location.origin;
@@ -29,6 +34,10 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     // Show a cleaner version without https://
     setDisplayUrl(url.replace(/^https?:\/\//, ""));
   }, [settings.slug]);
+
+  useEffect(() => {
+    setHasChanges(description !== settings.joinDescription);
+  }, [description, settings.joinDescription]);
 
   const copyLink = async () => {
     try {
@@ -39,9 +48,44 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     }
   };
 
+  const saveDescription = async () => {
+    setIsSaving(true);
+    try {
+      await updateTribeSettings({ joinDescription: description });
+      showToast("Description saved");
+      setHasChanges(false);
+    } catch {
+      showToast("Failed to save description");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
+        {/* Description Editor */}
+        <div className="mb-6">
+          <label className="block text-[12px] text-white/40 mb-2">Page description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="w-full px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 resize-none focus:outline-none transition-colors"
+            style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+            placeholder="Describe what people will get by joining your tribe..."
+          />
+          {hasChanges && (
+            <button
+              onClick={saveDescription}
+              disabled={isSaving}
+              className="mt-2 px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
+            >
+              <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE DESCRIPTION"}</span>
+            </button>
+          )}
+        </div>
+
         {/* URL Bar */}
         <div 
           className="flex items-center gap-3 px-4 py-3 rounded-[10px] mb-6 w-full"
@@ -93,7 +137,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
             
             {/* Description */}
             <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
-              A tribe is a a group of people who choose to follow your work, support your ideas, and stay connected.
+              {description}
             </p>
             
             {/* Email Input */}
