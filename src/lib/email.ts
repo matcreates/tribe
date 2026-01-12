@@ -107,22 +107,30 @@ export async function sendBulkEmailWithUnsubscribe(
 
       const textBody = `${plainTextBody}${signatureText}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
 
-      // Create unique reply-to address for tracking replies (only if replies are enabled)
-      // Format: reply+{emailId}+{subscriberToken}@domain.com
-      let replyTo: string | undefined;
-      if (allowReplies && emailId) {
-        const replyDomain = getReplyDomain();
-        replyTo = `reply+${emailId}+${recipient.unsubscribeToken}@${replyDomain}`;
-      }
-
-      return {
+      // Build the email configuration
+      const emailConfig: {
+        from: string;
+        to: string[];
+        subject: string;
+        html: string;
+        text: string;
+        reply_to?: string;
+      } = {
         from: fromEmail,
-        replyTo: replyTo,
         to: [recipient.email],
         subject,
         html: htmlBody,
         text: textBody,
       };
+
+      // Add reply-to address for tracking replies (only if replies are enabled)
+      // Format: reply-{emailId}@domain.com (we'll match sender email when receiving replies)
+      if (allowReplies && emailId) {
+        const replyDomain = getReplyDomain();
+        emailConfig.reply_to = `reply-${emailId}@${replyDomain}`;
+      }
+
+      return emailConfig;
     });
 
     try {

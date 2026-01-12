@@ -433,6 +433,14 @@ export async function getSubscriberById(id: string): Promise<DbSubscriber | null
   return rows[0] || null;
 }
 
+export async function getSubscriberByEmailAndTribe(email: string, tribeId: string): Promise<DbSubscriber | null> {
+  const rows = await query<DbSubscriber>(
+    `SELECT * FROM subscribers WHERE LOWER(email) = LOWER($1) AND tribe_id = $2`,
+    [email, tribeId]
+  );
+  return rows[0] || null;
+}
+
 export async function getSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
   const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 ORDER BY created_at DESC`, [tribeId]);
   // Ensure unsubscribed field has a default value

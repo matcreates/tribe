@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createEmailReply, getSentEmailById, getSubscriberByUnsubscribeToken } from "@/lib/db";
+import { createEmailReply, getSentEmailById, getSubscriberByEmailAndTribe } from "@/lib/db";
 
 // Sanitize reply text - remove HTML, links, and dangerous content
 function sanitizeReplyText(text: string): string {
@@ -44,16 +44,22 @@ function extractPlainTextBody(email: ResendInboundEmail): string {
   return "";
 }
 
-// Parse the reply-to address to extract emailId and subscriberToken
-function parseReplyAddress(toAddress: string): { emailId: string; subscriberToken: string } | null {
-  // Format: reply+{emailId}+{subscriberToken}@domain.com
-  const match = toAddress.match(/^reply\+([^+]+)\+([^@]+)@/i);
+// Parse the reply-to address to extract emailId
+function parseReplyAddress(toAddress: string): { emailId: string } | null {
+  // Format: reply-{emailId}@domain.com
+  const match = toAddress.match(/^reply-([^@]+)@/i);
   if (!match) return null;
   
   return {
     emailId: match[1],
-    subscriberToken: match[2],
   };
+}
+
+// Extract email address from "From" header (handles "Name <email>" format)
+function extractEmailFromHeader(from: string): string {
+  const match = from.match(/<([^>]+)>/);
+  if (match) return match[1].toLowerCase();
+  return from.toLowerCase().trim();
 }
 
 interface ResendInboundEmail {
@@ -90,7 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email data" }, { status: 400 });
     }
 
-    // Parse the "to" address to extract emailId and subscriberToken
+    // Parse the "to" address to extract emailId
     const parsed = parseReplyAddress(email.to);
     if (!parsed) {
       console.log("Inbound webhook: Could not parse reply address:", email.to);
@@ -98,7 +104,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Not a reply address" });
     }
 
-    const { emailId, subscriberToken } = parsed;
+    const { emailId } = parsed;
 
     // Verify the email exists
     const sentEmail = await getSentEmailById(emailId);
@@ -107,17 +113,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Email not found" });
     }
 
-    // Verify the subscriber exists and belongs to this email's tribe
-    const subscriber = await getSubscriberByUnsubscribeToken(subscriberToken);
-    if (!subscriber) {
-      console.log("Inbound webhook: Subscriber not found for token:", subscriberToken);
-      return NextResponse.json({ success: true, message: "Subscriber not found" });
-    }
+    // Extract sender's email address
+    const senderEmail = extractEmailFromHeader(email.from);
+    console.log("Inbound webhook: Sender email:", senderEmail);
 
-    // Check subscriber belongs to the same tribe
-    if (subscriber.tribe_id !== sentEmail.tribe_id) {
-      console.log("Inbound webhook: Tribe mismatch");
-      return NextResponse.json({ success: true, message: "Tribe mismatch" });
+    // Find the subscriber by their email and the tribe
+    const subscriber = await getSubscriberByEmailAndTribe(senderEmail, sentEmail.tribe_id);
+    if (!subscriber) {
+      console.log("Inbound webhook: Subscriber not found for email:", senderEmail);
+      return NextResponse.json({ success: true, message: "Subscriber not found" });
     }
 
     // Extract and sanitize the reply text
