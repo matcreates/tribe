@@ -306,15 +306,29 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
   
   const status = (tribe.subscription_status || 'free') as 'free' | 'active' | 'canceled' | 'past_due';
   const plan = tribe.subscription_plan as 'monthly' | 'yearly' | null;
-  const endsAt = tribe.subscription_ends_at ? tribe.subscription_ends_at.toISOString() : null;
+  
+  // Handle subscription_ends_at safely - it could be Date, string, or null
+  let endsAt: string | null = null;
+  if (tribe.subscription_ends_at) {
+    try {
+      const date = tribe.subscription_ends_at instanceof Date 
+        ? tribe.subscription_ends_at 
+        : new Date(tribe.subscription_ends_at);
+      if (!isNaN(date.getTime())) {
+        endsAt = date.toISOString();
+      }
+    } catch {
+      console.error("Invalid subscription_ends_at date:", tribe.subscription_ends_at);
+    }
+  }
   
   // User can send emails if they have an active subscription
   // or if their subscription is canceled but hasn't ended yet
   let canSendEmails = false;
   if (status === 'active') {
     canSendEmails = true;
-  } else if (status === 'canceled' && tribe.subscription_ends_at) {
-    canSendEmails = new Date(tribe.subscription_ends_at) > new Date();
+  } else if (status === 'canceled' && endsAt) {
+    canSendEmails = new Date(endsAt) > new Date();
   }
   
   return {
