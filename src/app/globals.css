@@ -173,39 +173,45 @@ select option {
   cursor: not-allowed;
 }
 
-/* Primary CTA button - white/cream with glass effect */
+/* Primary CTA button - dark glass with white text */
 .btn-glass-primary {
   position: relative;
   overflow: hidden;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(245, 240, 230, 0.95) 50%,
-    rgba(255, 255, 255, 0.9) 100%
+    rgba(60, 60, 65, 0.95) 0%,
+    rgba(45, 45, 50, 0.95) 50%,
+    rgba(55, 55, 60, 0.95) 100%
   );
-  color: rgb(12, 12, 12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.2),
-    0 1px 1px rgba(255, 255, 255, 0.8) inset,
-    0 -1px 1px rgba(0, 0, 0, 0.05) inset;
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 1px 1px rgba(255, 255, 255, 0.1) inset,
+    0 -1px 1px rgba(0, 0, 0, 0.2) inset;
   transition: all 0.3s ease;
 }
 
 .btn-glass-primary:hover {
   transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    rgba(70, 70, 75, 0.95) 0%,
+    rgba(55, 55, 60, 0.95) 50%,
+    rgba(65, 65, 70, 0.95) 100%
+  );
   box-shadow: 
-    0 6px 25px rgba(0, 0, 0, 0.25),
-    0 1px 1px rgba(255, 255, 255, 0.9) inset,
-    0 -1px 1px rgba(0, 0, 0, 0.05) inset;
+    0 6px 25px rgba(0, 0, 0, 0.35),
+    0 1px 1px rgba(255, 255, 255, 0.15) inset,
+    0 -1px 1px rgba(0, 0, 0, 0.2) inset;
 }
 
 .btn-glass-primary .btn-glass-text::before {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.3) 50%,
+    rgba(255, 255, 255, 0.5) 50%,
     transparent 100%
   );
   background-size: 200% 100%;

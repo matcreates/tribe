@@ -173,11 +173,11 @@ export default async function LandingPage() {
               style={{ background: 'rgba(255, 255, 255, 0.02)' }}
             >
               <p className="text-[13px] text-white/50 uppercase tracking-wider mb-2">Monthly</p>
-              <div className="flex items-baseline gap-1 mb-4">
+              <div className="flex items-baseline gap-1 mb-1">
                 <span className="text-[42px] font-medium text-white/90">$5</span>
                 <span className="text-[15px] text-white/40">/month</span>
               </div>
-              <p className="text-[14px] text-white/40 mb-6">Billed monthly. Cancel anytime.</p>
+              <p className="text-[14px] text-white/40 mb-6 h-5">Billed monthly. Cancel anytime.</p>
               <div className="space-y-3 mb-8">
                 {[
                   "Unlimited email sends",
@@ -217,7 +217,7 @@ export default async function LandingPage() {
                 <span className="text-[42px] font-medium text-white/90">$36</span>
                 <span className="text-[15px] text-white/40">/year</span>
               </div>
-              <p className="text-[14px] text-[#E8B84A]/70 mb-6">Just $3/month. Best value.</p>
+              <p className="text-[14px] text-[#E8B84A]/70 mb-6 h-5">Just $3/month. Best value.</p>
               <div className="space-y-3 mb-8">
                 {[
                   "Unlimited email sends",
@@ -274,7 +274,7 @@ export default async function LandingPage() {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <TribeLogo className="h-4 w-auto text-white/40" />
-            <span className="text-[12px] text-white/25">© 2025</span>
+            <span className="text-[12px] text-white/25">© 2026</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/login" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">
