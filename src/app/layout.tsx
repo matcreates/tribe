@@ -20,6 +20,11 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Tribe",
   description: "Minimalist email-list management",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({

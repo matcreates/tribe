@@ -66,7 +66,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
       <div className="w-full max-w-[540px]">
         {/* URL Bar */}
         <div className="mb-6">
-          <label className="block text-[12px] text-white/40 mb-2">Shareable link</label>
+          <label className="block text-[11px] text-white/30 mb-2 uppercase tracking-[0.08em]">Shareable link</label>
           <div 
             className="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full"
             style={{ background: 'rgba(255, 255, 255, 0.05)' }}
@@ -85,7 +85,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
 
         {/* Description Editor */}
         <div className="mb-6">
-          <label className="block text-[12px] text-white/40 mb-2">Page description</label>
+          <label className="block text-[11px] text-white/30 mb-2 uppercase tracking-[0.08em]">Page description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
