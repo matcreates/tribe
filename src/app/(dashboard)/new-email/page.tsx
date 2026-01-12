@@ -32,16 +32,46 @@ export default function NewEmailPage() {
   useEffect(() => {
     loadCounts();
     loadSignature();
-    loadSubscription();
     
-    // Check for subscription success/cancel from Stripe redirect
+    // Check for subscription success from Stripe redirect
     const subscriptionParam = searchParams.get('subscription');
     if (subscriptionParam === 'success') {
-      showToast("Subscription activated! You can now send emails.");
+      // Sync subscription status from Stripe (fallback if webhook didn't work)
+      syncAndLoadSubscription();
       // Remove the query param
       router.replace('/new-email');
+    } else {
+      loadSubscription();
     }
   }, []);
+
+  const syncAndLoadSubscription = async () => {
+    try {
+      // Call the verify endpoint to sync subscription from Stripe
+      const response = await fetch('/api/stripe/verify-subscription', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      if (data.synced && data.status === 'active') {
+        showToast("Subscription activated! You can now send emails.");
+        setShowPaywall(false);
+      }
+      
+      // Now load the subscription status from our database
+      const status = await getSubscriptionStatus();
+      setSubscription(status);
+      
+      if (!status.canSendEmails) {
+        setShowPaywall(true);
+      } else {
+        setShowPaywall(false);
+      }
+    } catch (error) {
+      console.error("Failed to sync subscription:", error);
+      loadSubscription();
+    }
+  };
 
   const loadCounts = async () => {
     try {

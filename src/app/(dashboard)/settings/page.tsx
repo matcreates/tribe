@@ -45,6 +45,29 @@ export default function SettingsPage() {
     }
   };
 
+  const syncSubscription = async () => {
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch("/api/stripe/verify-subscription", {
+        method: "POST",
+      });
+      const data = await response.json();
+      
+      if (data.synced) {
+        showToast("Subscription status updated");
+        // Reload subscription status
+        await loadSubscription();
+      } else {
+        showToast(data.message || "Could not sync subscription");
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      showToast("Failed to sync subscription");
+    } finally {
+      setIsLoadingPortal(false);
+    }
+  };
+
   const handleManageSubscription = async () => {
     setIsLoadingPortal(true);
     try {
@@ -284,13 +307,22 @@ export default function SettingsPage() {
                 <p className="text-[12px] text-white/40 mb-4">
                   Subscribe to unlock email sending. Starts at $3/month.
                 </p>
-                <a
-                  href="/new-email"
-                  className="inline-block px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
-                  style={{ background: '#E8B84A', color: '#000' }}
-                >
-                  Upgrade
-                </a>
+                <div className="flex items-center gap-3">
+                  <a
+                    href="/new-email"
+                    className="inline-block px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
+                    style={{ background: '#E8B84A', color: '#000' }}
+                  >
+                    Upgrade
+                  </a>
+                  <button
+                    onClick={syncSubscription}
+                    disabled={isLoadingPortal}
+                    className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
+                  >
+                    <span className="btn-glass-text">{isLoadingPortal ? "Syncing..." : "Already paid? Sync"}</span>
+                  </button>
+                </div>
               </>
             )}
           </div>
