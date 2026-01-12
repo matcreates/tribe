@@ -80,9 +80,18 @@ export async function POST() {
       plan = 'yearly';
     }
 
-    // Get period end
+    // Get period end - safely handle the timestamp
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const endsAt = new Date((subscription as any).current_period_end * 1000);
+    const periodEndTimestamp = (subscription as any).current_period_end;
+    let endsAt: Date | null = null;
+    
+    if (periodEndTimestamp && typeof periodEndTimestamp === 'number') {
+      endsAt = new Date(periodEndTimestamp * 1000);
+      // Validate the date is valid
+      if (isNaN(endsAt.getTime())) {
+        endsAt = null;
+      }
+    }
 
     // Update database
     await updateTribeSubscription(tribe.id, {
@@ -95,7 +104,7 @@ export async function POST() {
     return NextResponse.json({ 
       status,
       plan,
-      endsAt: endsAt.toISOString(),
+      endsAt: endsAt ? endsAt.toISOString() : null,
       synced: true,
       message: "Subscription synced from Stripe" 
     });

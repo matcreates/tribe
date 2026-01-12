@@ -127,7 +127,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const currentPeriodEnd = (subscriptionData as any).current_period_end;
   console.log("Subscription period end:", currentPeriodEnd);
   
-  const endsAt = new Date(currentPeriodEnd * 1000);
+  let endsAt: Date | null = null;
+  if (currentPeriodEnd && typeof currentPeriodEnd === 'number') {
+    endsAt = new Date(currentPeriodEnd * 1000);
+    if (isNaN(endsAt.getTime())) {
+      endsAt = null;
+    }
+  }
 
   await updateTribeSubscription(tribe.id, {
     stripe_subscription_id: subscriptionId,
@@ -136,7 +142,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     subscription_ends_at: endsAt,
   });
 
-  console.log(`Subscription activated for tribe ${tribe.id}, ends at ${endsAt.toISOString()}`);
+  console.log(`Subscription activated for tribe ${tribe.id}, ends at ${endsAt?.toISOString() || 'unknown'}`);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -158,7 +164,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const endsAt = new Date((subscription as any).current_period_end * 1000);
+  const currentPeriodEnd = (subscription as any).current_period_end;
+  let endsAt: Date | null = null;
+  if (currentPeriodEnd && typeof currentPeriodEnd === 'number') {
+    endsAt = new Date(currentPeriodEnd * 1000);
+    if (isNaN(endsAt.getTime())) {
+      endsAt = null;
+    }
+  }
 
   await updateTribeSubscription(tribe.id, {
     subscription_status: status,
