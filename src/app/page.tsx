@@ -235,7 +235,7 @@ export default async function LandingPage() {
               <Link
                 href="/signup"
                 className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase btn-glass-gold"
-              >
+            >
                 <span className="btn-glass-text">Get started</span>
               </Link>
             </div>

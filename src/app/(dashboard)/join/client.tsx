@@ -64,6 +64,25 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
+        {/* URL Bar */}
+        <div className="mb-6">
+          <label className="block text-[12px] text-white/40 mb-2">Shareable link</label>
+          <div 
+            className="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full"
+            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+          >
+            <LinkIcon className="w-4 h-4 text-white/35" />
+            <span className="flex-1 text-[13px] text-white/60 truncate">{displayUrl}</span>
+            <button
+              onClick={copyLink}
+              className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors"
+              aria-label="Copy link"
+            >
+              <CopyIcon className="w-4 h-4 text-white/35" />
+            </button>
+          </div>
+        </div>
+
         {/* Description Editor */}
         <div className="mb-6">
           <label className="block text-[12px] text-white/40 mb-2">Page description</label>
@@ -84,22 +103,6 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
               <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE DESCRIPTION"}</span>
             </button>
           )}
-        </div>
-
-        {/* URL Bar */}
-        <div 
-          className="flex items-center gap-3 px-4 py-3 rounded-[10px] mb-6 w-full"
-          style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-        >
-          <LinkIcon className="w-4 h-4 text-white/35" />
-          <span className="flex-1 text-[13px] text-white/60 truncate">{displayUrl}</span>
-          <button
-            onClick={copyLink}
-            className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors"
-            aria-label="Copy link"
-          >
-            <CopyIcon className="w-4 h-4 text-white/35" />
-          </button>
         </div>
 
         {/* Join Card Preview */}
