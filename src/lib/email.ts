@@ -27,6 +27,27 @@ function getReplyDomain() {
   return process.env.RESEND_REPLY_DOMAIN || "madewithtribe.com";
 }
 
+// Convert plain text paragraphs to styled HTML paragraphs for ebook-like reading
+function formatBodyAsEbook(text: string): string {
+  // Split by double newlines (paragraphs) or single newlines
+  const paragraphs = text.split(/\n\n+/);
+  
+  return paragraphs.map(para => {
+    // Handle single line breaks within paragraphs
+    const lines = para.trim();
+    if (!lines) return '';
+    
+    // Check if it looks like a heading (short, no period at end)
+    const isHeading = lines.length < 80 && !lines.endsWith('.') && !lines.includes('\n');
+    
+    if (isHeading && lines.length < 60) {
+      return `<p style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 500; line-height: 1.5; margin: 0 0 24px 0;">${lines}</p>`;
+    }
+    
+    return `<p style="color: rgba(255,255,255,0.85); font-size: 17px; font-weight: 400; line-height: 1.85; margin: 0 0 28px 0;">${lines.replace(/\n/g, '<br>')}</p>`;
+  }).filter(p => p).join('\n');
+}
+
 export async function sendBulkEmailWithUnsubscribe(
   recipients: RecipientWithToken[],
   subject: string,
@@ -57,57 +78,97 @@ export async function sendBulkEmailWithUnsubscribe(
     const batchEmails = batch.map(recipient => {
       const unsubscribeUrl = `${baseUrl}/api/unsubscribe?token=${recipient.unsubscribeToken}`;
       
-      // Tracking pixel for open rate
+      // Tracking pixel for open rate (invisible, at the end)
       const trackingPixel = emailId 
-        ? `<img src="${baseUrl}/api/track/${emailId}/pixel.gif" width="1" height="1" alt="" style="display:none;" />`
+        ? `<img src="${baseUrl}/api/track/${emailId}/pixel.gif" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />`
         : '';
 
-      // Format signature for HTML (convert links and line breaks)
+      // Format signature for HTML
       let signatureHtml = '';
       let signatureText = '';
       if (emailSignature && emailSignature.trim()) {
         const escapedSig = emailSignature.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        // Auto-link URLs in signature (yellow color for visibility)
+        // Auto-link URLs in signature
         const linkedSig = escapedSig.replace(
           /(https?:\/\/[^\s]+)/g,
           '<a href="$1" style="color: #E8B84A; text-decoration: underline;">$1</a>'
         );
         signatureHtml = `
-          <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
-            <div style="color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; white-space: pre-wrap;">${linkedSig}</div>
+          <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <p style="color: rgba(255,255,255,0.5); font-size: 15px; line-height: 1.7; margin: 0; white-space: pre-wrap;">${linkedSig}</p>
           </div>
         `;
         signatureText = `\n\n---\n${emailSignature}`;
       }
 
+      // Reply notice when replies are enabled
+      let replyNoticeHtml = '';
+      let replyNoticeText = '';
+      if (allowReplies) {
+        replyNoticeHtml = `
+          <div style="margin-top: 40px; padding: 20px 24px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+            <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0; text-align: center;">
+              💬 Feel free to reply to this email — ${ownerName} reads every response.
+            </p>
+          </div>
+        `;
+        replyNoticeText = `\n\n---\nFeel free to reply to this email — ${ownerName} reads every response.`;
+      }
+
+      // Format body as ebook-style paragraphs
+      const formattedBody = formatBodyAsEbook(plainTextBody);
+
+      // Clean, ebook-style HTML email template
       const htmlBody = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
-            <div style="max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
-              <div style="color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${escapedBody}</div>
-              ${signatureHtml}
-              <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
-                <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 0 0 8px;">
-                  Sent from ${ownerName}'s Tribe
-                </p>
-                <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.25); font-size: 11px; text-decoration: underline;">
-                  Unsubscribe
-                </a>
-              </div>
-            </div>
-            ${trackingPixel}
-          </body>
-        </html>
-      `;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>${subject}</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #0a0a0a; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+    <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #0a0a0a;">
+      <tr>
+        <td align="center" style="padding: 48px 24px;">
+          <table role="presentation" style="width: 100%; max-width: 560px; border: 0; border-spacing: 0;">
+            <tr>
+              <td style="padding: 0;">
+                <!-- Main Content -->
+                <div style="font-family: Georgia, 'Times New Roman', serif;">
+                  ${formattedBody}
+                </div>
+                
+                <!-- Signature -->
+                ${signatureHtml}
+                
+                <!-- Reply Notice -->
+                ${replyNoticeHtml}
+                
+                <!-- Footer -->
+                <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
+                    Sent by ${ownerName}
+                  </p>
+                  <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.2); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
+                    Unsubscribe
+                  </a>
+                </div>
+                
+                ${trackingPixel}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 
-      const textBody = `${plainTextBody}${signatureText}\n\n---\nSent from ${ownerName}'s Tribe\nUnsubscribe: ${unsubscribeUrl}`;
+      const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nUnsubscribe: ${unsubscribeUrl}`;
 
-      // Build the email configuration
+      // Build the email configuration with proper headers for deliverability
       const emailConfig: {
         from: string;
         to: string[];
@@ -115,16 +176,21 @@ export async function sendBulkEmailWithUnsubscribe(
         html: string;
         text: string;
         reply_to?: string;
+        headers?: Record<string, string>;
       } = {
         from: fromEmail,
         to: [recipient.email],
         subject,
         html: htmlBody,
         text: textBody,
+        // Add List-Unsubscribe header for better deliverability
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       };
 
-      // Add reply-to address for tracking replies (only if replies are enabled)
-      // Format: reply-{emailId}@domain.com (we'll match sender email when receiving replies)
+      // Add reply-to address for tracking replies
       if (allowReplies && emailId) {
         const replyDomain = getReplyDomain();
         emailConfig.reply_to = `reply-${emailId}@${replyDomain}`;
