@@ -10,11 +10,14 @@ interface PaywallModalProps {
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubscribe = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -24,13 +27,19 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
 
       const data = await response.json();
       
+      if (!response.ok) {
+        setError(data.error || "Failed to create checkout session");
+        return;
+      }
+      
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error("Failed to create checkout:", data.error);
+        setError("No checkout URL received. Please check your Stripe configuration.");
       }
-    } catch (error) {
-      console.error("Checkout error:", error);
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +80,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             {/* Yearly Plan */}
             <button
               onClick={() => setSelectedPlan("yearly")}
-              className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
+              className={`w-full p-4 pl-12 rounded-[12px] border transition-all text-left relative ${
                 selectedPlan === "yearly"
                   ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
                   : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
@@ -84,6 +93,15 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 </span>
               </div>
               
+              {/* Radio indicator */}
+              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                selectedPlan === "yearly" ? "border-[#E8B84A]" : "border-white/20"
+              }`}>
+                {selectedPlan === "yearly" && (
+                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
+                )}
+              </div>
+              
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[14px] font-medium text-white/80">Yearly</p>
@@ -94,27 +112,27 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                   <p className="text-[11px] text-[#E8B84A]">$3/month · Save 40%</p>
                 </div>
               </div>
-              
-              {/* Radio indicator */}
-              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                selectedPlan === "yearly" ? "border-[#E8B84A]" : "border-white/20"
-              }`}>
-                {selectedPlan === "yearly" && (
-                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
-                )}
-              </div>
             </button>
 
             {/* Monthly Plan */}
             <button
               onClick={() => setSelectedPlan("monthly")}
-              className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
+              className={`w-full p-4 pl-12 rounded-[12px] border transition-all text-left relative ${
                 selectedPlan === "monthly"
                   ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
                   : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
               }`}
             >
-              <div className="flex items-center justify-between pl-6">
+              {/* Radio indicator */}
+              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                selectedPlan === "monthly" ? "border-[#E8B84A]" : "border-white/20"
+              }`}>
+                {selectedPlan === "monthly" && (
+                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[14px] font-medium text-white/80">Monthly</p>
                   <p className="text-[12px] text-white/40 mt-0.5">Billed monthly</p>
@@ -123,15 +141,6 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                   <p className="text-[20px] font-medium text-white/90">$5<span className="text-[13px] text-white/40">/month</span></p>
                   <p className="text-[11px] text-white/40">Cancel anytime</p>
                 </div>
-              </div>
-              
-              {/* Radio indicator */}
-              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                selectedPlan === "monthly" ? "border-[#E8B84A]" : "border-white/20"
-              }`}>
-                {selectedPlan === "monthly" && (
-                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
-                )}
               </div>
             </button>
           </div>
@@ -160,6 +169,11 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
 
         {/* CTA */}
         <div className="p-6 pt-2">
+          {error && (
+            <div className="mb-3 p-3 rounded-[8px] bg-red-500/10 border border-red-500/20">
+              <p className="text-[12px] text-red-400 text-center">{error}</p>
+            </div>
+          )}
           <button
             onClick={handleSubscribe}
             disabled={isLoading}
