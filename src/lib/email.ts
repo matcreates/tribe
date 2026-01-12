@@ -13,8 +13,15 @@ function getResendClient() {
   return resend;
 }
 
-function getFromEmail() {
-  return process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>";
+function getFromEmail(ownerName?: string) {
+  const baseEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+  // Extract just the email address if it's in "Name <email>" format
+  const emailMatch = baseEmail.match(/<([^>]+)>/);
+  const emailOnly = emailMatch ? emailMatch[1] : baseEmail.replace(/^[^<]*<|>$/g, '').trim() || baseEmail;
+  
+  // Use owner name if provided, otherwise default to "Tribe"
+  const displayName = ownerName || "Tribe";
+  return `${displayName} <${emailOnly}>`;
 }
 
 interface RecipientWithToken {
@@ -64,7 +71,7 @@ export async function sendBulkEmailWithUnsubscribe(
   }
 
   const client = getResendClient();
-  const fromEmail = getFromEmail();
+  const fromEmail = getFromEmail(ownerName);
   const errors: string[] = [];
   let sentCount = 0;
 
@@ -238,7 +245,7 @@ export async function sendVerificationEmail(
   console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
   
   const { data, error } = await client.emails.send({
-    from: getFromEmail(),
+    from: getFromEmail(ownerName),
     to: [to],
     subject: `Confirm your subscription to ${ownerName}'s tribe`,
     html: `
