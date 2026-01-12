@@ -148,7 +148,7 @@ export default function PublicJoinPage({ params }: PageProps) {
           
           {/* Description */}
           <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
-            {tribeSettings?.description || "Join my tribe to receive exclusive updates, insights, and content directly in your inbox."}
+            {tribeSettings?.description || "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."}
           </p>
 
           {isJoined ? (

@@ -42,7 +42,7 @@ async function getTribe() {
 }
 
 // Default join page description
-const DEFAULT_JOIN_DESCRIPTION = "Join my tribe to receive exclusive updates, insights, and content directly in your inbox. Be part of a community that values meaningful connections.";
+const DEFAULT_JOIN_DESCRIPTION = "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.";
 
 // Tribe actions
 export async function getTribeSettings() {
