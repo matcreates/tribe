@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -8,11 +9,20 @@ interface PaywallModalProps {
 }
 
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
+  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      router.push("/dashboard");
+    }
+  };
 
   const handleSubscribe = async () => {
     setIsLoading(true);
@@ -50,7 +60,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Modal */}
@@ -58,6 +68,14 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         className="relative w-full max-w-md mx-4 rounded-[16px] border border-white/[0.08] overflow-hidden"
         style={{ background: 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
       >
+        {/* Close Button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/10 transition-all z-10"
+        >
+          <CloseIcon className="w-4 h-4" />
+        </button>
+
         {/* Header */}
         <div className="p-6 pb-4 text-center">
           <div 
@@ -207,6 +225,14 @@ function CheckIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3.5 8.5l3 3 6-6" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4l8 8M12 4l-8 8" />
     </svg>
   );
 }
