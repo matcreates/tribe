@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSubscribers, removeSubscriber, previewImport, importSubscribers, exportSubscribers } from "@/lib/actions";
+import { getSubscribers, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
+import { ImportChooserModal, ManualEntryModal } from "@/components/ImportChooserModal";
 
 interface Subscriber {
   id: string;
@@ -63,6 +64,8 @@ export default function TribePage() {
   const { toast, showToast, hideToast } = useToast();
 
   // Import modal state
+  const [showImportChooser, setShowImportChooser] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -177,7 +180,26 @@ export default function TribePage() {
   };
 
   const handleImportClick = () => {
+    setShowImportChooser(true);
+  };
+
+  const handleChooseFile = () => {
+    setShowImportChooser(false);
     fileInputRef.current?.click();
+  };
+
+  const handleEnterManually = () => {
+    setShowImportChooser(false);
+    setShowManualEntry(true);
+  };
+
+  const handleAddManually = async (email: string) => {
+    const result = await addSubscriberManually(email);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to add subscriber");
+    }
+    await loadSubscribers();
+    showToast("Subscriber added successfully");
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -479,6 +501,21 @@ export default function TribePage() {
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
+
+      {/* Import Chooser Modal */}
+      <ImportChooserModal
+        isOpen={showImportChooser}
+        onClose={() => setShowImportChooser(false)}
+        onChooseFile={handleChooseFile}
+        onEnterManually={handleEnterManually}
+      />
+
+      {/* Manual Entry Modal */}
+      <ManualEntryModal
+        isOpen={showManualEntry}
+        onClose={() => setShowManualEntry(false)}
+        onAdd={handleAddManually}
+      />
 
       {/* Import Modal */}
       <ImportModal

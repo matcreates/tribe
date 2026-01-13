@@ -10,6 +10,7 @@ import {
   addSubscriber as dbAddSubscriber,
   addSubscriberBulk as dbAddSubscriberBulk,
   getExistingEmailsInTribe,
+  subscriberExistsInTribe,
   removeSubscriber as dbRemoveSubscriber,
   getVerifiedSubscriberCount,
   getSentEmailsByTribeId,
@@ -124,6 +125,35 @@ export async function addSubscriber(email: string, name?: string) {
   revalidatePath("/tribe");
   revalidatePath("/dashboard");
   return result;
+}
+
+// Add a subscriber manually (as verified, no verification email)
+export async function addSubscriberManually(email: string): Promise<{ success: boolean; error?: string }> {
+  const tribe = await getTribe();
+  
+  // Validate email format
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const normalizedEmail = email.trim().toLowerCase();
+  
+  if (!emailPattern.test(normalizedEmail)) {
+    return { success: false, error: "Invalid email format" };
+  }
+  
+  // Check if already exists
+  const exists = await subscriberExistsInTribe(tribe.id, normalizedEmail);
+  if (exists) {
+    return { success: false, error: "Email already exists in your tribe" };
+  }
+  
+  // Add as verified
+  const result = await dbAddSubscriberBulk(tribe.id, normalizedEmail, true);
+  if (!result) {
+    return { success: false, error: "Failed to add subscriber" };
+  }
+  
+  revalidatePath("/tribe");
+  revalidatePath("/dashboard");
+  return { success: true };
 }
 
 export async function removeSubscriber(id: string) {
