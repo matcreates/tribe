@@ -1,10 +1,30 @@
-
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // CRITICAL: Allow webhook endpoints without ANY processing
+  // This must be checked FIRST before any auth logic
+  if (pathname === "/api/inbound" || pathname.startsWith("/api/inbound")) {
+    console.log("Middleware: Allowing inbound webhook through");
+    return NextResponse.next();
+  }
+  
+  // Allow all API routes
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+  
+  // Allow public pages
+  const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/@");
+  const isPublicPage = pathname === "/" || pathname === "/verified" || pathname === "/unsubscribed";
+  
+  if (isPublicJoinPage || isPublicPage) {
+    return NextResponse.next();
+  }
+  
   // Auth.js v5 uses different cookie names - try both secure and non-secure
   const token = await getToken({ 
     req: request, 
@@ -17,17 +37,7 @@ export async function middleware(request: NextRequest) {
   });
   
   const isLoggedIn = !!token;
-  const { pathname } = request.nextUrl;
-  
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
-  const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/@");
-  const isApiRoute = pathname.startsWith("/api");
-  const isPublicPage = pathname === "/" || pathname === "/verified" || pathname === "/unsubscribed";
-
-  // Allow API routes, public join pages, landing page, and other public pages
-  if (isApiRoute || isPublicJoinPage || isPublicPage) {
-    return NextResponse.next();
-  }
 
   // Redirect logged-in users away from auth pages to dashboard
   if (isLoggedIn && isAuthPage) {
@@ -44,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Exclude static files, images, and favicon
     "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };
-
