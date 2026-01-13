@@ -11,17 +11,50 @@ function getResendClient() {
   return new Resend(apiKey);
 }
 
-// Sanitize reply text - remove HTML, links, and dangerous content
+// Sanitize reply text - remove HTML, links, quoted content, and dangerous content
 function sanitizeReplyText(text: string): string {
   if (!text) return "";
-  let sanitized = text.replace(/<[^>]*>/g, "");
-  sanitized = sanitized.replace(/(?:https?|ftp):\/\/[^\s]+/gi, "[link removed]");
-  sanitized = sanitized.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email removed]");
+  
+  // Remove HTML tags
+  let sanitized = text.replace(/<[^>]*>/g, " ");
+  
+  // Remove quoted reply sections (the original email that gets included)
+  // Pattern 1: "On [date], [name] wrote:" and everything after
+  sanitized = sanitized.replace(/On\s+[\d\w\s,]+,?\s+at\s+[\d:]+[^<]*wrote:[\s\S]*/gi, "");
+  // Pattern 2: "On [date], [name] <email> wrote:" format
+  sanitized = sanitized.replace(/On\s+\w+\s+\d+,\s+\d+[\s\S]*wrote:[\s\S]*/gi, "");
+  // Pattern 3: Lines starting with ">" (quoted text)
+  sanitized = sanitized.replace(/^>.*$/gm, "");
+  // Pattern 4: "---------- Forwarded message" or "---------- Original Message"
+  sanitized = sanitized.replace(/-{5,}\s*(Forwarded|Original)\s*(message|Message)[\s\S]*/gi, "");
+  // Pattern 5: "From: ... Sent: ... To: ... Subject:" email headers
+  sanitized = sanitized.replace(/From:[\s\S]*?Subject:[\s\S]*/gi, "");
+  
+  // Remove common email signatures
+  sanitized = sanitized.replace(/Sent from my iPhone/gi, "");
+  sanitized = sanitized.replace(/Sent from my iPad/gi, "");
+  sanitized = sanitized.replace(/Sent from my Android/gi, "");
+  sanitized = sanitized.replace(/Sent from Mail for Windows/gi, "");
+  sanitized = sanitized.replace(/Get Outlook for iOS/gi, "");
+  sanitized = sanitized.replace(/Get Outlook for Android/gi, "");
+  
+  // Remove URLs
+  sanitized = sanitized.replace(/(?:https?|ftp):\/\/[^\s]+/gi, "");
+  
+  // Remove email addresses
+  sanitized = sanitized.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "");
+  
+  // Remove angle brackets
   sanitized = sanitized.replace(/[<>]/g, "");
-  sanitized = sanitized.replace(/\n{3,}/g, "\n\n").trim();
+  
+  // Clean up whitespace
+  sanitized = sanitized.replace(/\s+/g, " ").trim();
+  
+  // Limit length
   if (sanitized.length > 10000) {
     sanitized = sanitized.substring(0, 10000) + "... [truncated]";
   }
+  
   return sanitized;
 }
 
