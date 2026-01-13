@@ -12,7 +12,6 @@ function sanitizeReplyText(text: string): string {
   sanitized = sanitized.replace(/(?:https?|ftp):\/\/[^\s]+/gi, "[link removed]");
   
   // Remove email addresses (to prevent spam harvesting display)
-  // We keep the original sender's email separately
   sanitized = sanitized.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email removed]");
   
   // Remove any remaining angle brackets
@@ -29,136 +28,158 @@ function sanitizeReplyText(text: string): string {
   return sanitized;
 }
 
-// Parse the reply-to address to extract emailId
+// Parse the reply-to address to extract emailId - try multiple formats
 function parseReplyAddress(toAddress: string): { emailId: string } | null {
   // Format: reply-{emailId}@domain.com
-  const match = toAddress.match(/reply-([^@]+)@/i);
-  if (!match) return null;
+  let match = toAddress.match(/reply-([a-f0-9-]+)@/i);
+  if (match) return { emailId: match[1] };
   
-  return {
-    emailId: match[1],
-  };
-}
-
-// Extract email address from "From" header (handles "Name <email>" format)
-function extractEmailFromHeader(from: string): string {
-  const match = from.match(/<([^>]+)>/);
-  if (match) return match[1].toLowerCase();
-  return from.toLowerCase().trim();
-}
-
-// Extract first "to" address from various formats
-function extractToAddress(to: unknown): string | null {
-  if (typeof to === 'string') {
-    return to;
-  }
-  if (Array.isArray(to) && to.length > 0) {
-    const first = to[0];
-    if (typeof first === 'string') return first;
-    if (typeof first === 'object' && first && 'email' in first) {
-      return (first as { email: string }).email;
-    }
-  }
+  // Also try without the dash: reply{emailId}@domain.com
+  match = toAddress.match(/reply([a-f0-9-]+)@/i);
+  if (match) return { emailId: match[1] };
+  
   return null;
 }
 
+// Extract email address from various formats
+function extractEmail(value: unknown): string | null {
+  if (!value) return null;
+  
+  if (typeof value === 'string') {
+    // Handle "Name <email>" format
+    const match = value.match(/<([^>]+)>/);
+    if (match) return match[1].toLowerCase().trim();
+    // Plain email
+    if (value.includes('@')) return value.toLowerCase().trim();
+    return null;
+  }
+  
+  if (Array.isArray(value) && value.length > 0) {
+    return extractEmail(value[0]);
+  }
+  
+  if (typeof value === 'object' && value !== null) {
+    const obj = value as Record<string, unknown>;
+    if ('email' in obj) return extractEmail(obj.email);
+    if ('address' in obj) return extractEmail(obj.address);
+  }
+  
+  return null;
+}
+
+// Extract plain text from various body formats
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractPlainText(body: any): string {
-  // Try various possible locations for text content
+  // Direct text field
   if (body.text) return body.text;
+  
+  // Nested in data
   if (body.data?.text) return body.data.text;
-  if (body.html) return body.html.replace(/<[^>]*>/g, "");
-  if (body.data?.html) return body.data.html.replace(/<[^>]*>/g, "");
+  
+  // Try body field
+  if (body.body) return typeof body.body === 'string' ? body.body : '';
+  
+  // HTML fallback
+  if (body.html) return body.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  if (body.data?.html) return body.data.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  
   return "";
 }
 
 export async function POST(request: NextRequest) {
+  console.log("=== INBOUND EMAIL WEBHOOK RECEIVED ===");
+  console.log("Timestamp:", new Date().toISOString());
+  
   try {
-    const body = await request.json();
-    console.log("=== INBOUND EMAIL WEBHOOK ===");
-    console.log("Full body:", JSON.stringify(body, null, 2));
+    const rawBody = await request.text();
+    console.log("Raw body length:", rawBody.length);
+    console.log("Raw body preview:", rawBody.substring(0, 500));
+    
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      console.log("Failed to parse JSON, trying as form data");
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+    
+    console.log("Parsed body keys:", Object.keys(body));
+    console.log("Full parsed body:", JSON.stringify(body, null, 2));
 
-    // Handle both direct format and wrapped format (Resend might wrap in "data" or send event types)
-    const emailData = body.data || body;
+    // Handle Resend's event wrapper format
+    // Resend sends: { type: "email.received", data: { ... } } or direct format
+    const emailData = body.type === 'email.received' ? body.data : (body.data || body);
     
-    // Extract "to" address - could be string, array of strings, or array of objects
-    const toRaw = emailData.to || body.to;
-    const toAddress = extractToAddress(toRaw);
-    
-    // Extract "from" address
-    const fromRaw = emailData.from || body.from;
-    const fromAddress = typeof fromRaw === 'string' ? fromRaw : 
-      (Array.isArray(fromRaw) && fromRaw.length > 0) ? 
-        (typeof fromRaw[0] === 'string' ? fromRaw[0] : fromRaw[0]?.email) : null;
+    console.log("Email data keys:", Object.keys(emailData || {}));
 
-    console.log("Parsed to:", toAddress);
-    console.log("Parsed from:", fromAddress);
+    // Extract "to" address
+    const toAddress = extractEmail(emailData.to) || extractEmail(body.to);
+    console.log("Extracted TO:", toAddress);
     
-    if (!toAddress || !fromAddress) {
-      console.log("Inbound webhook: Missing to or from address");
-      return NextResponse.json({ error: "Invalid email data - missing to/from" }, { status: 400 });
+    // Extract "from" address  
+    const fromAddress = extractEmail(emailData.from) || extractEmail(body.from);
+    console.log("Extracted FROM:", fromAddress);
+    
+    if (!toAddress) {
+      console.log("ERROR: Could not extract TO address");
+      return NextResponse.json({ received: true, error: "No TO address" });
+    }
+    
+    if (!fromAddress) {
+      console.log("ERROR: Could not extract FROM address");
+      return NextResponse.json({ received: true, error: "No FROM address" });
     }
 
     // Parse the "to" address to extract emailId
     const parsed = parseReplyAddress(toAddress);
     if (!parsed) {
-      console.log("Inbound webhook: Could not parse reply address:", toAddress);
-      // Not a reply to our emails, ignore silently
-      return NextResponse.json({ success: true, message: "Not a reply address" });
+      console.log("Not a reply address format:", toAddress);
+      return NextResponse.json({ received: true, message: "Not a reply address" });
     }
 
     const { emailId } = parsed;
-    console.log("Parsed emailId:", emailId);
+    console.log("Extracted emailId:", emailId);
 
     // Verify the email exists
     const sentEmail = await getSentEmailById(emailId);
     if (!sentEmail) {
-      console.log("Inbound webhook: Email not found:", emailId);
-      return NextResponse.json({ success: true, message: "Email not found" });
+      console.log("ERROR: Sent email not found for ID:", emailId);
+      return NextResponse.json({ received: true, error: "Email not found" });
     }
-    console.log("Found sent email, tribe_id:", sentEmail.tribe_id);
-
-    // Extract sender's email address
-    const senderEmail = extractEmailFromHeader(fromAddress);
-    console.log("Inbound webhook: Sender email:", senderEmail);
-
-    // Find the subscriber by their email and the tribe
-    const subscriber = await getSubscriberByEmailAndTribe(senderEmail, sentEmail.tribe_id);
-    if (!subscriber) {
-      console.log("Inbound webhook: Subscriber not found for email:", senderEmail, "in tribe:", sentEmail.tribe_id);
-      // Save reply anyway with the sender email (they might have replied from a different email)
-      const rawText = extractPlainText(emailData);
-      const sanitizedText = sanitizeReplyText(rawText);
-      
-      if (sanitizedText.trim()) {
-        await createEmailReply(emailId, senderEmail, sanitizedText);
-        console.log("Inbound webhook: Reply saved (non-subscriber) for email", emailId, "from", senderEmail);
-        return NextResponse.json({ success: true, message: "Reply saved (non-subscriber)" });
-      }
-      return NextResponse.json({ success: true, message: "Subscriber not found, empty reply" });
-    }
+    console.log("Found sent email - subject:", sentEmail.subject, "tribe_id:", sentEmail.tribe_id);
 
     // Extract and sanitize the reply text
     const rawText = extractPlainText(emailData);
+    console.log("Raw text length:", rawText.length);
+    console.log("Raw text preview:", rawText.substring(0, 200));
+    
     const sanitizedText = sanitizeReplyText(rawText);
+    console.log("Sanitized text length:", sanitizedText.length);
 
     if (!sanitizedText.trim()) {
-      console.log("Inbound webhook: Empty reply after sanitization");
-      return NextResponse.json({ success: true, message: "Empty reply" });
+      console.log("WARNING: Empty reply after sanitization");
+      // Still save with a placeholder
+      await createEmailReply(emailId, fromAddress, "[Empty reply]");
+      return NextResponse.json({ received: true, message: "Empty reply saved" });
     }
 
     // Save the reply
-    await createEmailReply(emailId, subscriber.email, sanitizedText);
-    console.log("Inbound webhook: Reply saved for email", emailId, "from", subscriber.email);
+    await createEmailReply(emailId, fromAddress, sanitizedText);
+    console.log("SUCCESS: Reply saved for email", emailId, "from", fromAddress);
 
-    return NextResponse.json({ success: true, message: "Reply saved" });
+    return NextResponse.json({ received: true, success: true, message: "Reply saved" });
   } catch (error) {
-    console.error("Inbound webhook error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("INBOUND WEBHOOK ERROR:", error);
+    return NextResponse.json({ received: true, error: String(error) }, { status: 500 });
   }
 }
 
-// Also handle GET for Resend webhook verification
+// GET endpoint for testing and webhook verification
 export async function GET() {
-  return NextResponse.json({ status: "Inbound webhook endpoint active" });
+  return NextResponse.json({ 
+    status: "active",
+    endpoint: "/api/inbound",
+    message: "Inbound email webhook is ready. Configure this URL in Resend webhooks.",
+    timestamp: new Date().toISOString()
+  });
 }
