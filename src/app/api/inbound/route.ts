@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createEmailReply, getSentEmailById, pool } from "@/lib/db";
+import { createEmailReply, getSentEmailById } from "@/lib/db";
 
 // Sanitize reply text - remove HTML, links, and dangerous content
 function sanitizeReplyText(text: string): string {
@@ -86,48 +86,20 @@ function extractPlainText(body: any): string {
   return "";
 }
 
-// Save raw webhook data for debugging
-async function saveWebhookDebug(rawBody: string, status: string, details: string) {
-  try {
-    // Create debug table if it doesn't exist
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS webhook_debug (
-        id SERIAL PRIMARY KEY,
-        raw_body TEXT,
-        status TEXT,
-        details TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await pool.query(
-      `INSERT INTO webhook_debug (raw_body, status, details) VALUES ($1, $2, $3)`,
-      [rawBody.substring(0, 10000), status, details]
-    );
-  } catch (e) {
-    console.error("Failed to save webhook debug:", e);
-  }
-}
-
 export async function POST(request: NextRequest) {
   console.log("=== INBOUND EMAIL WEBHOOK RECEIVED ===");
   console.log("Timestamp:", new Date().toISOString());
   
-  let rawBody = "";
-  
   try {
-    rawBody = await request.text();
+    const rawBody = await request.text();
     console.log("Raw body length:", rawBody.length);
     console.log("Raw body preview:", rawBody.substring(0, 1000));
-    
-    // Save raw webhook data immediately for debugging
-    await saveWebhookDebug(rawBody, "received", "Webhook received");
     
     let body;
     try {
       body = JSON.parse(rawBody);
     } catch (parseError) {
       console.log("Failed to parse JSON:", parseError);
-      await saveWebhookDebug(rawBody, "error", "Failed to parse JSON: " + String(parseError));
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
     
@@ -154,17 +126,13 @@ export async function POST(request: NextRequest) {
     if (!fromAddress && body.data?.from) fromAddress = extractEmail(body.data.from);
     console.log("Extracted FROM:", fromAddress);
     
-    const extractionDetails = `to=${toAddress}, from=${fromAddress}, bodyType=${body.type}, keys=${Object.keys(body).join(',')}`;
-    
     if (!toAddress) {
       console.log("ERROR: Could not extract TO address");
-      await saveWebhookDebug(rawBody, "error-no-to", extractionDetails);
       return NextResponse.json({ received: true, error: "No TO address" });
     }
     
     if (!fromAddress) {
       console.log("ERROR: Could not extract FROM address");
-      await saveWebhookDebug(rawBody, "error-no-from", extractionDetails);
       return NextResponse.json({ received: true, error: "No FROM address" });
     }
 
@@ -172,7 +140,6 @@ export async function POST(request: NextRequest) {
     const parsed = parseReplyAddress(toAddress);
     if (!parsed) {
       console.log("Not a reply address format:", toAddress);
-      await saveWebhookDebug(rawBody, "not-reply-address", `toAddress=${toAddress}`);
       return NextResponse.json({ received: true, message: "Not a reply address" });
     }
 
@@ -183,7 +150,6 @@ export async function POST(request: NextRequest) {
     const sentEmail = await getSentEmailById(emailId);
     if (!sentEmail) {
       console.log("ERROR: Sent email not found for ID:", emailId);
-      await saveWebhookDebug(rawBody, "email-not-found", `emailId=${emailId}`);
       return NextResponse.json({ received: true, error: "Email not found" });
     }
     console.log("Found sent email - subject:", sentEmail.subject, "tribe_id:", sentEmail.tribe_id);
@@ -203,12 +169,10 @@ export async function POST(request: NextRequest) {
     // Save the reply
     await createEmailReply(emailId, fromAddress, replyContent);
     console.log("SUCCESS: Reply saved for email", emailId, "from", fromAddress);
-    await saveWebhookDebug(rawBody, "success", `emailId=${emailId}, from=${fromAddress}, textLen=${replyContent.length}`);
 
     return NextResponse.json({ received: true, success: true, message: "Reply saved" });
   } catch (error) {
     console.error("INBOUND WEBHOOK ERROR:", error);
-    await saveWebhookDebug(rawBody, "exception", String(error));
     return NextResponse.json({ received: true, error: String(error) }, { status: 500 });
   }
 }
