@@ -178,13 +178,19 @@ export async function sendBulkEmailWithUnsubscribe(
       const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nUnsubscribe: ${unsubscribeUrl}`;
 
       // Build the email configuration with proper headers for deliverability
+      // Note: Resend SDK uses camelCase field names
+      const replyDomain = getReplyDomain();
+      const replyToAddress = allowReplies && emailId ? `reply-${emailId}@${replyDomain}` : undefined;
+      
+      console.log(`Email config: allowReplies=${allowReplies}, emailId=${emailId}, replyTo=${replyToAddress}`);
+      
       const emailConfig: {
         from: string;
         to: string[];
         subject: string;
         html: string;
         text: string;
-        reply_to?: string;
+        replyTo?: string;
         headers?: Record<string, string>;
       } = {
         from: fromEmail,
@@ -199,13 +205,9 @@ export async function sendBulkEmailWithUnsubscribe(
         },
       };
 
-      // Add reply-to address for tracking replies
-      if (allowReplies && emailId) {
-        const replyDomain = getReplyDomain();
-        emailConfig.reply_to = `reply-${emailId}@${replyDomain}`;
-        console.log(`Setting reply_to: ${emailConfig.reply_to} (allowReplies=${allowReplies}, emailId=${emailId})`);
-      } else {
-        console.log(`NOT setting reply_to: allowReplies=${allowReplies}, emailId=${emailId}`);
+      // Add reply-to address for tracking replies (using camelCase for Resend SDK)
+      if (replyToAddress) {
+        emailConfig.replyTo = replyToAddress;
       }
 
       return emailConfig;
