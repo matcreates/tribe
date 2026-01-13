@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { getSentEmailById, getEmailReplies } from "@/lib/actions";
+import { getSentEmailById, getEmailReplies, deleteSentEmail } from "@/lib/actions";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface EmailInsightsPageProps {
   params: Promise<{ id: string }>;
@@ -27,10 +28,13 @@ interface EmailReply {
 
 export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
   const resolvedParams = use(params);
+  const router = useRouter();
   const [email, setEmail] = useState<SentEmail | null>(null);
   const [replies, setReplies] = useState<EmailReply[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadEmail();
@@ -55,6 +59,18 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
       setReplies(data);
     } catch (err) {
       console.error("Failed to load replies:", err);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteSentEmail(resolvedParams.id);
+      router.push('/dashboard');
+    } catch (err) {
+      console.error("Failed to delete email:", err);
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -344,7 +360,55 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
             )}
           </div>
         </div>
+
+        {/* Delete Section */}
+        <div className="mt-12 pt-8 border-t border-white/[0.06]">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-5 py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+          >
+            Delete this email
+          </button>
+          <p className="text-[11px] text-white/25 mt-2">
+            This will permanently delete this email and all associated data.
+          </p>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => !isDeleting && setShowDeleteConfirm(false)}
+          />
+          <div 
+            className="relative w-full max-w-[360px] mx-4 rounded-[16px] p-6"
+            style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <h3 className="text-[16px] font-medium text-white/90 mb-2">Delete this email?</h3>
+            <p className="text-[13px] text-white/50 mb-6 leading-relaxed">
+              Are you sure you want to delete &ldquo;{email?.subject || "Untitled"}&rdquo;? This will also delete all replies and tracking data. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.08em] uppercase text-white/60 hover:bg-white/5 transition-colors border border-white/[0.08]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.08em] uppercase bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors border border-red-500/30"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

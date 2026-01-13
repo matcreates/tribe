@@ -29,25 +29,10 @@ function sanitizeReplyText(text: string): string {
   return sanitized;
 }
 
-// Extract the plain text body from email
-function extractPlainTextBody(email: ResendInboundEmail): string {
-  // Prefer plain text body
-  if (email.text) {
-    return email.text;
-  }
-  
-  // Fall back to HTML stripped of tags
-  if (email.html) {
-    return email.html.replace(/<[^>]*>/g, "");
-  }
-  
-  return "";
-}
-
 // Parse the reply-to address to extract emailId
 function parseReplyAddress(toAddress: string): { emailId: string } | null {
   // Format: reply-{emailId}@domain.com
-  const match = toAddress.match(/^reply-([^@]+)@/i);
+  const match = toAddress.match(/reply-([^@]+)@/i);
   if (!match) return null;
   
   return {
@@ -62,49 +47,68 @@ function extractEmailFromHeader(from: string): string {
   return from.toLowerCase().trim();
 }
 
-interface ResendInboundEmail {
-  from: string;
-  to: string;
-  subject: string;
-  text?: string;
-  html?: string;
-  headers?: Record<string, string>;
+// Extract first "to" address from various formats
+function extractToAddress(to: unknown): string | null {
+  if (typeof to === 'string') {
+    return to;
+  }
+  if (Array.isArray(to) && to.length > 0) {
+    const first = to[0];
+    if (typeof first === 'string') return first;
+    if (typeof first === 'object' && first && 'email' in first) {
+      return (first as { email: string }).email;
+    }
+  }
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractPlainText(body: any): string {
+  // Try various possible locations for text content
+  if (body.text) return body.text;
+  if (body.data?.text) return body.data.text;
+  if (body.html) return body.html.replace(/<[^>]*>/g, "");
+  if (body.data?.html) return body.data.html.replace(/<[^>]*>/g, "");
+  return "";
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret if configured
-    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const signature = request.headers.get("svix-signature");
-      // For now, just check if the header exists
-      // In production, you'd verify the full signature
-      if (!signature) {
-        console.log("Inbound webhook: Missing signature");
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
     const body = await request.json();
-    console.log("Inbound email received:", JSON.stringify(body, null, 2));
+    console.log("=== INBOUND EMAIL WEBHOOK ===");
+    console.log("Full body:", JSON.stringify(body, null, 2));
 
-    // Resend sends the email data in the body
-    const email: ResendInboundEmail = body;
+    // Handle both direct format and wrapped format (Resend might wrap in "data" or send event types)
+    const emailData = body.data || body;
     
-    if (!email.to || !email.from) {
-      console.log("Inbound webhook: Missing to or from");
-      return NextResponse.json({ error: "Invalid email data" }, { status: 400 });
+    // Extract "to" address - could be string, array of strings, or array of objects
+    const toRaw = emailData.to || body.to;
+    const toAddress = extractToAddress(toRaw);
+    
+    // Extract "from" address
+    const fromRaw = emailData.from || body.from;
+    const fromAddress = typeof fromRaw === 'string' ? fromRaw : 
+      (Array.isArray(fromRaw) && fromRaw.length > 0) ? 
+        (typeof fromRaw[0] === 'string' ? fromRaw[0] : fromRaw[0]?.email) : null;
+
+    console.log("Parsed to:", toAddress);
+    console.log("Parsed from:", fromAddress);
+    
+    if (!toAddress || !fromAddress) {
+      console.log("Inbound webhook: Missing to or from address");
+      return NextResponse.json({ error: "Invalid email data - missing to/from" }, { status: 400 });
     }
 
     // Parse the "to" address to extract emailId
-    const parsed = parseReplyAddress(email.to);
+    const parsed = parseReplyAddress(toAddress);
     if (!parsed) {
-      console.log("Inbound webhook: Could not parse reply address:", email.to);
+      console.log("Inbound webhook: Could not parse reply address:", toAddress);
       // Not a reply to our emails, ignore silently
       return NextResponse.json({ success: true, message: "Not a reply address" });
     }
 
     const { emailId } = parsed;
+    console.log("Parsed emailId:", emailId);
 
     // Verify the email exists
     const sentEmail = await getSentEmailById(emailId);
@@ -112,20 +116,30 @@ export async function POST(request: NextRequest) {
       console.log("Inbound webhook: Email not found:", emailId);
       return NextResponse.json({ success: true, message: "Email not found" });
     }
+    console.log("Found sent email, tribe_id:", sentEmail.tribe_id);
 
     // Extract sender's email address
-    const senderEmail = extractEmailFromHeader(email.from);
+    const senderEmail = extractEmailFromHeader(fromAddress);
     console.log("Inbound webhook: Sender email:", senderEmail);
 
     // Find the subscriber by their email and the tribe
     const subscriber = await getSubscriberByEmailAndTribe(senderEmail, sentEmail.tribe_id);
     if (!subscriber) {
-      console.log("Inbound webhook: Subscriber not found for email:", senderEmail);
-      return NextResponse.json({ success: true, message: "Subscriber not found" });
+      console.log("Inbound webhook: Subscriber not found for email:", senderEmail, "in tribe:", sentEmail.tribe_id);
+      // Save reply anyway with the sender email (they might have replied from a different email)
+      const rawText = extractPlainText(emailData);
+      const sanitizedText = sanitizeReplyText(rawText);
+      
+      if (sanitizedText.trim()) {
+        await createEmailReply(emailId, senderEmail, sanitizedText);
+        console.log("Inbound webhook: Reply saved (non-subscriber) for email", emailId, "from", senderEmail);
+        return NextResponse.json({ success: true, message: "Reply saved (non-subscriber)" });
+      }
+      return NextResponse.json({ success: true, message: "Subscriber not found, empty reply" });
     }
 
     // Extract and sanitize the reply text
-    const rawText = extractPlainTextBody(email);
+    const rawText = extractPlainText(emailData);
     const sanitizedText = sanitizeReplyText(rawText);
 
     if (!sanitizedText.trim()) {

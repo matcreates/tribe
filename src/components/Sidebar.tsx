@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect, useRef } from "react";
-import { deleteSentEmail } from "@/lib/actions";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   sentEmails: { id: string; subject: string | null }[];
@@ -12,15 +11,8 @@ interface SidebarProps {
 
 export function Sidebar({ sentEmails }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [hoveredEmail, setHoveredEmail] = useState<string | null>(null);
-  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; subject: string } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const menuButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   // Close menu when route changes
   useEffect(() => {
@@ -49,25 +41,6 @@ export function Sidebar({ sentEmails }: SidebarProps) {
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/login" });
-  };
-
-  const handleDelete = async () => {
-    if (!deleteConfirm) return;
-    setIsDeleting(true);
-    try {
-      await deleteSentEmail(deleteConfirm.id);
-      // If we're on the deleted email's page, redirect to dashboard
-      if (pathname === `/email/${deleteConfirm.id}`) {
-        router.push('/dashboard');
-      } else {
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Failed to delete email:", error);
-    } finally {
-      setIsDeleting(false);
-      setDeleteConfirm(null);
-    }
   };
 
   return (
@@ -158,47 +131,16 @@ export function Sidebar({ sentEmails }: SidebarProps) {
             {sentEmails.slice(0, 5).map((email) => {
               const isActive = pathname === `/email/${email.id}`;
               return (
-                <li 
-                  key={email.id}
-                  className="group"
-                  onMouseEnter={() => setHoveredEmail(email.id)}
-                  onMouseLeave={() => {
-                    if (menuOpenFor !== email.id) {
-                      setHoveredEmail(null);
-                    }
-                  }}
-                >
+                <li key={email.id}>
                   <Link
                     href={`/email/${email.id}`}
-                    className={`flex items-center justify-between px-5 py-2 text-[13px] rounded-md transition-colors ${
+                    className={`block px-5 py-2 text-[13px] truncate rounded-md transition-colors ${
                       isActive 
                         ? "bg-white/[0.08] text-white/70" 
                         : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
                     }`}
                   >
-                    <span className="truncate flex-1 mr-2">{email.subject || "Untitled"}</span>
-                    
-                    {/* Triple dot button - only show on hover or when menu is open */}
-                    {(hoveredEmail === email.id || menuOpenFor === email.id) && (
-                      <button
-                        ref={(el) => { menuButtonRefs.current[email.id] = el; }}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (menuOpenFor === email.id) {
-                            setMenuOpenFor(null);
-                            setMenuPosition(null);
-                          } else {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setMenuPosition({ top: rect.top + rect.height / 2 - 16, left: rect.right + 8 });
-                            setMenuOpenFor(email.id);
-                          }
-                        }}
-                        className="flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
-                      >
-                        <MoreIcon className="w-3.5 h-3.5 text-white/50" />
-                      </button>
-                    )}
+                    {email.subject || "Untitled"}
                   </Link>
                 </li>
               );
@@ -227,86 +169,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
           </button>
         </div>
       </aside>
-
-      {/* Dropdown menu - fixed position to avoid clipping */}
-      {menuOpenFor && menuPosition && (
-        <div 
-          className="fixed py-1 rounded-md shadow-xl z-[100] min-w-[80px]"
-          style={{ 
-            top: menuPosition.top,
-            left: menuPosition.left,
-            background: 'rgb(32, 32, 32)', 
-            border: '1px solid rgba(255,255,255,0.1)' 
-          }}
-          onMouseLeave={() => {
-            setMenuOpenFor(null);
-            setMenuPosition(null);
-            setHoveredEmail(null);
-          }}
-        >
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const email = sentEmails.find(e => e.id === menuOpenFor);
-              if (email) {
-                setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
-              }
-              setMenuOpenFor(null);
-              setMenuPosition(null);
-            }}
-            className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setDeleteConfirm(null)}
-          />
-          <div 
-            className="relative w-full max-w-[320px] mx-4 rounded-[12px] p-6"
-            style={{ background: 'rgba(25, 25, 28, 0.98)', border: '1px solid rgba(255,255,255,0.08)' }}
-          >
-            <h3 className="text-[15px] font-medium text-white/90 mb-2">Delete email?</h3>
-            <p className="text-[13px] text-white/50 mb-5">
-              Are you sure you want to delete &quot;{deleteConfirm.subject}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 rounded-[8px] text-[11px] font-medium tracking-[0.08em] uppercase text-white/60 hover:bg-white/5 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 rounded-[8px] text-[11px] font-medium tracking-[0.08em] uppercase bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
-  );
-}
-
-function MoreIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="3" cy="8" r="1.5" />
-      <circle cx="8" cy="8" r="1.5" />
-      <circle cx="13" cy="8" r="1.5" />
-    </svg>
   );
 }
 
