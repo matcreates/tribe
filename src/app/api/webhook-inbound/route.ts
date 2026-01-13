@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createEmailReply, getSentEmailById } from "@/lib/db";
+import { Resend } from "resend";
+
+// Initialize Resend client to fetch email content
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY not set");
+  }
+  return new Resend(apiKey);
+}
 
 // Sanitize reply text - remove HTML, links, and dangerous content
 function sanitizeReplyText(text: string): string {
@@ -140,8 +150,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, error: "Email not found" });
     }
 
-    // Try to extract text - pass both emailData and full body for thorough checking
-    const rawText = extractPlainText(emailData, body);
+    // The webhook only contains metadata - we need to fetch the full email content via API
+    const resendEmailId = emailData?.email_id || body?.data?.email_id;
+    console.log("Resend email_id for fetching content:", resendEmailId);
+    
+    let rawText = "";
+    
+    if (resendEmailId) {
+      try {
+        // Fetch the full email content from Resend API
+        const resend = getResendClient();
+        console.log("Fetching email content from Resend API...");
+        
+        // Use Resend's API to get the email - the emails.get endpoint
+        const response = await fetch(`https://api.resend.com/emails/${resendEmailId}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+        });
+        
+        if (response.ok) {
+          const emailContent = await response.json();
+          console.log("Resend API response keys:", Object.keys(emailContent));
+          console.log("Resend API response:", JSON.stringify(emailContent).substring(0, 1000));
+          
+          // Extract text from the fetched email
+          rawText = emailContent.text || emailContent.body || emailContent.html?.replace(/<[^>]*>/g, " ") || "";
+        } else {
+          console.log("Resend API error:", response.status, await response.text());
+        }
+      } catch (apiError) {
+        console.error("Failed to fetch email from Resend API:", apiError);
+      }
+    }
+    
+    // Fallback: try to extract from webhook payload (in case Resend changes their format)
+    if (!rawText) {
+      rawText = extractPlainText(emailData, body);
+    }
     
     console.log("Extracted rawText length:", rawText.length);
     console.log("Extracted rawText preview:", rawText.substring(0, 200));
