@@ -191,10 +191,10 @@ export function Sidebar({ sentEmails }: SidebarProps) {
                     )}
                   </Link>
                   
-                  {/* Dropdown menu */}
+                  {/* Dropdown menu - positioned to the right of dots */}
                   {menuOpenFor === email.id && (
                     <div 
-                      className="absolute right-2 top-full mt-0.5 py-1 rounded-md shadow-xl z-50 min-w-[90px]"
+                      className="absolute left-full top-0 ml-1 py-1 rounded-md shadow-xl z-50 min-w-[80px]"
                       style={{ background: 'rgb(32, 32, 32)', border: '1px solid rgba(255,255,255,0.1)' }}
                       onMouseLeave={() => {
                         setMenuOpenFor(null);

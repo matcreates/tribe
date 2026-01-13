@@ -19,13 +19,20 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: "Tribe",
-  description: "Minimalist email-list management",
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon.svg", sizes: "32x32" },
-    ],
-    shortcut: "/icon.svg",
+  description: "Minimalist email-list management for creators. Build your community, send beautiful emails, and grow your tribe.",
+  metadataBase: new URL("https://madewithtribe.com"),
+  openGraph: {
+    title: "Tribe",
+    description: "Minimalist email-list management for creators. Build your community, send beautiful emails, and grow your tribe.",
+    url: "https://madewithtribe.com",
+    siteName: "Tribe",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tribe",
+    description: "Minimalist email-list management for creators. Build your community, send beautiful emails, and grow your tribe.",
   },
 };
 
