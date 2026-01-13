@@ -158,19 +158,21 @@ export async function POST(request: NextRequest) {
     
     if (resendEmailId) {
       try {
-        console.log("Fetching received email content using Resend SDK...");
+        console.log("Fetching received email via Resend API...");
         
-        // Use Resend SDK's emails.received.get() method for inbound emails
-        const resend = getResendClient();
+        // Use direct API call - endpoint for received emails
+        const response = await fetch(`https://api.resend.com/emails/received/${resendEmailId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        });
         
-        // @ts-expect-error - emails.received might not be in type definitions yet
-        const { data: emailContent, error } = await resend.emails.received.get(resendEmailId);
+        console.log("API response status:", response.status);
         
-        if (error) {
-          console.log("Resend SDK error:", JSON.stringify(error));
-        }
-        
-        if (emailContent) {
+        if (response.ok) {
+          const emailContent = await response.json();
           console.log("SUCCESS! Received email keys:", Object.keys(emailContent));
           console.log("Received email data:", JSON.stringify(emailContent).substring(0, 2000));
           
@@ -185,6 +187,9 @@ export async function POST(request: NextRequest) {
             rawText = typeof emailContent.body === 'string' ? emailContent.body : "";
             console.log("Extracted from body, length:", rawText.length);
           }
+        } else {
+          const errorText = await response.text();
+          console.log("API error:", response.status, errorText);
         }
       } catch (apiError) {
         console.error("Failed to fetch email from Resend:", apiError);
