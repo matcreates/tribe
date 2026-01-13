@@ -158,7 +158,7 @@ export function Sidebar({ sentEmails }: SidebarProps) {
               return (
                 <li 
                   key={email.id}
-                  className="relative group"
+                  className="group"
                   onMouseEnter={() => setHoveredEmail(email.id)}
                   onMouseLeave={() => {
                     if (menuOpenFor !== email.id) {
@@ -176,44 +176,46 @@ export function Sidebar({ sentEmails }: SidebarProps) {
                   >
                     <span className="truncate flex-1 mr-2">{email.subject || "Untitled"}</span>
                     
-                    {/* Triple dot button - only show on hover or when menu is open */}
+                    {/* Triple dot button with dropdown - only show on hover or when menu is open */}
                     {(hoveredEmail === email.id || menuOpenFor === email.id) && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setMenuOpenFor(menuOpenFor === email.id ? null : email.id);
-                        }}
-                        className="flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
-                      >
-                        <MoreIcon className="w-3.5 h-3.5 text-white/50" />
-                      </button>
+                      <div className="relative flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setMenuOpenFor(menuOpenFor === email.id ? null : email.id);
+                          }}
+                          className="p-1 rounded hover:bg-white/10 transition-colors"
+                        >
+                          <MoreIcon className="w-3.5 h-3.5 text-white/50" />
+                        </button>
+                        
+                        {/* Dropdown menu - positioned to the right of the button */}
+                        {menuOpenFor === email.id && (
+                          <div 
+                            className="absolute left-full top-1/2 -translate-y-1/2 ml-2 py-1 rounded-md shadow-xl z-[100] min-w-[80px]"
+                            style={{ background: 'rgb(32, 32, 32)', border: '1px solid rgba(255,255,255,0.1)' }}
+                            onMouseLeave={() => {
+                              setMenuOpenFor(null);
+                              setHoveredEmail(null);
+                            }}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
+                                setMenuOpenFor(null);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </Link>
-                  
-                  {/* Dropdown menu - positioned to the right of dots */}
-                  {menuOpenFor === email.id && (
-                    <div 
-                      className="absolute left-full top-0 ml-1 py-1 rounded-md shadow-xl z-50 min-w-[80px]"
-                      style={{ background: 'rgb(32, 32, 32)', border: '1px solid rgba(255,255,255,0.1)' }}
-                      onMouseLeave={() => {
-                        setMenuOpenFor(null);
-                        setHoveredEmail(null);
-                      }}
-                    >
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
-                          setMenuOpenFor(null);
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
                 </li>
               );
             })}
