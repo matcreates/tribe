@@ -161,54 +161,57 @@ export function Sidebar({ sentEmails }: SidebarProps) {
                   className="relative group"
                   onMouseEnter={() => setHoveredEmail(email.id)}
                   onMouseLeave={() => {
-                    setHoveredEmail(null);
-                    if (menuOpenFor === email.id) setMenuOpenFor(null);
+                    if (menuOpenFor !== email.id) {
+                      setHoveredEmail(null);
+                    }
                   }}
                 >
                   <Link
                     href={`/email/${email.id}`}
-                    className={`block px-5 py-2 pr-8 text-[13px] truncate rounded-md transition-colors ${
+                    className={`flex items-center justify-between px-5 py-2 text-[13px] rounded-md transition-colors ${
                       isActive 
                         ? "bg-white/[0.08] text-white/70" 
                         : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
                     }`}
                   >
-                    {email.subject || "Untitled"}
-                  </Link>
-                  
-                  {/* Triple dot menu */}
-                  {(hoveredEmail === email.id || menuOpenFor === email.id) && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <span className="truncate flex-1 mr-2">{email.subject || "Untitled"}</span>
+                    
+                    {/* Triple dot button - only show on hover or when menu is open */}
+                    {(hoveredEmail === email.id || menuOpenFor === email.id) && (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           setMenuOpenFor(menuOpenFor === email.id ? null : email.id);
                         }}
-                        className="p-1 rounded hover:bg-white/10 transition-colors"
+                        className="flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
                       >
-                        <MoreIcon className="w-4 h-4 text-white/40" />
+                        <MoreIcon className="w-3.5 h-3.5 text-white/50" />
                       </button>
-                      
-                      {/* Dropdown menu */}
-                      {menuOpenFor === email.id && (
-                        <div 
-                          className="absolute right-0 top-full mt-1 py-1 rounded-md shadow-lg z-50 min-w-[100px]"
-                          style={{ background: 'rgba(30, 30, 30, 0.98)', border: '1px solid rgba(255,255,255,0.1)' }}
-                        >
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
-                              setMenuOpenFor(null);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                    )}
+                  </Link>
+                  
+                  {/* Dropdown menu */}
+                  {menuOpenFor === email.id && (
+                    <div 
+                      className="absolute right-2 top-full mt-0.5 py-1 rounded-md shadow-xl z-50 min-w-[90px]"
+                      style={{ background: 'rgb(32, 32, 32)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onMouseLeave={() => {
+                        setMenuOpenFor(null);
+                        setHoveredEmail(null);
+                      }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
+                          setMenuOpenFor(null);
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
+                      >
+                        Delete
+                      </button>
                     </div>
                   )}
                 </li>
@@ -280,9 +283,9 @@ export function Sidebar({ sentEmails }: SidebarProps) {
 function MoreIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="8" cy="3" r="1.5" />
+      <circle cx="3" cy="8" r="1.5" />
       <circle cx="8" cy="8" r="1.5" />
-      <circle cx="8" cy="13" r="1.5" />
+      <circle cx="13" cy="8" r="1.5" />
     </svg>
   );
 }
