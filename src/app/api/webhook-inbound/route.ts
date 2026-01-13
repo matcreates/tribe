@@ -44,14 +44,50 @@ function extractEmail(value: unknown): string | null {
   return null;
 }
 
-// Extract plain text from various body formats
+// Extract plain text from various body formats - check all possible field names
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractPlainText(body: any): string {
-  if (body.text) return body.text;
-  if (body.data?.text) return body.data.text;
-  if (body.body) return typeof body.body === 'string' ? body.body : '';
-  if (body.html) return body.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-  if (body.data?.html) return body.data.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+function extractPlainText(payload: any): string {
+  // Log all available keys for debugging
+  console.log("Extracting text from payload keys:", Object.keys(payload || {}));
+  if (payload?.data) {
+    console.log("Payload.data keys:", Object.keys(payload.data));
+  }
+  
+  // Try all possible locations for text content
+  const possibleTextFields = [
+    payload?.text,
+    payload?.data?.text,
+    payload?.body,
+    payload?.data?.body,
+    payload?.content,
+    payload?.data?.content,
+    payload?.plain_text,
+    payload?.data?.plain_text,
+    payload?.plainText,
+    payload?.data?.plainText,
+  ];
+  
+  for (const field of possibleTextFields) {
+    if (typeof field === 'string' && field.trim()) {
+      console.log("Found text in field, length:", field.length);
+      return field;
+    }
+  }
+  
+  // Try HTML as fallback
+  const possibleHtmlFields = [
+    payload?.html,
+    payload?.data?.html,
+  ];
+  
+  for (const field of possibleHtmlFields) {
+    if (typeof field === 'string' && field.trim()) {
+      console.log("Using HTML fallback, length:", field.length);
+      return field.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    }
+  }
+  
+  console.log("No text content found in payload");
   return "";
 }
 
@@ -60,10 +96,14 @@ export async function POST(request: NextRequest) {
   
   try {
     const rawBody = await request.text();
-    console.log("Raw body:", rawBody.substring(0, 500));
+    console.log("Raw body length:", rawBody.length);
+    console.log("Raw body preview:", rawBody.substring(0, 1500));
     
     const body = JSON.parse(rawBody);
+    console.log("Top-level keys:", Object.keys(body));
+    
     const emailData = body.type === 'email.received' ? body.data : (body.data || body);
+    console.log("emailData keys:", Object.keys(emailData || {}));
 
     let toAddress = extractEmail(emailData?.to) || extractEmail(body.to);
     let fromAddress = extractEmail(emailData?.from) || extractEmail(body.from);
@@ -84,14 +124,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, error: "Email not found" });
     }
 
-    let rawText = extractPlainText(emailData || {});
-    if (!rawText && body.text) rawText = body.text;
-    const sanitizedText = sanitizeReplyText(rawText) || "[Empty reply]";
+    // Try to extract text from both the full body and emailData
+    let rawText = extractPlainText(body);
+    if (!rawText) {
+      rawText = extractPlainText(emailData);
+    }
     
-    await createEmailReply(parsed.emailId, fromAddress, sanitizedText);
-    console.log("SUCCESS: Reply saved");
+    console.log("Extracted rawText length:", rawText.length);
+    console.log("Extracted rawText preview:", rawText.substring(0, 200));
+    
+    const sanitizedText = sanitizeReplyText(rawText);
+    const finalText = sanitizedText.trim() || "[Empty reply]";
+    
+    console.log("Final text to save:", finalText.substring(0, 100));
+    
+    await createEmailReply(parsed.emailId, fromAddress, finalText);
+    console.log("SUCCESS: Reply saved with text length:", finalText.length);
 
-    return NextResponse.json({ received: true, success: true });
+    return NextResponse.json({ received: true, success: true, textLength: finalText.length });
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json({ received: true, error: String(error) }, { status: 500 });
