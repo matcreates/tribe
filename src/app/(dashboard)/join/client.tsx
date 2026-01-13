@@ -94,15 +94,15 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
             style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
             placeholder="Describe what people will get by joining your tribe..."
           />
-          {hasChanges && (
-            <button
-              onClick={saveDescription}
-              disabled={isSaving}
-              className="mt-2 px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
-            >
-              <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE DESCRIPTION"}</span>
-            </button>
-          )}
+          <button
+            onClick={saveDescription}
+            disabled={isSaving || !hasChanges}
+            className={`mt-3 px-5 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.1em] uppercase transition-opacity ${
+              hasChanges ? 'btn-glass' : 'btn-glass-secondary opacity-50'
+            }`}
+          >
+            <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE"}</span>
+          </button>
         </div>
 
         {/* Join Card Preview */}

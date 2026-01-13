@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { deleteSentEmail } from "@/lib/actions";
 
 interface SidebarProps {
@@ -17,8 +17,10 @@ export function Sidebar({ sentEmails }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredEmail, setHoveredEmail] = useState<string | null>(null);
   const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; subject: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const menuButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   // Close menu when route changes
   useEffect(() => {
@@ -176,44 +178,26 @@ export function Sidebar({ sentEmails }: SidebarProps) {
                   >
                     <span className="truncate flex-1 mr-2">{email.subject || "Untitled"}</span>
                     
-                    {/* Triple dot button with dropdown - only show on hover or when menu is open */}
+                    {/* Triple dot button - only show on hover or when menu is open */}
                     {(hoveredEmail === email.id || menuOpenFor === email.id) && (
-                      <div className="relative flex-shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setMenuOpenFor(menuOpenFor === email.id ? null : email.id);
-                          }}
-                          className="p-1 rounded hover:bg-white/10 transition-colors"
-                        >
-                          <MoreIcon className="w-3.5 h-3.5 text-white/50" />
-                        </button>
-                        
-                        {/* Dropdown menu - positioned to the right of the button */}
-                        {menuOpenFor === email.id && (
-                          <div 
-                            className="absolute left-full top-1/2 -translate-y-1/2 ml-2 py-1 rounded-md shadow-xl z-[100] min-w-[80px]"
-                            style={{ background: 'rgb(32, 32, 32)', border: '1px solid rgba(255,255,255,0.1)' }}
-                            onMouseLeave={() => {
-                              setMenuOpenFor(null);
-                              setHoveredEmail(null);
-                            }}
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
-                                setMenuOpenFor(null);
-                              }}
-                              className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <button
+                        ref={(el) => { menuButtonRefs.current[email.id] = el; }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (menuOpenFor === email.id) {
+                            setMenuOpenFor(null);
+                            setMenuPosition(null);
+                          } else {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuPosition({ top: rect.top + rect.height / 2 - 16, left: rect.right + 8 });
+                            setMenuOpenFor(email.id);
+                          }
+                        }}
+                        className="flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
+                      >
+                        <MoreIcon className="w-3.5 h-3.5 text-white/50" />
+                      </button>
                     )}
                   </Link>
                 </li>
@@ -243,6 +227,40 @@ export function Sidebar({ sentEmails }: SidebarProps) {
           </button>
         </div>
       </aside>
+
+      {/* Dropdown menu - fixed position to avoid clipping */}
+      {menuOpenFor && menuPosition && (
+        <div 
+          className="fixed py-1 rounded-md shadow-xl z-[100] min-w-[80px]"
+          style={{ 
+            top: menuPosition.top,
+            left: menuPosition.left,
+            background: 'rgb(32, 32, 32)', 
+            border: '1px solid rgba(255,255,255,0.1)' 
+          }}
+          onMouseLeave={() => {
+            setMenuOpenFor(null);
+            setMenuPosition(null);
+            setHoveredEmail(null);
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const email = sentEmails.find(e => e.id === menuOpenFor);
+              if (email) {
+                setDeleteConfirm({ id: email.id, subject: email.subject || "Untitled" });
+              }
+              setMenuOpenFor(null);
+              setMenuPosition(null);
+            }}
+            className="w-full px-3 py-1.5 text-left text-[12px] text-red-400 hover:bg-white/5 transition-colors"
+          >
+            Delete
+          </button>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
