@@ -160,52 +160,36 @@ export async function POST(request: NextRequest) {
       try {
         console.log("Fetching received email via Resend API...");
         
-        // Try multiple endpoint variations
-        const endpoints = [
-          { url: `https://api.resend.com/emails/${resendEmailId}`, method: 'GET' },
-          { url: `https://api.resend.com/received/${resendEmailId}`, method: 'GET' },
-          { url: `https://api.resend.com/emails/received/${resendEmailId}`, method: 'POST' },
-        ];
+        // Correct endpoint: /emails/receiving/:id (not /received/)
+        const url = `https://api.resend.com/emails/receiving/${resendEmailId}`;
+        console.log("Calling:", url);
         
-        for (const { url, method } of endpoints) {
-          console.log(`Trying ${method} ${url}`);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log("Response status:", response.status);
+        
+        if (response.ok) {
+          const emailContent = await response.json();
+          console.log("SUCCESS! Response keys:", Object.keys(emailContent));
+          console.log("Response data:", JSON.stringify(emailContent).substring(0, 2000));
           
-          const response = await fetch(url, {
-            method,
-            headers: {
-              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          
-          console.log("Response status:", response.status);
-          
-          if (response.ok) {
-            const emailContent = await response.json();
-            console.log("SUCCESS! Response keys:", Object.keys(emailContent));
-            console.log("Response data:", JSON.stringify(emailContent).substring(0, 2000));
-            
-            // Check if it's wrapped in data property
-            const content = emailContent.data || emailContent;
-            
-            // Extract text - try html first since plain text might be empty
-            if (content.html) {
-              rawText = content.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-              console.log("Extracted from HTML, length:", rawText.length);
-              break;
-            } else if (content.text) {
-              rawText = content.text;
-              console.log("Extracted from text, length:", rawText.length);
-              break;
-            } else if (content.body) {
-              rawText = typeof content.body === 'string' ? content.body : "";
-              console.log("Extracted from body, length:", rawText.length);
-              break;
-            }
-          } else {
-            const errorText = await response.text();
-            console.log("Failed:", response.status, errorText.substring(0, 100));
+          // Extract text - try html first since plain text might be null
+          if (emailContent.html) {
+            rawText = emailContent.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+            console.log("Extracted from HTML, length:", rawText.length);
+          } else if (emailContent.text) {
+            rawText = emailContent.text;
+            console.log("Extracted from text, length:", rawText.length);
           }
+        } else {
+          const errorText = await response.text();
+          console.log("API error:", response.status, errorText);
         }
       } catch (apiError) {
         console.error("Failed to fetch email from Resend:", apiError);
