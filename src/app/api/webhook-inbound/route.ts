@@ -158,50 +158,36 @@ export async function POST(request: NextRequest) {
     
     if (resendEmailId) {
       try {
-        console.log("Fetching email content from Resend API...");
+        console.log("Fetching received email content using Resend SDK...");
         
-        // Try multiple endpoints - Resend might use different endpoints for inbound emails
-        const endpoints = [
-          `https://api.resend.com/emails/inbound/${resendEmailId}`,
-          `https://api.resend.com/inbound/${resendEmailId}`,
-          `https://api.resend.com/emails/${resendEmailId}`,
-        ];
+        // Use Resend SDK's emails.received.get() method for inbound emails
+        const resend = getResendClient();
         
-        for (const endpoint of endpoints) {
-          console.log("Trying endpoint:", endpoint);
-          const response = await fetch(endpoint, {
-            headers: {
-              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            },
-          });
+        // @ts-expect-error - emails.received might not be in type definitions yet
+        const { data: emailContent, error } = await resend.emails.received.get(resendEmailId);
+        
+        if (error) {
+          console.log("Resend SDK error:", JSON.stringify(error));
+        }
+        
+        if (emailContent) {
+          console.log("SUCCESS! Received email keys:", Object.keys(emailContent));
+          console.log("Received email data:", JSON.stringify(emailContent).substring(0, 2000));
           
-          console.log("Response status:", response.status);
-          
-          if (response.ok) {
-            const emailContent = await response.json();
-            console.log("SUCCESS! API response keys:", Object.keys(emailContent));
-            console.log("API response:", JSON.stringify(emailContent).substring(0, 2000));
-            
-            // Extract text - try html first since plain text might be empty
-            if (emailContent.html) {
-              rawText = emailContent.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-              console.log("Extracted from HTML, length:", rawText.length);
-            } else if (emailContent.text) {
-              rawText = emailContent.text;
-              console.log("Extracted from text, length:", rawText.length);
-            } else if (emailContent.body) {
-              rawText = typeof emailContent.body === 'string' ? emailContent.body : "";
-              console.log("Extracted from body, length:", rawText.length);
-            }
-            
-            if (rawText) break; // Found content, stop trying endpoints
-          } else {
-            const errorText = await response.text();
-            console.log("Endpoint failed:", response.status, errorText.substring(0, 200));
+          // Extract text - try html first since plain text might be empty
+          if (emailContent.html) {
+            rawText = emailContent.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+            console.log("Extracted from HTML, length:", rawText.length);
+          } else if (emailContent.text) {
+            rawText = emailContent.text;
+            console.log("Extracted from text, length:", rawText.length);
+          } else if (emailContent.body) {
+            rawText = typeof emailContent.body === 'string' ? emailContent.body : "";
+            console.log("Extracted from body, length:", rawText.length);
           }
         }
       } catch (apiError) {
-        console.error("Failed to fetch email from Resend API:", apiError);
+        console.error("Failed to fetch email from Resend:", apiError);
       }
     }
     
