@@ -199,7 +199,12 @@ export default function TribePage() {
       throw new Error(result.error || "Failed to add subscriber");
     }
     await loadSubscribers();
-    showToast("Subscriber added successfully");
+    if (result.error) {
+      // Partial success (added but email failed)
+      showToast(result.error);
+    } else {
+      showToast("Verification email sent!");
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

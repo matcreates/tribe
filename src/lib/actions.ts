@@ -127,7 +127,7 @@ export async function addSubscriber(email: string, name?: string) {
   return result;
 }
 
-// Add a subscriber manually (as verified, no verification email)
+// Add a subscriber manually (sends verification email)
 export async function addSubscriberManually(email: string): Promise<{ success: boolean; error?: string }> {
   const tribe = await getTribe();
   
@@ -145,10 +145,30 @@ export async function addSubscriberManually(email: string): Promise<{ success: b
     return { success: false, error: "Email already exists in your tribe" };
   }
   
-  // Add as verified
-  const result = await dbAddSubscriberBulk(tribe.id, normalizedEmail, true);
+  // Add as non-verified (will have verification token)
+  const result = await dbAddSubscriber(tribe.id, normalizedEmail);
   if (!result) {
     return { success: false, error: "Failed to add subscriber" };
+  }
+  
+  // Send verification email
+  try {
+    if (result.verification_token) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
+      await sendVerificationEmail(
+        normalizedEmail,
+        tribe.name,
+        tribe.owner_name || "Someone",
+        result.verification_token,
+        baseUrl
+      );
+    }
+  } catch (emailError) {
+    console.error("Failed to send verification email:", emailError);
+    // Still return success since subscriber was added, just note the email issue
+    revalidatePath("/tribe");
+    revalidatePath("/dashboard");
+    return { success: true, error: "Added but verification email failed to send" };
   }
   
   revalidatePath("/tribe");

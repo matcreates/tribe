@@ -193,7 +193,7 @@ export function ManualEntryModal({
 
           {/* Info */}
           <p className="text-[11px] text-white/30 mb-6">
-            The email will be added as verified without sending a confirmation email.
+            A verification email will be sent to confirm their subscription.
           </p>
 
           {/* Action Buttons */}
