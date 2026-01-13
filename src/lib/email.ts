@@ -66,6 +66,8 @@ export async function sendBulkEmailWithUnsubscribe(
   emailSignature?: string,
   allowReplies: boolean = true
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
+  console.log(`sendBulkEmailWithUnsubscribe called: emailId=${emailId}, allowReplies=${allowReplies}, recipients=${recipients.length}`);
+  
   if (recipients.length === 0) {
     return { success: true, sentCount: 0, errors: [] };
   }
@@ -201,6 +203,9 @@ export async function sendBulkEmailWithUnsubscribe(
       if (allowReplies && emailId) {
         const replyDomain = getReplyDomain();
         emailConfig.reply_to = `reply-${emailId}@${replyDomain}`;
+        console.log(`Setting reply_to: ${emailConfig.reply_to} (allowReplies=${allowReplies}, emailId=${emailId})`);
+      } else {
+        console.log(`NOT setting reply_to: allowReplies=${allowReplies}, emailId=${emailId}`);
       }
 
       return emailConfig;

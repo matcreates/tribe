@@ -471,6 +471,7 @@ export async function sendEmail(
 
   // Create email record FIRST to get the emailId for tracking pixel
   const email = await createSentEmail(tribe.id, subject, body, 0);
+  console.log(`Created email record with id: ${email.id}, allowReplies: ${allowReplies}`);
 
   // Send emails with personalized unsubscribe links and tracking pixel
   const result = await sendBulkEmailWithUnsubscribe(
