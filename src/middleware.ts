@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclude static files, images, and favicon
-    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
+    // Exclude static files, images, favicon, AND the inbound webhook
+    "/((?!_next/static|_next/image|favicon.ico|api/inbound|.*\\..*).*)",
   ],
 };
