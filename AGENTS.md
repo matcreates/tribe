@@ -1,151 +1,168 @@
-# AGENTS.md - AI Agent Context for Tribe
+# Tribe - AI Agent Context Guide
 
 This document provides context for AI agents working on this codebase.
 
 ## Project Overview
 
-**Tribe** is an email newsletter platform that allows creators to build and engage with their audience ("tribe"). Users can send emails to their subscribers, track opens, receive replies, and manage their tribe through a beautiful dark-themed dashboard.
+**Tribe** is a newsletter/email platform that allows creators to build and communicate with their audience ("tribe"). Users can collect subscribers, send emails, track opens, and receive replies.
 
-**Live URL:** https://www.madewithtribe.com (note: uses `www.` prefix - important for webhooks!)
+**Live URL:** https://www.madewithtribe.com (note: uses `www.` subdomain)
 
 ## Tech Stack
 
-- **Framework:** Next.js 14+ (App Router)
+- **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
-- **Database:** PostgreSQL (via `pg` package)
+- **Database:** PostgreSQL (Neon)
 - **Authentication:** NextAuth.js (Auth.js v5)
-- **Email Service:** Resend
+- **Email:** Resend
 - **Payments:** Stripe
-- **Styling:** Tailwind CSS with custom glass-effect buttons
 - **Hosting:** Vercel
+- **Styling:** Tailwind CSS
 
-## Key Environment Variables
+## Key Integrations
 
-```
-DATABASE_URL          # PostgreSQL connection string
-RESEND_API_KEY        # Resend API key (needs FULL ACCESS for replies feature)
-RESEND_FROM_EMAIL     # Sender email (e.g., "Tribe <noreply@madewithtribe.com>")
-RESEND_REPLY_DOMAIN   # Domain for reply-to addresses (e.g., "madewithtribe.com")
-STRIPE_SECRET_KEY     # Stripe secret key
-STRIPE_WEBHOOK_SECRET # Stripe webhook signing secret
-NEXT_PUBLIC_BASE_URL  # Base URL (https://www.madewithtribe.com)
-AUTH_SECRET           # NextAuth secret
-```
+### Resend (Email)
 
-## Important Architecture Decisions
+- **Sending emails:** Uses `resend.batch.send()` for bulk sending
+- **Receiving emails (replies):** 
+  - Webhook endpoint: `/api/webhook-inbound` (must use `www.madewithtribe.com`)
+  - Webhook event: `email.received`
+  - **CRITICAL:** The webhook only sends metadata, NOT the email body
+  - Must call `GET https://api.resend.com/emails/receiving/:id` to fetch email content
+  - API key needs "Full Access" permissions (not just "Sending")
+- **Reply-to format:** `reply-{emailId}@madewithtribe.com`
+- **SDK field names:** Use `replyTo` (camelCase), not `reply_to`
 
-### 1. Email Replies System
+### Stripe (Payments)
 
-The reply system was complex to implement. Here's how it works:
+- Subscription-based model
+- Webhook endpoint: `/api/stripe/webhook`
+- Manual sync endpoint: `/api/stripe/verify-subscription` (fallback if webhook fails)
+- API version: Use latest stable version
 
-1. **Sending emails with reply-to:** When sending emails with "Allow replies" enabled, we set a custom `replyTo` address in the format: `reply-{emailId}@madewithtribe.com`
+### Vercel
 
-2. **Receiving replies:** Resend receives the reply and triggers a webhook to `/api/webhook-inbound`
+- **Domain redirect:** `madewithtribe.com` → `www.madewithtribe.com` (307 redirect)
+- **Important:** All webhook URLs must use `www.madewithtribe.com` to avoid redirect issues
+- Environment variables are set in Vercel dashboard
 
-3. **Fetching reply content:** The webhook payload does NOT include the email body! You must fetch it via:
-   ```
-   GET https://api.resend.com/emails/receiving/{email_id}
-   ```
-   Note: It's `/emails/receiving/` (not `/received/`)
-
-4. **API Key permissions:** The Resend API key must have "Full Access" (not just "Sending access") to fetch received emails.
-
-5. **Text extraction:** Email replies often come as HTML-only (no plain text). We extract text from HTML and strip:
-   - Quoted original email ("On [date] wrote:...")
-   - Email signatures ("Sent from my iPhone")
-   - URLs and email addresses
-
-### 2. Webhook URL Must Use www.
-
-The domain `madewithtribe.com` redirects (307) to `www.madewithtribe.com`. **Webhook URLs must use the www. prefix** or they will fail with 307 redirects.
-
-Correct: `https://www.madewithtribe.com/api/webhook-inbound`
-Wrong: `https://madewithtribe.com/api/webhook-inbound`
-
-### 3. Resend SDK Field Names
-
-The Resend SDK uses **camelCase** field names, not snake_case:
-- ✅ `replyTo` (correct)
-- ❌ `reply_to` (wrong - won't work)
-
-### 4. Middleware Configuration
-
-The middleware at `src/middleware.ts` handles authentication. API routes and webhook endpoints are excluded from auth checks. If adding new webhook endpoints, ensure they're added to the matcher exclusion pattern.
-
-## Database Schema
+## Database Schema (PostgreSQL)
 
 Key tables:
 - `users` - User accounts
-- `tribes` - Each user's tribe settings
-- `subscribers` - Email subscribers for each tribe
-- `sent_emails` - Sent email records
+- `tribes` - Each user has one tribe (settings, name, etc.)
+- `subscribers` - People who joined a tribe
+- `sent_emails` - Emails sent to tribe
 - `email_replies` - Replies received from subscribers
 - `scheduled_emails` - Emails scheduled for future sending
 
-## Key Files
+## Directory Structure
 
-- `src/lib/email.ts` - Email sending logic (Resend integration)
-- `src/lib/db.ts` - Database queries and schema
-- `src/lib/actions.ts` - Server actions for frontend
-- `src/app/api/webhook-inbound/route.ts` - Inbound email webhook handler
-- `src/app/api/stripe/webhook/route.ts` - Stripe webhook handler
-- `src/middleware.ts` - Auth middleware (excludes API routes)
+```
+src/
+├── app/
+│   ├── (auth)/          # Login/signup pages
+│   ├── (dashboard)/     # Protected dashboard pages
+│   │   ├── dashboard/   # Main dashboard
+│   │   ├── email/[id]/  # Email insights page
+│   │   ├── new-email/   # Compose new email
+│   │   ├── tribe/       # Subscriber management
+│   │   ├── join/        # Join page settings
+│   │   └── settings/    # User settings
+│   ├── api/             # API routes
+│   │   ├── inbound/     # Legacy inbound endpoint
+│   │   ├── webhook-inbound/  # Current inbound webhook
+│   │   ├── stripe/      # Stripe endpoints
+│   │   └── ...
+│   └── j/[slug]/        # Public join pages
+├── components/          # React components
+├── lib/
+│   ├── actions.ts       # Server actions
+│   ├── auth.ts          # NextAuth config
+│   ├── db.ts            # Database queries
+│   ├── email.ts         # Email sending functions
+│   └── types.ts         # TypeScript types
+└── middleware.ts        # Auth middleware
+```
 
-## Resend Configuration
+## Environment Variables
 
-### Webhooks (in Resend Dashboard)
-- **Endpoint:** `https://www.madewithtribe.com/api/webhook-inbound`
-- **Event:** `email.received`
-
-### Domain Setup
-- MX records point to Resend for receiving emails
-- Domain verified for sending
-
-## Stripe Configuration
-
-### Products
-- Subscription-based model for sending emails
-
-### Webhooks
-- Endpoint: `https://www.madewithtribe.com/api/stripe/webhook`
-- Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+Required in Vercel:
+```
+DATABASE_URL=           # Neon PostgreSQL connection string
+AUTH_SECRET=            # NextAuth secret
+RESEND_API_KEY=         # Resend API key (needs Full Access)
+RESEND_FROM_EMAIL=      # e.g., "noreply@madewithtribe.com"
+RESEND_REPLY_DOMAIN=    # e.g., "madewithtribe.com"
+STRIPE_SECRET_KEY=      # Stripe secret key
+STRIPE_WEBHOOK_SECRET=  # Stripe webhook signing secret
+NEXT_PUBLIC_BASE_URL=   # e.g., "https://www.madewithtribe.com"
+```
 
 ## Common Issues & Solutions
 
-### Issue: Webhook returns 307 redirect
-**Solution:** Use `www.madewithtribe.com` instead of `madewithtribe.com`
+### 1. Webhook returns 307 redirect
+**Cause:** Using `madewithtribe.com` instead of `www.madewithtribe.com`
+**Solution:** Always use `www.` prefix for webhook URLs
 
-### Issue: Replies show as "[Empty reply]"
-**Solutions:**
-1. Ensure Resend API key has "Full Access" permissions
-2. Check that we're calling `/emails/receiving/{id}` (not `/received/`)
-3. HTML content extraction is working (text field may be null)
+### 2. Replies show as "[Empty reply]"
+**Cause:** Resend webhook doesn't include email body in payload
+**Solution:** Fetch email content via `GET /emails/receiving/:id` API
 
-### Issue: reply_to not being set on outgoing emails
-**Solution:** Use `replyTo` (camelCase) not `reply_to` in Resend SDK
+### 3. API key restricted error
+**Cause:** Resend API key only has "Sending" permissions
+**Solution:** Create new API key with "Full Access" in Resend dashboard
 
-### Issue: Build fails with "pool" import error
-**Solution:** Don't import `pool` directly in API routes that might run on edge. Use the `query` function instead.
+### 4. Reply-to not working
+**Cause:** Using `reply_to` instead of `replyTo` in Resend SDK
+**Solution:** Use camelCase `replyTo` field name
 
-## UI/UX Notes
+### 5. Middleware blocking API routes
+**Cause:** Auth middleware intercepting webhook requests
+**Solution:** Exclude webhook paths in middleware matcher or check pathname first
 
-- Dark theme throughout (background: #0a0a0a)
-- Glass-effect buttons with shine animation (see `globals.css`)
-- Responsive sidebar that slides in on mobile
-- Russian language support (UTF-8) for international users
+## Key Code Patterns
 
-## Testing Replies Locally
+### Server Actions (lib/actions.ts)
+All database mutations go through server actions with auth checks:
+```typescript
+async function getTribe() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  // ...
+}
+```
 
-1. Use ngrok or similar to expose local server
-2. Update Resend webhook URL temporarily
-3. Send test email with replies enabled
-4. Reply from your email client
-5. Check Vercel/local logs for webhook processing
+### Email Sending (lib/email.ts)
+Emails use batch sending with personalized unsubscribe links:
+```typescript
+const emailConfig = {
+  from: fromEmail,
+  to: [recipient.email],
+  subject,
+  html: htmlBody,
+  replyTo: allowReplies ? `reply-${emailId}@${domain}` : undefined,
+};
+```
 
-## Future Considerations
+### Inbound Webhook (api/webhook-inbound/route.ts)
+1. Receive webhook (metadata only)
+2. Extract `email_id` from payload
+3. Fetch full email via `GET /emails/receiving/:id`
+4. Parse reply address to get original `emailId`
+5. Clean up reply text (remove quoted content)
+6. Save to database
 
-- Click tracking for links in emails
-- A/B testing for subject lines
-- Subscriber segmentation
-- Email templates
-- Analytics dashboard improvements
+## UI Notes
+
+- Uses custom "liquid glass" button effect (see `globals.css`)
+- Dark theme with subtle transparency effects
+- Toast notifications via custom `Toast` component
+- Modals for confirmations and imports
+
+## Testing Tips
+
+1. Check Vercel Logs for webhook debugging
+2. Resend dashboard shows received emails under "Receiving" tab
+3. Use Resend's "Replay" button to re-test webhooks
+4. Database queries can be tested via `/api/init-db` endpoint
