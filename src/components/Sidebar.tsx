@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 interface SidebarProps {
@@ -40,10 +39,6 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
     { href: "/tribe", label: "Your tribe", icon: UsersIcon },
     { href: "/join", label: "Join page", icon: SquarePlusIcon },
   ];
-
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
-  };
 
   return (
     <>
@@ -155,42 +150,33 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
           </ul>
         </div>
 
-        {/* User Profile & Logout */}
+        {/* User Profile */}
         <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
-          <div className="flex items-center gap-3 px-3">
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 flex-1 py-2 rounded-md hover:bg-white/[0.05] transition-colors group"
-            >
-              {user.avatar ? (
-                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-medium text-white/70 ring-2 ring-white/10"
-                  style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-                >
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <span className="text-[13px] text-white/60 group-hover:text-white/80 transition-colors truncate">
-                {user.name}
-              </span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-md text-white/30 hover:bg-white/[0.05] hover:text-white/60 transition-colors"
-              title="Log out"
-            >
-              <LogoutIcon className="w-[15px] h-[15px]" />
-            </button>
-          </div>
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/[0.05] transition-colors group"
+          >
+            {user.avatar ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={user.avatar} 
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-medium text-white/70 ring-2 ring-white/10"
+                style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+              >
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="text-[13px] text-white/60 group-hover:text-white/80 transition-colors truncate">
+              {user.name}
+            </span>
+          </Link>
         </div>
       </aside>
     </>
@@ -255,16 +241,6 @@ function GearIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 11 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M5.50003 3.91304C4.39548 3.91304 3.50006 4.8474 3.50006 6C3.50006 7.15257 4.39548 8.08696 5.50003 8.08696C6.60456 8.08696 7.49999 7.15257 7.49999 6C7.49999 4.8474 6.60456 3.91304 5.50003 3.91304ZM4.50005 6C4.50005 5.42369 4.94774 4.95652 5.50003 4.95652C6.05232 4.95652 6.50001 5.42369 6.50001 6C6.50001 6.57631 6.05232 7.04348 5.50003 7.04348C4.94774 7.04348 4.50005 6.57631 4.50005 6Z" />
       <path fillRule="evenodd" clipRule="evenodd" d="M5.14328 0C4.44284 0 3.82298 0.504757 3.68579 1.22924L3.64626 1.43803C3.55239 1.93376 3.03092 2.25944 2.52251 2.08076L2.32408 2.01103C1.6612 1.77807 0.919346 2.05027 0.559172 2.68139L0.202458 3.30644C-0.161133 3.94354 -0.0228255 4.75037 0.519623 5.2248L0.678555 5.36379C1.06467 5.70151 1.06467 6.29849 0.678555 6.63621L0.519623 6.7752C-0.0228255 7.24962 -0.161133 8.05643 0.202458 8.69353L0.559157 9.31857C0.919341 9.94972 1.66122 10.2219 2.32411 9.98896L2.52248 9.9192C3.03091 9.7405 3.55239 10.0662 3.64626 10.5619L3.6858 10.7707C3.82298 11.4952 4.44284 12 5.14328 12H5.85672C6.55716 12 7.17705 11.4952 7.3142 10.7707L7.3537 10.562C7.4476 10.0662 7.96904 9.7405 8.47748 9.9192L8.67593 9.98896C9.33881 10.2219 10.0807 9.94972 10.4408 9.31857L10.7975 8.69358C11.1611 8.05649 11.0228 7.24962 10.4803 6.7752L10.3214 6.63621C9.9353 6.29854 9.9353 5.70146 10.3214 5.36379L10.4803 5.2248C11.0228 4.75038 11.1611 3.94354 10.7975 3.30643L10.4408 2.68138C10.0807 2.05027 9.33881 1.77806 8.67597 2.01101L8.47748 2.08077C7.96904 2.25944 7.4476 1.93374 7.3537 1.438L7.3142 1.2293C7.17705 0.504788 6.55716 0 5.85672 0H5.14328ZM4.66679 1.43152C4.70734 1.21739 4.89904 1.04348 5.14328 1.04348H5.85672C6.10092 1.04348 6.29267 1.21741 6.33316 1.43154L6.37271 1.64024C6.58946 2.7851 7.74529 3.43913 8.79662 3.06967L8.99512 2.99992C9.22462 2.91927 9.46951 3.01876 9.58166 3.21529L9.9384 3.84033C10.0472 4.03089 10.0103 4.27446 9.83806 4.42505L9.67911 4.56403C8.81612 5.31877 8.81612 6.68123 9.67911 7.43598L9.83806 7.57492C10.0103 7.72555 10.0472 7.9691 9.9384 8.15969L9.58171 8.78468C9.46951 8.98122 9.22462 9.08071 8.99512 9.00005L8.79667 8.93029C7.74534 8.5608 6.58946 9.21485 6.37271 10.3598L6.33316 10.5685C6.29267 10.7826 6.10092 10.9565 5.85672 10.9565H5.14328C4.89909 10.9565 4.70734 10.7826 4.66679 10.5685L4.62729 10.3597C4.41049 9.2148 3.2546 8.5608 2.20329 8.93035L2.00492 9.00005C1.77543 9.08071 1.5305 8.98122 1.41833 8.78468L1.06163 8.15963C0.95288 7.9691 0.98978 7.72555 1.16197 7.57492L1.3209 7.43593C2.18387 6.68118 2.18387 5.31882 1.3209 4.56406L1.16197 4.42506C0.98978 4.27447 0.95288 4.0309 1.06163 3.84035L1.41834 3.2153C1.53051 3.01876 1.77543 2.91928 2.00491 2.99993L2.20334 3.06966C3.25464 3.43913 4.41049 2.78514 4.62729 1.64031L4.66679 1.43152Z" />
-    </svg>
-  );
-}
-
-function LogoutIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 2H3.5A1.5 1.5 0 002 3.5v9A1.5 1.5 0 003.5 14H6" />
-      <path d="M10.5 11.5L14 8l-3.5-3.5" />
-      <path d="M14 8H6" />
     </svg>
   );
 }

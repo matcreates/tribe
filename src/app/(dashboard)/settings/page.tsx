@@ -165,7 +165,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
-        <h1 className="text-[20px] font-medium text-white/90 mb-6">Account</h1>
+        <h1 className="text-[20px] font-medium text-white/90 mb-6">Account settings</h1>
 
         {/* Profile Image */}
         <div className="mb-5">
@@ -339,7 +339,7 @@ export default function SettingsPage() {
         </button>
 
         {/* Log out */}
-        <div className="mt-16 pt-8 border-t border-white/[0.06]">
+        <div className="mt-16 pt-8 pb-12 border-t border-white/[0.06]">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex items-center gap-2 text-[13px] text-white/40 hover:text-white/60 transition-colors"
