@@ -7,7 +7,11 @@ export async function middleware(request: NextRequest) {
   
   // CRITICAL: Allow webhook endpoints without ANY processing
   // This must be checked FIRST before any auth logic
-  if (pathname.includes("/api/inbound") || pathname.includes("/api/webhook") || pathname.includes("/api/test")) {
+  if (
+    pathname.includes("/api/inbound") || 
+    pathname.includes("/webhook") ||  // Matches /api/stripe/webhook, /api/webhook-inbound, etc.
+    pathname.includes("/api/test")
+  ) {
     console.log("Middleware: Allowing webhook through:", pathname);
     return NextResponse.next();
   }
@@ -55,6 +59,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Exclude static files, images, favicon, AND webhook endpoints
-    "/((?!_next/static|_next/image|favicon.ico|api/inbound|api/webhook|api/test|.*\\..*).*)",
+    // Note: Using broader patterns to catch all webhook paths
+    "/((?!_next/static|_next/image|favicon.ico|api/inbound|api/stripe/webhook|api/webhook-inbound|api/test|.*\\..*).*)",
   ],
 };
+
+
