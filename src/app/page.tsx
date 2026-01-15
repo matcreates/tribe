@@ -33,7 +33,7 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-start justify-center px-6 pt-32 overflow-hidden">
+      <section className="relative min-h-screen flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 overflow-hidden">
         {/* Background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -50,38 +50,38 @@ export default async function LandingPage() {
           }}
         />
 
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
+        <div className="relative z-10 max-w-3xl mx-auto text-center px-2">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full mb-5 sm:mb-8 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
-            <span className="text-[11px] text-white/50 tracking-wide">Simple newsletter tool for creators</span>
+            <span className="text-[10px] sm:text-[11px] text-white/50 tracking-wide">Simple newsletter tool for creators</span>
           </div>
           
-          <h1 className="text-[clamp(2.5rem,8vw,4.5rem)] font-medium text-white leading-[1.1] tracking-tight mb-6">
+          <h1 className="text-[1.75rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-medium text-white leading-[1.15] sm:leading-[1.1] tracking-tight mb-4 sm:mb-6">
             Build your tribe,{' '}
             <span className="text-white/40">one email at a time</span>
           </h1>
           
-          <p className="text-[17px] text-white/45 leading-relaxed max-w-xl mx-auto mb-10">
-            A minimal newsletter platform for creators who want to connect with their audience without the complexity. No noise, just you and your people.
+          <p className="text-[14px] sm:text-[15px] md:text-[17px] text-white/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">
+            A minimal newsletter platform for creators who want to connect with their audience without the complexity.
           </p>
 
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               href="/signup"
-              className="px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
+              className="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
             >
               <span className="btn-glass-text">Start for free</span>
             </Link>
             <Link
               href="/login"
-              className="px-8 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
+              className="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
               <span className="btn-glass-text">Sign in</span>
             </Link>
           </div>
 
           {/* Social proof hint */}
-          <p className="mt-10 text-[12px] text-white/30">
+          <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-white/30">
             Free to explore • Starts at $3/month
           </p>
         </div>
