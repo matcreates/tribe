@@ -33,7 +33,7 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+      <section className="relative min-h-screen flex items-start justify-center px-6 pt-32 overflow-hidden">
         {/* Background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -42,19 +42,11 @@ export default async function LandingPage() {
           }}
         />
         
-        {/* Dark overlay for text readability */}
+        {/* Lighter overlay - more visible image, darker at top for nav readability */}
         <div 
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(180deg, rgba(12, 12, 12, 0.7) 0%, rgba(12, 12, 12, 0.85) 50%, rgba(12, 12, 12, 0.95) 100%)',
-          }}
-        />
-        
-        {/* Subtle teal accent gradient */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: 'radial-gradient(ellipse 80% 50% at 50% 30%, rgba(45, 138, 138, 0.2), transparent)',
+            background: 'linear-gradient(180deg, rgba(12, 12, 12, 0.6) 0%, rgba(12, 12, 12, 0.3) 40%, rgba(12, 12, 12, 0.2) 60%, rgba(12, 12, 12, 0.7) 100%)',
           }}
         />
 
@@ -89,15 +81,15 @@ export default async function LandingPage() {
           </div>
 
           {/* Social proof hint */}
-          <p className="mt-16 text-[12px] text-white/25">
+          <p className="mt-10 text-[12px] text-white/30">
             Free to explore • Starts at $3/month
           </p>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-[10px] text-white/20 tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-white/20 to-transparent" />
+        {/* Scroll indicator - positioned at bottom */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+          <span className="text-[10px] text-white/30 tracking-widest uppercase">Scroll</span>
+          <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
         </div>
       </section>
 
