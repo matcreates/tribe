@@ -34,21 +34,27 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-        {/* Background gradient */}
+        {/* Background image */}
         <div 
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(45, 138, 138, 0.15), transparent)',
+            backgroundImage: 'url(/hero-bg.jpg)',
           }}
         />
         
-        {/* Grid pattern */}
+        {/* Dark overlay for text readability */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
+            background: 'linear-gradient(180deg, rgba(12, 12, 12, 0.7) 0%, rgba(12, 12, 12, 0.85) 50%, rgba(12, 12, 12, 0.95) 100%)',
+          }}
+        />
+        
+        {/* Subtle teal accent gradient */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'radial-gradient(ellipse 80% 50% at 50% 30%, rgba(45, 138, 138, 0.2), transparent)',
           }}
         />
 
