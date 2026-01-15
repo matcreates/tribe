@@ -28,6 +28,31 @@ interface EmailReply {
 
 const REPLIES_PAGE_SIZE = 10;
 
+function ReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 6L3 10l4 4" />
+      <path d="M3 10h10a4 4 0 0 1 4 4v2" />
+    </svg>
+  );
+}
+
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 4L6 8L10 12" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4L10 8L6 12" />
+    </svg>
+  );
+}
+
 export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -460,13 +485,3 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
     </div>
   );
 }
-
-function ReplyIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 6L3 10l4 4" />
-      <path d="M3 10h10a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
-}
-
