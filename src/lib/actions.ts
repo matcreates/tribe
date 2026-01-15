@@ -8,6 +8,7 @@ import {
   updateTribe,
   getVerifiedSubscribersByTribeId,
   getSubscribersByTribeId,
+  getSubscriberById,
   addSubscriber as dbAddSubscriber,
   addSubscriberBulk as dbAddSubscriberBulk,
   getExistingEmailsInTribe,
@@ -297,7 +298,14 @@ export async function addSubscriberManually(email: string): Promise<{ success: b
 }
 
 export async function removeSubscriber(id: string) {
-  await getTribe(); // Auth check
+  const tribe = await getTribe();
+  
+  // Verify subscriber belongs to this tribe before deletion (prevents IDOR)
+  const subscriber = await getSubscriberById(id);
+  if (!subscriber || subscriber.tribe_id !== tribe.id) {
+    throw new Error("Subscriber not found");
+  }
+  
   await dbRemoveSubscriber(id);
   revalidatePath("/tribe");
   revalidatePath("/dashboard");

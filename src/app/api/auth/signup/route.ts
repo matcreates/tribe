@@ -12,9 +12,11 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    // Require strong password: 8+ chars, at least one uppercase, one lowercase, one number
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!strongPasswordRegex.test(password)) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: "Password must be at least 8 characters with uppercase, lowercase, and a number" },
         { status: 400 }
       );
     }
