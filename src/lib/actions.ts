@@ -2,6 +2,7 @@
 
 import { auth } from "./auth";
 import {
+  pool,
   getTribeByUserId,
   getTribeBySlug,
   updateTribe,
@@ -117,6 +118,125 @@ export async function getSubscribers() {
     verification_token: s.verification_token,
     created_at: s.created_at instanceof Date ? s.created_at.toISOString() : String(s.created_at),
   }));
+}
+
+// Paginated subscriber list with server-side filtering/sorting
+export type SubscriberFilter = "all" | "verified" | "non-verified";
+export type SubscriberSort = "newest" | "oldest" | "a-z" | "z-a" | "verified-first" | "unverified-first";
+
+export interface PaginatedSubscribersResult {
+  subscribers: {
+    id: string;
+    email: string;
+    name: string | null;
+    verified: boolean;
+    created_at: string;
+  }[];
+  total: number;
+  totalVerified: number;
+  totalNonVerified: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export async function getSubscribersPaginated(
+  page: number = 1,
+  pageSize: number = 50,
+  filter: SubscriberFilter = "all",
+  sort: SubscriberSort = "newest",
+  search: string = ""
+): Promise<PaginatedSubscribersResult> {
+  const tribe = await getTribe();
+  
+  // Build WHERE clause
+  let whereClause = "WHERE tribe_id = $1";
+  const params: (string | number)[] = [tribe.id];
+  let paramIndex = 2;
+  
+  if (filter === "verified") {
+    whereClause += " AND verified = true";
+  } else if (filter === "non-verified") {
+    whereClause += " AND verified = false";
+  }
+  
+  if (search.trim()) {
+    whereClause += ` AND email ILIKE $${paramIndex}`;
+    params.push(`%${search.trim()}%`);
+    paramIndex++;
+  }
+  
+  // Build ORDER BY clause
+  let orderClause: string;
+  switch (sort) {
+    case "oldest":
+      orderClause = "ORDER BY created_at ASC";
+      break;
+    case "a-z":
+      orderClause = "ORDER BY email ASC";
+      break;
+    case "z-a":
+      orderClause = "ORDER BY email DESC";
+      break;
+    case "verified-first":
+      orderClause = "ORDER BY verified DESC, created_at DESC";
+      break;
+    case "unverified-first":
+      orderClause = "ORDER BY verified ASC, created_at DESC";
+      break;
+    case "newest":
+    default:
+      orderClause = "ORDER BY created_at DESC";
+      break;
+  }
+  
+  // Get total counts
+  const countQuery = `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1`;
+  const countResult = await pool.query(countQuery, [tribe.id]);
+  const total = parseInt(countResult.rows[0].count, 10);
+  
+  const verifiedCountQuery = `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = true`;
+  const verifiedResult = await pool.query(verifiedCountQuery, [tribe.id]);
+  const totalVerified = parseInt(verifiedResult.rows[0].count, 10);
+  
+  const totalNonVerified = total - totalVerified;
+  
+  // Get filtered count for pagination
+  const filteredCountQuery = `SELECT COUNT(*) as count FROM subscribers ${whereClause}`;
+  const filteredCountResult = await pool.query(filteredCountQuery, params);
+  const filteredTotal = parseInt(filteredCountResult.rows[0].count, 10);
+  
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const offset = (safePage - 1) * pageSize;
+  
+  // Get paginated results
+  const dataQuery = `
+    SELECT id, email, name, verified, created_at 
+    FROM subscribers 
+    ${whereClause} 
+    ${orderClause} 
+    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+  `;
+  params.push(pageSize, offset);
+  
+  const result = await pool.query(dataQuery, params);
+  
+  return {
+    subscribers: result.rows.map((s: { id: string; email: string; name: string | null; verified: boolean; created_at: Date | string }) => ({
+      id: s.id,
+      email: s.email,
+      name: s.name,
+      verified: s.verified,
+      created_at: s.created_at instanceof Date ? s.created_at.toISOString() : String(s.created_at),
+    })),
+    total,
+    totalVerified,
+    totalNonVerified,
+    page: safePage,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function addSubscriber(email: string, name?: string) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { getSubscribers, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually } from "@/lib/actions";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getSubscribersPaginated, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually, SubscriberFilter, SubscriberSort, PaginatedSubscribersResult } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
 import { ImportChooserModal, ManualEntryModal } from "@/components/ImportChooserModal";
@@ -11,12 +11,10 @@ interface Subscriber {
   email: string;
   name: string | null;
   verified: boolean;
-  verification_token: string | null;
   created_at: string;
 }
 
-type FilterType = "all" | "verified" | "non-verified";
-type SortType = "newest" | "oldest" | "a-z" | "z-a" | "verified-first" | "unverified-first";
+const PAGE_SIZE = 50;
 
 // Email regex for extraction
 const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -55,8 +53,14 @@ function extractEmailsFromText(text: string): string[] {
 export default function TribePage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [sort, setSort] = useState<SortType>("newest");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filter, setFilter] = useState<SubscriberFilter>("all");
+  const [sort, setSort] = useState<SubscriberSort>("newest");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalVerified, setTotalVerified] = useState(0);
+  const [totalNonVerified, setTotalNonVerified] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,9 +75,42 @@ export default function TribePage() {
   const [isImporting, setIsImporting] = useState(false);
   const [pendingEmails, setPendingEmails] = useState<string[]>([]);
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset to first page on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Load subscribers when filters change
+  const loadSubscribers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result: PaginatedSubscribersResult = await getSubscribersPaginated(
+        page,
+        PAGE_SIZE,
+        filter,
+        sort,
+        debouncedSearch
+      );
+      setSubscribers(result.subscribers);
+      setTotal(result.total);
+      setTotalVerified(result.totalVerified);
+      setTotalNonVerified(result.totalNonVerified);
+      setTotalPages(result.totalPages);
+      setPage(result.page);
+    } catch (error) {
+      console.error("Failed to load subscribers:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, filter, sort, debouncedSearch]);
+
   useEffect(() => {
     loadSubscribers();
-  }, []);
+  }, [loadSubscribers]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -86,19 +123,8 @@ export default function TribePage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const loadSubscribers = async () => {
-    try {
-      const data = await getSubscribers();
-      setSubscribers(data);
-    } catch (error) {
-      console.error("Failed to load subscribers:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Sort options config
-  const sortOptions: { value: SortType; label: string }[] = [
+  const sortOptions: { value: SubscriberSort; label: string }[] = [
     { value: "newest", label: "Newest to oldest" },
     { value: "oldest", label: "Oldest to newest" },
     { value: "a-z", label: "Alphabetical: A to Z" },
@@ -109,40 +135,18 @@ export default function TribePage() {
 
   const currentSortLabel = sortOptions.find(o => o.value === sort)?.label || "Sort";
 
-  // Apply search, filter, and sort
-  const filteredAndSortedSubscribers = subscribers
-    .filter((s) => {
-      const matchesSearch = s.email.toLowerCase().includes(search.toLowerCase());
-      const matchesFilter = 
-        filter === "all" ? true :
-        filter === "verified" ? s.verified :
-        !s.verified;
-      return matchesSearch && matchesFilter;
-    })
-    .sort((a, b) => {
-      switch (sort) {
-        case "a-z":
-          return a.email.localeCompare(b.email);
-        case "z-a":
-          return b.email.localeCompare(a.email);
-        case "newest":
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case "oldest":
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        case "verified-first":
-          if (a.verified === b.verified) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          return a.verified ? -1 : 1;
-        case "unverified-first":
-          if (a.verified === b.verified) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          return a.verified ? 1 : -1;
-        default:
-          return 0;
-      }
-    });
+  // Handle filter change - reset to page 1
+  const handleFilterChange = (newFilter: SubscriberFilter) => {
+    setFilter(newFilter);
+    setPage(1);
+  };
 
-  // Count for each filter
-  const verifiedCount = subscribers.filter(s => s.verified).length;
-  const nonVerifiedCount = subscribers.filter(s => !s.verified).length;
+  // Handle sort change - reset to page 1
+  const handleSortChange = (newSort: SubscriberSort) => {
+    setSort(newSort);
+    setPage(1);
+    setShowSortDropdown(false);
+  };
 
   const handleCopy = async (email: string) => {
     try {
@@ -321,21 +325,13 @@ export default function TribePage() {
     setPendingEmails([]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-[13px] text-white/30">Loading...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
-            Your tribe is made of <span className="text-white">{subscribers.length}</span> {subscribers.length === 1 ? 'person' : 'people'}
+            Your tribe is made of <span className="text-white">{total}</span> {total === 1 ? 'person' : 'people'}
           </h1>
           <div className="flex-1" />
           <div className="flex gap-2">
@@ -364,34 +360,34 @@ export default function TribePage() {
         {/* Filter Tabs */}
         <div className="flex gap-1 mb-4 overflow-x-auto">
           <button
-            onClick={() => setFilter("all")}
+            onClick={() => handleFilterChange("all")}
             className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "all"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
             }`}
           >
-            All ({subscribers.length})
+            All ({total})
           </button>
           <button
-            onClick={() => setFilter("verified")}
+            onClick={() => handleFilterChange("verified")}
             className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "verified"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
             }`}
           >
-            Verified ({verifiedCount})
+            Verified ({totalVerified})
           </button>
           <button
-            onClick={() => setFilter("non-verified")}
+            onClick={() => handleFilterChange("non-verified")}
             className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "non-verified"
                 ? "bg-white/[0.08] text-white/70"
                 : "text-white/40 hover:text-white/60"
             }`}
           >
-            Non-verified ({nonVerifiedCount})
+            Non-verified ({totalNonVerified})
           </button>
         </div>
 
@@ -430,10 +426,7 @@ export default function TribePage() {
                 {sortOptions.map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => {
-                      setSort(option.value);
-                      setShowSortDropdown(false);
-                    }}
+                    onClick={() => handleSortChange(option.value)}
                     className={`w-full px-4 py-2 text-left text-[12px] transition-colors ${
                       sort === option.value 
                         ? 'text-white/80 bg-white/[0.06]' 
@@ -450,7 +443,11 @@ export default function TribePage() {
 
         {/* Subscriber List */}
         <div className="space-y-1.5">
-          {filteredAndSortedSubscribers.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-10">
+              <p className="text-[13px] text-white/35">Loading...</p>
+            </div>
+          ) : subscribers.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-[13px] text-white/35">
                 {search ? "No subscribers found" : "No subscribers yet"}
@@ -462,7 +459,7 @@ export default function TribePage() {
               )}
             </div>
           ) : (
-            filteredAndSortedSubscribers.map((subscriber) => (
+            subscribers.map((subscriber) => (
               <div
                 key={subscriber.id}
                 className="flex items-center gap-2 px-4 py-3 rounded-[10px] hover:bg-white/[0.04] transition-colors group border border-white/[0.06]"
@@ -503,6 +500,51 @@ export default function TribePage() {
             ))
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6 pb-8">
+            <button
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="First page"
+            >
+              <DoubleChevronLeftIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="Previous page"
+            >
+              <ChevronLeftIcon className="w-4 h-4" />
+            </button>
+            
+            <div className="flex items-center gap-1 px-2">
+              <span className="text-[13px] text-white/60">
+                Page {page} of {totalPages}
+              </span>
+            </div>
+            
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="Next page"
+            >
+              <ChevronRightIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+              className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="Last page"
+            >
+              <DoubleChevronRightIcon className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
@@ -573,6 +615,40 @@ function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 4.5L6 7.5L9 4.5" />
+    </svg>
+  );
+}
+
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 4L6 8L10 12" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4L10 8L6 12" />
+    </svg>
+  );
+}
+
+function DoubleChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 4L4 8L8 12" />
+      <path d="M12 4L8 8L12 12" />
+    </svg>
+  );
+}
+
+function DoubleChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4L8 8L4 12" />
+      <path d="M8 4L12 8L8 12" />
     </svg>
   );
 }
