@@ -108,7 +108,7 @@ export default function PublicJoinPage({ params }: PageProps) {
   }
 
   const ownerName = tribeSettings?.ownerName || "Anonymous";
-  const ownerAvatar = tribeSettings?.ownerAvatar;
+  const ownerAvatar = tribeSettings?.ownerAvatar ?? null;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
