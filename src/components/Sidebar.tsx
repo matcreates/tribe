@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { AvatarMedium } from "./Avatar";
 
 interface SidebarProps {
   sentEmails: { id: string; subject: string | null }[];
@@ -156,23 +157,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
             href="/settings"
             className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/[0.05] transition-colors group"
           >
-            {user.avatar ? (
-              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={user.avatar} 
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-medium text-white/70 ring-2 ring-white/10"
-                style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-              >
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarMedium src={user.avatar} name={user.name} className="flex-shrink-0" />
             <span className="text-[13px] text-white/60 group-hover:text-white/80 transition-colors truncate">
               {user.name}
             </span>

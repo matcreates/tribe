@@ -2,51 +2,42 @@
 
 import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
-import { getTribeSettings, updateTribeSettings, getSubscriptionStatus, SubscriptionStatus } from "@/lib/actions";
+import { updateTribeSettings } from "@/lib/actions";
+import { useTribeSettings, useSubscriptionStatus } from "@/lib/hooks";
 import { Toast, useToast } from "@/components/Toast";
 import { PaywallModal } from "@/components/PaywallModal";
+import { AvatarLarge } from "@/components/Avatar";
 
 export default function SettingsPage() {
+  // Use SWR hooks for cached data
+  const { settings, isLoading: isLoadingSettings, mutate: mutateSettings } = useTribeSettings();
+  const { subscription, isLoading: isLoadingSubscription, mutate: mutateSubscription } = useSubscriptionStatus();
+  
+  // Local form state
   const [ownerName, setOwnerName] = useState("");
   const [slug, setSlug] = useState("");
   const [ownerAvatar, setOwnerAvatar] = useState("");
   const [emailSignature, setEmailSignature] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
+  // Populate form when settings are loaded
   useEffect(() => {
-    loadSettings();
-    loadSubscription();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const settings = await getTribeSettings();
+    if (settings && !hasInitialized) {
       setOwnerName(settings.ownerName);
       setSlug(settings.slug);
       setOwnerAvatar(settings.ownerAvatar || "");
       setEmailSignature(settings.emailSignature || "");
-    } catch (error) {
-      console.error("Failed to load settings:", error);
-    } finally {
-      setIsLoading(false);
+      setHasInitialized(true);
     }
-  };
+  }, [settings, hasInitialized]);
 
-  const loadSubscription = async () => {
-    try {
-      const status = await getSubscriptionStatus();
-      setSubscription(status);
-    } catch (error) {
-      console.error("Failed to load subscription:", error);
-    }
-  };
+  const isLoading = isLoadingSettings || isLoadingSubscription;
 
   const syncSubscription = async () => {
     setIsLoadingPortal(true);
@@ -58,8 +49,8 @@ export default function SettingsPage() {
       
       if (data.synced) {
         showToast("Subscription status updated");
-        // Reload subscription status
-        await loadSubscription();
+        // Invalidate cache to refetch
+        mutateSubscription();
       } else {
         showToast(data.message || "Could not sync subscription");
       }
@@ -147,6 +138,8 @@ export default function SettingsPage() {
         ownerAvatar: ownerAvatar.trim() || undefined,
         emailSignature: emailSignature.trim() || undefined,
       });
+      // Invalidate cache to reflect changes across the app
+      mutateSettings();
       showToast("Settings saved");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save";
@@ -180,19 +173,7 @@ export default function SettingsPage() {
         <div className="mb-5">
           <label className="block text-[12px] text-white/40 mb-2">Profile image</label>
           <div className="flex items-center gap-3 mb-2">
-            {ownerAvatar && (
-              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={ownerAvatar} 
-                  alt="Profile preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
+            <AvatarLarge src={ownerAvatar || null} name={ownerName || "User"} />
             <button
               type="button"
               onClick={handleFileSelect}

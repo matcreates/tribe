@@ -487,6 +487,68 @@ export async function getEmailReplies(emailId: string) {
   }));
 }
 
+// Paginated version of getEmailReplies
+export interface PaginatedRepliesResult {
+  replies: {
+    id: string;
+    email_id: string;
+    subscriber_email: string;
+    reply_text: string;
+    received_at: string;
+  }[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export async function getEmailRepliesPaginated(
+  emailId: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<PaginatedRepliesResult> {
+  // First verify the user owns this email
+  const tribe = await getTribe();
+  const emails = await getSentEmailsByTribeId(tribe.id);
+  const email = emails.find(e => e.id === emailId);
+  if (!email) {
+    throw new Error("Email not found");
+  }
+  
+  // Get total count
+  const countResult = await pool.query(
+    `SELECT COUNT(*) as count FROM email_replies WHERE email_id = $1`,
+    [emailId]
+  );
+  const total = parseInt(countResult.rows[0].count, 10);
+  
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const offset = (safePage - 1) * pageSize;
+  
+  // Get paginated replies
+  const result = await pool.query(
+    `SELECT * FROM email_replies WHERE email_id = $1 ORDER BY received_at DESC LIMIT $2 OFFSET $3`,
+    [emailId, pageSize, offset]
+  );
+  
+  return {
+    replies: result.rows.map((reply: { id: string; email_id: string; subscriber_email: string; reply_text: string; received_at: Date | string }) => ({
+      id: reply.id,
+      email_id: reply.email_id,
+      subscriber_email: reply.subscriber_email,
+      reply_text: reply.reply_text,
+      received_at: reply.received_at instanceof Date 
+        ? reply.received_at.toISOString() 
+        : String(reply.received_at),
+    })),
+    total,
+    page: safePage,
+    pageSize,
+    totalPages,
+  };
+}
+
 export type RecipientFilter = "verified" | "non-verified" | "all";
 
 export async function getEmailSignature(): Promise<string> {

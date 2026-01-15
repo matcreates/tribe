@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Toast, useToast } from "@/components/Toast";
 import { updateTribeSettings } from "@/lib/actions";
+import { Avatar } from "@/components/Avatar";
 
 interface Settings {
   id: string;
@@ -112,22 +113,8 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
         >
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
-            <div 
-              className="w-14 h-14 rounded-full mb-2.5 flex items-center justify-center overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #2d8a8a 0%, #1a5f5f 100%)' }}
-            >
-              {settings.ownerAvatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img 
-                  src={settings.ownerAvatar} 
-                  alt={settings.ownerName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-xl text-white/90 font-medium">
-                  {settings.ownerName.charAt(0)}
-                </span>
-              )}
+            <div className="mb-2.5">
+              <Avatar src={settings.ownerAvatar} name={settings.ownerName} size={56} />
             </div>
             
             {/* Name */}

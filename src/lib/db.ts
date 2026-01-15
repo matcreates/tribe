@@ -164,6 +164,37 @@ export async function initDatabase() {
       received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Performance indexes for subscribers table
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscribers_tribe_verified ON subscribers(tribe_id, verified)`);
+  } catch {
+    // Index might already exist
+  }
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscribers_tribe_email ON subscribers(tribe_id, email)`);
+  } catch {
+    // Index might already exist
+  }
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscribers_tribe_created ON subscribers(tribe_id, created_at DESC)`);
+  } catch {
+    // Index might already exist
+  }
+
+  // Performance indexes for sent_emails table
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sent_emails_tribe_sent ON sent_emails(tribe_id, sent_at DESC)`);
+  } catch {
+    // Index might already exist
+  }
+
+  // Performance indexes for email_replies table
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_email_replies_email ON email_replies(email_id, received_at DESC)`);
+  } catch {
+    // Index might already exist
+  }
 }
 
 export interface DbUser {

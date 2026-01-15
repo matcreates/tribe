@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { Toast, useToast } from "@/components/Toast";
+import { Avatar } from "@/components/Avatar";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -23,12 +24,10 @@ export default function PublicJoinPage({ params }: PageProps) {
   const [isJoined, setIsJoined] = useState(false);
   const [error, setError] = useState("");
   const [tribeSettings, setTribeSettings] = useState<TribeSettings | null>(null);
-  const [avatarError, setAvatarError] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     // Fetch tribe settings
-    setAvatarError(false);
     fetch(`/api/tribe/${resolvedParams.slug}`)
       .then(res => res.json())
       .then(data => {
@@ -119,23 +118,8 @@ export default function PublicJoinPage({ params }: PageProps) {
       >
         <div className="flex flex-col items-center text-center">
           {/* Avatar */}
-          <div 
-            className="w-14 h-14 rounded-full mb-2.5 flex items-center justify-center overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #2d8a8a 0%, #1a5f5f 100%)' }}
-          >
-            {ownerAvatar && !avatarError ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img 
-                src={ownerAvatar} 
-                alt={ownerName}
-                className="w-full h-full object-cover"
-                onError={() => setAvatarError(true)}
-              />
-            ) : (
-              <span className="text-xl text-white/90 font-medium">
-                {ownerName.charAt(0).toUpperCase()}
-              </span>
-            )}
+          <div className="mb-2.5">
+            <Avatar src={ownerAvatar} name={ownerName} size={56} />
           </div>
           
           {/* Name */}

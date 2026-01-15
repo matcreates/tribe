@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { getSentEmailById, getEmailReplies, deleteSentEmail } from "@/lib/actions";
+import { useState, useEffect, use, useCallback } from "react";
+import { getSentEmailById, getEmailRepliesPaginated, deleteSentEmail, PaginatedRepliesResult } from "@/lib/actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -26,22 +26,23 @@ interface EmailReply {
   received_at: string;
 }
 
+const REPLIES_PAGE_SIZE = 10;
+
 export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
   const [email, setEmail] = useState<SentEmail | null>(null);
   const [replies, setReplies] = useState<EmailReply[]>([]);
+  const [repliesPage, setRepliesPage] = useState(1);
+  const [repliesTotalPages, setRepliesTotalPages] = useState(1);
+  const [repliesTotal, setRepliesTotal] = useState(0);
+  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    loadEmail();
-    loadReplies();
-  }, [resolvedParams.id]);
-
-  const loadEmail = async () => {
+  const loadEmail = useCallback(async () => {
     try {
       const data = await getSentEmailById(resolvedParams.id);
       setEmail(data);
@@ -51,16 +52,34 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [resolvedParams.id]);
 
-  const loadReplies = async () => {
+  const loadReplies = useCallback(async () => {
+    setIsLoadingReplies(true);
     try {
-      const data = await getEmailReplies(resolvedParams.id);
-      setReplies(data);
+      const result: PaginatedRepliesResult = await getEmailRepliesPaginated(
+        resolvedParams.id,
+        repliesPage,
+        REPLIES_PAGE_SIZE
+      );
+      setReplies(result.replies);
+      setRepliesTotal(result.total);
+      setRepliesTotalPages(result.totalPages);
+      setRepliesPage(result.page);
     } catch (err) {
       console.error("Failed to load replies:", err);
+    } finally {
+      setIsLoadingReplies(false);
     }
-  };
+  }, [resolvedParams.id, repliesPage]);
+
+  useEffect(() => {
+    loadEmail();
+  }, [loadEmail]);
+
+  useEffect(() => {
+    loadReplies();
+  }, [loadReplies]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -300,12 +319,16 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
         >
           <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
             <h3 className="text-[13px] font-medium text-white/70">Replies</h3>
-            {replies.length > 0 && (
-              <span className="text-[11px] text-white/40">{replies.length} {replies.length === 1 ? 'reply' : 'replies'}</span>
+            {repliesTotal > 0 && (
+              <span className="text-[11px] text-white/40">{repliesTotal} {repliesTotal === 1 ? 'reply' : 'replies'}</span>
             )}
           </div>
           <div className="p-5">
-            {replies.length === 0 ? (
+            {isLoadingReplies ? (
+              <div className="text-center py-8">
+                <p className="text-[13px] text-white/40">Loading replies...</p>
+              </div>
+            ) : replies.length === 0 ? (
               <div className="text-center py-8">
                 <div 
                   className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
@@ -319,44 +342,69 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {replies.map((reply) => {
-                  const replyDate = new Date(reply.received_at);
-                  const replyFormatted = replyDate.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  }) + " at " + replyDate.toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  });
-                  
-                  return (
-                    <div 
-                      key={reply.id}
-                      className="rounded-[10px] border border-white/[0.06] overflow-hidden"
-                      style={{ background: 'rgba(0, 0, 0, 0.15)' }}
-                    >
-                      <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white/70"
-                            style={{ background: 'rgba(45, 138, 138, 0.3)' }}
-                          >
-                            {reply.subscriber_email.charAt(0).toUpperCase()}
+              <>
+                <div className="space-y-4">
+                  {replies.map((reply) => {
+                    const replyDate = new Date(reply.received_at);
+                    const replyFormatted = replyDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    }) + " at " + replyDate.toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    });
+                    
+                    return (
+                      <div 
+                        key={reply.id}
+                        className="rounded-[10px] border border-white/[0.06] overflow-hidden"
+                        style={{ background: 'rgba(0, 0, 0, 0.15)' }}
+                      >
+                        <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white/70"
+                              style={{ background: 'rgba(45, 138, 138, 0.3)' }}
+                            >
+                              {reply.subscriber_email.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-[12px] text-white/60">{reply.subscriber_email}</span>
                           </div>
-                          <span className="text-[12px] text-white/60">{reply.subscriber_email}</span>
+                          <span className="text-[10px] text-white/30">{replyFormatted}</span>
                         </div>
-                        <span className="text-[10px] text-white/30">{replyFormatted}</span>
+                        <div className="px-4 py-3">
+                          <p className="text-[13px] text-white/50 leading-relaxed whitespace-pre-wrap">
+                            {reply.reply_text}
+                          </p>
+                        </div>
                       </div>
-                      <div className="px-4 py-3">
-                        <p className="text-[13px] text-white/50 leading-relaxed whitespace-pre-wrap">
-                          {reply.reply_text}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Replies Pagination */}
+                {repliesTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/[0.04]">
+                    <button
+                      onClick={() => setRepliesPage(p => Math.max(1, p - 1))}
+                      disabled={repliesPage === 1}
+                      className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronLeftIcon className="w-4 h-4" />
+                    </button>
+                    <span className="text-[12px] text-white/50 px-2">
+                      {repliesPage} / {repliesTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setRepliesPage(p => Math.min(repliesTotalPages, p + 1))}
+                      disabled={repliesPage === repliesTotalPages}
+                      className="p-2 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronRightIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
