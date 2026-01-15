@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { getTribeSettings, updateTribeSettings, getSubscriptionStatus, SubscriptionStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
+import { PaywallModal } from "@/components/PaywallModal";
 
 export default function SettingsPage() {
   const [ownerName, setOwnerName] = useState("");
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
@@ -163,9 +165,16 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col items-center pt-14 px-6">
-      <div className="w-full max-w-[540px]">
-        <h1 className="text-[20px] font-medium text-white/90 mb-6">Account settings</h1>
+    <>
+      {/* Paywall Modal */}
+      <PaywallModal 
+        isOpen={showPaywall} 
+        onClose={() => setShowPaywall(false)}
+      />
+
+      <div className="flex flex-col items-center pt-14 px-6">
+        <div className="w-full max-w-[540px]">
+          <h1 className="text-[20px] font-medium text-white/90 mb-6">Account settings</h1>
 
         {/* Profile Image */}
         <div className="mb-5">
@@ -309,13 +318,13 @@ export default function SettingsPage() {
                   Subscribe to unlock email sending. Starts at $3/month.
                 </p>
                 <div className="flex items-center gap-3">
-                  <a
-                    href="/new-email"
-                    className="inline-block px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
+                  <button
+                    onClick={() => setShowPaywall(true)}
+                    className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase"
                     style={{ background: '#E8B84A', color: '#000' }}
                   >
                     Upgrade
-                  </a>
+                  </button>
                   <button
                     onClick={syncSubscription}
                     disabled={isLoadingPortal}
@@ -354,7 +363,8 @@ export default function SettingsPage() {
         </div>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
