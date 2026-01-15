@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { signOut } from "next-auth/react";
 import { getTribeSettings, updateTribeSettings, getSubscriptionStatus, SubscriptionStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 
@@ -164,7 +165,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col items-center pt-14 px-6">
       <div className="w-full max-w-[540px]">
-        <h1 className="text-[20px] font-medium text-white/90 mb-6">Settings</h1>
+        <h1 className="text-[20px] font-medium text-white/90 mb-6">Account</h1>
 
         {/* Profile Image */}
         <div className="mb-5">
@@ -336,6 +337,21 @@ export default function SettingsPage() {
         >
           <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE"}</span>
         </button>
+
+        {/* Log out */}
+        <div className="mt-16 pt-8 border-t border-white/[0.06]">
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-2 text-[13px] text-white/40 hover:text-white/60 transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2H3.5A1.5 1.5 0 002 3.5v9A1.5 1.5 0 003.5 14H6" />
+              <path d="M10.5 11.5L14 8l-3.5-3.5" />
+              <path d="M14 8H6" />
+            </svg>
+            Log out
+          </button>
+        </div>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>

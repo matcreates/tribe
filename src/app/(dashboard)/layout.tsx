@@ -17,8 +17,16 @@ export default async function DashboardLayout({
   const tribe = await getTribeByUserId(session.user.id);
   const sentEmails = tribe ? await getSentEmailsByTribeId(tribe.id) : [];
 
+  const user = {
+    name: tribe?.owner_name || session.user.name || "User",
+    avatar: tribe?.owner_avatar || null,
+  };
+
   return (
-    <Shell sentEmails={sentEmails.map(e => ({ id: e.id, subject: e.subject }))}>
+    <Shell 
+      sentEmails={sentEmails.map(e => ({ id: e.id, subject: e.subject }))}
+      user={user}
+    >
       {children}
     </Shell>
   );

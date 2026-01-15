@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 interface SidebarProps {
   sentEmails: { id: string; subject: string | null }[];
+  user: {
+    name: string;
+    avatar: string | null;
+  };
 }
 
-export function Sidebar({ sentEmails }: SidebarProps) {
+export function Sidebar({ sentEmails, user }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
   // Close menu when route changes
@@ -36,7 +39,6 @@ export function Sidebar({ sentEmails }: SidebarProps) {
     { href: "/new-email", label: "New email", icon: PencilIcon },
     { href: "/tribe", label: "Your tribe", icon: UsersIcon },
     { href: "/join", label: "Join page", icon: SquarePlusIcon },
-    { href: "/settings", label: "Settings", icon: GearIcon },
   ];
 
   const handleLogout = () => {
@@ -153,20 +155,42 @@ export function Sidebar({ sentEmails }: SidebarProps) {
           </ul>
         </div>
 
-        {/* User & Logout */}
+        {/* User Profile & Logout */}
         <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
-          <div className="px-5 mb-4">
-            <p className="text-[12px] text-white/50 truncate">
-              {session?.user?.email}
-            </p>
+          <div className="flex items-center gap-3 px-3">
+            <Link
+              href="/settings"
+              className="flex items-center gap-3 flex-1 py-2 rounded-md hover:bg-white/[0.05] transition-colors group"
+            >
+              {user.avatar ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={user.avatar} 
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-medium text-white/70 ring-2 ring-white/10"
+                  style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="text-[13px] text-white/60 group-hover:text-white/80 transition-colors truncate">
+                {user.name}
+              </span>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-md text-white/30 hover:bg-white/[0.05] hover:text-white/60 transition-colors"
+              title="Log out"
+            >
+              <LogoutIcon className="w-[15px] h-[15px]" />
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-5 py-2.5 rounded-md text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white/70 transition-colors w-full"
-          >
-            <LogoutIcon className="w-[15px] h-[15px]" />
-            Log out
-          </button>
         </div>
       </aside>
     </>
