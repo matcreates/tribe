@@ -1,5 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
 import { createEmailReply, getSentEmailById } from "@/lib/db";
+
+// Verify webhook signature from Resend (uses Svix)
+function verifyWebhookSignature(
+  payload: string,
+  headers: {
+    svixId: string | null;
+    svixTimestamp: string | null;
+    svixSignature: string | null;
+  }
+): boolean {
+  const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+  
+  if (!webhookSecret) {
+    console.error("RESEND_WEBHOOK_SECRET is not configured");
+    return false;
+  }
+
+  if (!headers.svixId || !headers.svixTimestamp || !headers.svixSignature) {
+    console.error("Missing Svix headers");
+    return false;
+  }
+
+  try {
+    const wh = new Webhook(webhookSecret);
+    wh.verify(payload, {
+      "svix-id": headers.svixId,
+      "svix-timestamp": headers.svixTimestamp,
+      "svix-signature": headers.svixSignature,
+    });
+    return true;
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return false;
+  }
+}
 
 // Sanitize reply text - remove HTML, links, and dangerous content
 function sanitizeReplyText(text: string): string {
@@ -92,8 +128,20 @@ export async function POST(request: NextRequest) {
   
   try {
     const rawBody = await request.text();
-    console.log("Raw body length:", rawBody.length);
-    console.log("Raw body preview:", rawBody.substring(0, 1000));
+    
+    // Verify webhook signature FIRST before any processing
+    const svixHeaders = {
+      svixId: request.headers.get("svix-id"),
+      svixTimestamp: request.headers.get("svix-timestamp"),
+      svixSignature: request.headers.get("svix-signature"),
+    };
+    
+    if (!verifyWebhookSignature(rawBody, svixHeaders)) {
+      console.error("Webhook signature verification failed - rejecting request");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+    
+    console.log("Webhook signature verified successfully");
     
     let body;
     try {
@@ -104,7 +152,6 @@ export async function POST(request: NextRequest) {
     }
     
     console.log("Parsed body keys:", Object.keys(body));
-    console.log("Full parsed body:", JSON.stringify(body, null, 2));
 
     // Handle Resend's event wrapper format
     // Resend sends: { type: "email.received", data: { ... } } or direct format

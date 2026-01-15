@@ -1,14 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
 import { createEmailReply, getSentEmailById } from "@/lib/db";
-import { Resend } from "resend";
 
-// Initialize Resend client to fetch email content
-function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY not set");
+// Verify webhook signature from Resend (uses Svix)
+function verifyWebhookSignature(
+  payload: string,
+  headers: {
+    svixId: string | null;
+    svixTimestamp: string | null;
+    svixSignature: string | null;
   }
-  return new Resend(apiKey);
+): boolean {
+  const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+  
+  if (!webhookSecret) {
+    console.error("RESEND_WEBHOOK_SECRET is not configured");
+    return false;
+  }
+
+  if (!headers.svixId || !headers.svixTimestamp || !headers.svixSignature) {
+    console.error("Missing Svix headers");
+    return false;
+  }
+
+  try {
+    const wh = new Webhook(webhookSecret);
+    wh.verify(payload, {
+      "svix-id": headers.svixId,
+      "svix-timestamp": headers.svixTimestamp,
+      "svix-signature": headers.svixSignature,
+    });
+    return true;
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return false;
+  }
 }
 
 // Sanitize reply text - remove HTML, links, quoted content, and dangerous content
@@ -155,8 +181,20 @@ export async function POST(request: NextRequest) {
   
   try {
     const rawBody = await request.text();
-    console.log("Raw body length:", rawBody.length);
-    console.log("Raw body preview:", rawBody.substring(0, 1500));
+    
+    // Verify webhook signature FIRST before any processing
+    const svixHeaders = {
+      svixId: request.headers.get("svix-id"),
+      svixTimestamp: request.headers.get("svix-timestamp"),
+      svixSignature: request.headers.get("svix-signature"),
+    };
+    
+    if (!verifyWebhookSignature(rawBody, svixHeaders)) {
+      console.error("Webhook signature verification failed - rejecting request");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+    
+    console.log("Webhook signature verified successfully");
     
     const body = JSON.parse(rawBody);
     console.log("Top-level keys:", Object.keys(body));
