@@ -95,10 +95,7 @@ export default function NewEmailPage() {
     try {
       const status = await getSubscriptionStatus();
       setSubscription(status);
-      // Show paywall if user can't send emails
-      if (!status.canSendEmails) {
-        setShowPaywall(true);
-      }
+      // Don't show paywall on load - only when trying to send/schedule
     } catch (error) {
       console.error("Failed to load subscription:", error);
     }
@@ -265,6 +262,12 @@ export default function NewEmailPage() {
     const body = getPlainText();
     if (!body.trim() || isSending) return;
 
+    // Check subscription before sending
+    if (!subscription?.canSendEmails) {
+      setShowPaywall(true);
+      return;
+    }
+
     const count = getCurrentCount();
     if (count === 0) {
       showToast("No recipients to send to");
@@ -298,6 +301,13 @@ export default function NewEmailPage() {
   const handleSchedule = async (scheduledAt: Date) => {
     const body = getPlainText();
     if (!body.trim() || isScheduling) return;
+
+    // Check subscription before scheduling
+    if (!subscription?.canSendEmails) {
+      setShowPaywall(true);
+      setShowScheduleModal(false);
+      return;
+    }
 
     const count = getCurrentCount();
     if (count === 0) {
@@ -358,8 +368,23 @@ export default function NewEmailPage() {
         <div className="w-full max-w-[540px]">
           {/* Header */}
           <h1 className="text-[20px] font-medium text-white/90 mb-5">
-            New email
-        </h1>
+            Write
+          </h1>
+
+          {/* Free user info banner */}
+          {subscription && !subscription.canSendEmails && (
+            <div 
+              className="flex items-center gap-3 p-4 rounded-[10px] border border-amber-500/20 mb-5"
+              style={{ background: 'rgba(234, 179, 8, 0.08)' }}
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(234, 179, 8, 0.15)' }}>
+                <InfoIcon className="w-4 h-4 text-amber-400" />
+              </div>
+              <p className="text-[13px] text-amber-200/80">
+                Sending emails is only available for Premium users. <button onClick={() => setShowPaywall(true)} className="underline hover:text-amber-100 transition-colors">Upgrade now</button>
+              </p>
+            </div>
+          )}
 
         {/* Recipient Selector */}
         <div className="flex items-center gap-3 mb-4">
@@ -564,6 +589,16 @@ function ReplyToggleIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 5L2 8l4 3" />
       <path d="M2 8h8a3 3 0 0 1 3 3v2" />
+    </svg>
+  );
+}
+
+function InfoIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M8 11V7" />
+      <circle cx="8" cy="4.5" r="0.5" fill="currentColor" />
     </svg>
   );
 }

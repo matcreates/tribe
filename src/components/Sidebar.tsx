@@ -35,7 +35,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
-    { href: "/new-email", label: "New email", icon: PencilIcon },
+    { href: "/new-email", label: "Write", icon: PencilIcon },
     { href: "/tribe", label: "Your tribe", icon: UsersIcon },
     { href: "/join", label: "Join page", icon: SquarePlusIcon },
   ];
