@@ -361,7 +361,7 @@ export default function NewEmailPage() {
       {/* Paywall Modal */}
       <PaywallModal 
         isOpen={showPaywall} 
-        onClose={subscription?.canSendEmails ? () => setShowPaywall(false) : undefined}
+        onClose={() => setShowPaywall(false)}
       />
 
       <div className="flex flex-col items-center pt-14 px-6">
