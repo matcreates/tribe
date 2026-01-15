@@ -24,6 +24,7 @@ export default function NewEmailPage() {
   const [allowReplies, setAllowReplies] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [subject, setSubject] = useState("");
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -260,7 +261,7 @@ export default function NewEmailPage() {
 
   const handleSend = async () => {
     const body = getPlainText();
-    if (!body.trim() || isSending) return;
+    if (!body.trim() || !subject.trim() || isSending) return;
 
     // Check subscription before sending
     if (!subscription?.canSendEmails) {
@@ -277,16 +278,13 @@ export default function NewEmailPage() {
     setIsSending(true);
     
     try {
-      // Extract first line as subject
-      const lines = body.trim().split("\n");
-      const subject = lines[0].slice(0, 60) || "Untitled";
-      
-      const result = await sendEmail(subject, body, recipientFilter, allowReplies);
+      const result = await sendEmail(subject.trim(), body, recipientFilter, allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
       }
       setIsEmpty(true);
+      setSubject("");
       setLastSentCount(result.sentCount);
       setShowSuccess(true);
       router.refresh();
@@ -300,7 +298,7 @@ export default function NewEmailPage() {
 
   const handleSchedule = async (scheduledAt: Date) => {
     const body = getPlainText();
-    if (!body.trim() || isScheduling) return;
+    if (!body.trim() || !subject.trim() || isScheduling) return;
 
     // Check subscription before scheduling
     if (!subscription?.canSendEmails) {
@@ -318,16 +316,13 @@ export default function NewEmailPage() {
     setIsScheduling(true);
     
     try {
-      // Extract first line as subject
-      const lines = body.trim().split("\n");
-      const subject = lines[0].slice(0, 60) || "Untitled";
-      
-      await scheduleEmail(subject, body, scheduledAt, recipientFilter, allowReplies);
+      await scheduleEmail(subject.trim(), body, scheduledAt, recipientFilter, allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
       }
       setIsEmpty(true);
+      setSubject("");
       setShowScheduleModal(false);
       
       // Format the scheduled time for toast
@@ -385,6 +380,21 @@ export default function NewEmailPage() {
               </p>
             </div>
           )}
+
+          {/* Subject Field */}
+          <div className="mb-4">
+            <label className="block text-[11px] text-white/40 uppercase tracking-[0.08em] mb-2">
+              Subject
+            </label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Enter email subject..."
+              className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/80 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
+              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            />
+          </div>
 
         {/* Recipient Selector */}
         <div className="flex items-center gap-3 mb-4">
@@ -465,14 +475,14 @@ export default function NewEmailPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleSend}
-            disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0}
             className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
           >
             <span className="btn-glass-text">{isSending ? "SENDING..." : "SEND"}</span>
           </button>
           <button
             onClick={() => setShowScheduleModal(true)}
-            disabled={isSending || isScheduling || isEmpty || getCurrentCount() === 0}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0}
             className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
           >
             <ClockIcon className="w-3 h-3 text-white/60" />
