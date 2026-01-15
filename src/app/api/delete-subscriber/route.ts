@@ -1,8 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { pool, getTribeByUserId } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Get the user's tribe
+    const tribe = await getTribeByUserId(session.user.id);
+    if (!tribe) {
+      return NextResponse.json(
+        { error: "Tribe not found" },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
     const { email } = body;
 
@@ -13,22 +32,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Delete subscriber by email
-    await pool.query(
-      `DELETE FROM subscribers WHERE email = $1`,
-      [email.toLowerCase()]
+    // Delete subscriber only if they belong to the authenticated user's tribe
+    const result = await pool.query(
+      `DELETE FROM subscribers WHERE email = $1 AND tribe_id = $2`,
+      [email.toLowerCase(), tribe.id]
     );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { error: "Subscriber not found in your tribe" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ 
       success: true,
-      message: `Deleted subscriber: ${email}` 
+      message: "Subscriber deleted" 
     });
   } catch (error) {
     console.error("Delete subscriber error:", error);
     return NextResponse.json(
-      { 
-        error: error instanceof Error ? error.message : "Internal server error" 
-      },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

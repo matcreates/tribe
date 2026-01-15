@@ -11,12 +11,17 @@ import { sendBulkEmailWithUnsubscribe } from "@/lib/email";
 // Configure in vercel.json: { "crons": [{ "path": "/api/cron/send-scheduled", "schedule": "*/5 * * * *" }] }
 
 export async function GET(request: Request) {
-  // Verify cron secret for security (optional but recommended)
+  // Verify cron secret - REQUIRED for security
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
   
-  // If CRON_SECRET is set, verify it
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // CRON_SECRET must be configured and must match
+  if (!cronSecret) {
+    console.error("CRON_SECRET environment variable is not configured");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+  
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
