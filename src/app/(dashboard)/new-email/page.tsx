@@ -37,7 +37,7 @@ export default function NewEmailPage() {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const hasSignature = !!signature?.trim();
-  const isWeeklyLimitReached = subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail;
+  const isWeeklyLimitReached = !!(subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail);
 
   useEffect(() => {
     loadCounts();
