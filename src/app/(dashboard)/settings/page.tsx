@@ -249,20 +249,25 @@ export default function SettingsPage() {
               <>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <div className={`w-2 h-2 rounded-full ${subscription.status === 'canceled' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
                     <span className="text-[13px] text-white/70 font-medium">
-                      {subscription.status === 'canceled' ? 'Active until cancellation' : 'Active'}
+                      {subscription.status === 'canceled' ? 'Canceled' : 'Active'}
                     </span>
                   </div>
                   <span className="text-[12px] text-white/40 capitalize">
                     {subscription.plan} plan
                   </span>
                 </div>
-                {subscription.endsAt && (
-                  <p className="text-[12px] text-white/40 mb-4">
-                    {subscription.status === 'canceled' ? 'Access until' : 'Renews'}: {new Date(subscription.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                  </p>
-                )}
+                <p className="text-[12px] text-white/40 mb-4">
+                  {subscription.status === 'canceled' 
+                    ? subscription.endsAt 
+                      ? `Access until ${new Date(subscription.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                      : 'Your subscription has been canceled'
+                    : subscription.endsAt 
+                      ? `Renews on ${new Date(subscription.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                      : 'Your subscription is active'
+                  }
+                </p>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleManageSubscription}

@@ -61,7 +61,16 @@ export async function POST() {
 
     const subscription = subscriptions.data[0];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cancelAtPeriodEnd = (subscription as any).cancel_at_period_end;
+    const subAny = subscription as any;
+    const cancelAtPeriodEnd = subAny.cancel_at_period_end;
+    
+    console.log("Subscription details:", {
+      status: subscription.status,
+      cancel_at_period_end: cancelAtPeriodEnd,
+      current_period_end: subAny.current_period_end,
+      canceled_at: subAny.canceled_at,
+      cancel_at: subAny.cancel_at,
+    });
     
     // Determine status
     // If cancel_at_period_end is true, treat as canceled (but still active until period end)
@@ -84,8 +93,11 @@ export async function POST() {
     }
 
     // Get period end - safely handle the timestamp
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const periodEndTimestamp = (subscription as any).current_period_end;
+    // For canceled subscriptions, use cancel_at if available, otherwise current_period_end
+    const periodEndTimestamp = cancelAtPeriodEnd && subAny.cancel_at 
+      ? subAny.cancel_at 
+      : subAny.current_period_end;
+    
     let endsAt: Date | null = null;
     
     if (periodEndTimestamp && typeof periodEndTimestamp === 'number') {
@@ -95,6 +107,8 @@ export async function POST() {
         endsAt = null;
       }
     }
+    
+    console.log("Computed endsAt:", endsAt?.toISOString());
 
     // Update database
     await updateTribeSubscription(tribe.id, {
