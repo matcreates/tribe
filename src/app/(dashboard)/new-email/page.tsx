@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, RecipientFilter, SubscriptionStatus } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, RecipientFilter, SubscriptionStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
@@ -25,6 +25,11 @@ export default function NewEmailPage() {
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [subject, setSubject] = useState("");
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [testEmailError, setTestEmailError] = useState("");
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testEmailSent, setTestEmailSent] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -342,6 +347,43 @@ export default function NewEmailPage() {
     }
   };
 
+  const handleSendTest = async () => {
+    const body = getPlainText();
+    if (!body.trim() || !subject.trim() || !testEmail.trim()) return;
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testEmail.trim())) {
+      setTestEmailError("Please enter a valid email address");
+      return;
+    }
+
+    setIsSendingTest(true);
+    setTestEmailError("");
+    
+    try {
+      const result = await sendTestEmailAction(testEmail.trim(), subject.trim(), body);
+      
+      if (!result.success) {
+        setTestEmailError(result.error || "Failed to send test email");
+      } else {
+        setTestEmailSent(true);
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to send test email";
+      setTestEmailError(msg);
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  const closeTestModal = () => {
+    setShowTestModal(false);
+    setTestEmail("");
+    setTestEmailError("");
+    setTestEmailSent(false);
+  };
+
   if (showSuccess) {
     return (
       <EmailSentSuccess 
@@ -358,6 +400,103 @@ export default function NewEmailPage() {
         isOpen={showPaywall} 
         onClose={() => setShowPaywall(false)}
       />
+
+      {/* Test Email Modal */}
+      {showTestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={closeTestModal}
+          />
+          <div 
+            className="relative w-full max-w-[400px] mx-4 rounded-[16px] p-6"
+            style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeTestModal}
+              className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M5 5l10 10M15 5L5 15" />
+              </svg>
+            </button>
+
+            {!testEmailSent ? (
+              <>
+                <div className="flex items-center gap-3 mb-4">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ background: 'rgba(139, 92, 246, 0.15)' }}
+                  >
+                    <TestTubeIcon className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-medium text-white/90">Send test email</h3>
+                    <p className="text-[12px] text-white/40">Preview how your email will look</p>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-[11px] text-white/40 uppercase tracking-[0.08em] mb-2">
+                    Send to
+                  </label>
+                  <input
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => {
+                      setTestEmail(e.target.value);
+                      setTestEmailError("");
+                    }}
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/80 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                    autoFocus
+                  />
+                  {testEmailError && (
+                    <p className="mt-2 text-[12px] text-red-400">{testEmailError}</p>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleSendTest}
+                  disabled={isSendingTest || !testEmail.trim()}
+                  className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span className="btn-glass-text">{isSendingTest ? "SENDING..." : "SEND TEST EMAIL"}</span>
+                </button>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div 
+                  className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: 'rgba(34, 197, 94, 0.15)' }}
+                >
+                  <CheckCircleIcon className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h3 className="text-[16px] font-medium text-white/90 mb-2">Test email sent!</h3>
+                <p className="text-[13px] text-white/50 mb-4">
+                  Sent to <span className="text-white/70">{testEmail}</span>
+                </p>
+                <div 
+                  className="p-4 rounded-[10px] mb-5 text-left"
+                  style={{ background: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)' }}
+                >
+                  <p className="text-[12px] text-amber-200/80 leading-relaxed">
+                    💡 The email might take a couple of minutes to arrive. Remember to check your Junk/Spam folder if you don&apos;t see it in your inbox.
+                  </p>
+                </div>
+                <button
+                  onClick={closeTestModal}
+                  className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
+                >
+                  <span className="btn-glass-text">BACK TO WRITING</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col items-center pt-14 px-6">
         <div className="w-full max-w-[540px]">
@@ -472,7 +611,7 @@ export default function NewEmailPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleSend}
             disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0}
@@ -487,6 +626,15 @@ export default function NewEmailPage() {
           >
             <ClockIcon className="w-3 h-3 text-white/60" />
             <span className="btn-glass-text">SCHEDULE</span>
+          </button>
+          <button
+            onClick={() => setShowTestModal(true)}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim()}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/50 hover:text-white/70 hover:border-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+          >
+            <TestTubeIcon className="w-3 h-3" />
+            <span>SEND TEST</span>
           </button>
         </div>
 
@@ -609,6 +757,25 @@ function InfoIcon({ className }: { className?: string }) {
       <circle cx="8" cy="8" r="6.5" />
       <path d="M8 11V7" />
       <circle cx="8" cy="4.5" r="0.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TestTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2L10 10.5C10 12.433 8.433 14 6.5 14C4.567 14 3 12.433 3 10.5L3 2" />
+      <path d="M3 2h7" />
+      <path d="M3 6h7" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="8" />
+      <path d="M6 10l3 3 5-6" />
     </svg>
   );
 }

@@ -29,7 +29,7 @@ import {
   getOpenRateSince,
   deleteSentEmail as dbDeleteSentEmail,
 } from "./db";
-import { sendVerificationEmail, sendBulkEmailWithUnsubscribe } from "./email";
+import { sendVerificationEmail, sendBulkEmailWithUnsubscribe, sendTestEmail } from "./email";
 import { revalidatePath } from "next/cache";
 
 async function getTribe() {
@@ -623,6 +623,29 @@ export async function getRecipientCounts(): Promise<{
     nonVerified,
     all: allSubscribers.length,
   };
+}
+
+// Send a test email to preview how the email will look
+export async function sendTestEmailAction(
+  testEmail: string,
+  subject: string,
+  body: string
+): Promise<{ success: boolean; error?: string }> {
+  const tribe = await getTribe();
+  
+  // Use tribe settings for owner name and signature
+  const ownerName = tribe.owner_name || "Anonymous";
+  const emailSignature = tribe.email_signature || undefined;
+  
+  const result = await sendTestEmail(
+    testEmail,
+    subject,
+    body,
+    ownerName,
+    emailSignature
+  );
+  
+  return result;
 }
 
 export async function sendEmail(
