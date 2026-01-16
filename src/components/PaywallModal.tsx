@@ -126,8 +126,8 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                   <p className="text-[12px] text-white/40 mt-0.5">Billed annually</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[20px] font-medium text-white/90">$36<span className="text-[13px] text-white/40">/year</span></p>
-                  <p className="text-[11px] text-[#E8B84A]">$3/month · Save 40%</p>
+                  <p className="text-[20px] font-medium text-white/90">$60<span className="text-[13px] text-white/40">/year</span></p>
+                  <p className="text-[11px] text-[#E8B84A]">$5/month · Save 37%</p>
                 </div>
               </div>
             </button>
@@ -156,7 +156,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                   <p className="text-[12px] text-white/40 mt-0.5">Billed monthly</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[20px] font-medium text-white/90">$5<span className="text-[13px] text-white/40">/month</span></p>
+                  <p className="text-[20px] font-medium text-white/90">$8<span className="text-[13px] text-white/40">/month</span></p>
                   <p className="text-[11px] text-white/40">Cancel anytime</p>
                 </div>
               </div>
@@ -201,7 +201,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
               color: '#000',
             }}
           >
-            <span>{isLoading ? "Loading..." : `Subscribe ${selectedPlan === "yearly" ? "for $36/year" : "for $5/month"}`}</span>
+            <span>{isLoading ? "Loading..." : `Subscribe ${selectedPlan === "yearly" ? "for $60/year" : "for $8/month"}`}</span>
           </button>
           <p className="text-[11px] text-white/30 text-center mt-3">
             Secure payment powered by Stripe

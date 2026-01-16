@@ -82,7 +82,7 @@ export default async function LandingPage() {
 
           {/* Social proof hint */}
           <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-white/30">
-            Free to explore • Starts at $3/month
+            Free to explore • Starts at $5/month
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export default async function LandingPage() {
             >
               <p className="text-[13px] text-white/50 uppercase tracking-wider mb-2">Monthly</p>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-[42px] font-medium text-white/90">$5</span>
+                <span className="text-[42px] font-medium text-white/90">$8</span>
                 <span className="text-[15px] text-white/40">/month</span>
               </div>
               <p className="text-[14px] text-white/40 mb-6 h-5">Billed monthly. Cancel anytime.</p>
@@ -206,16 +206,16 @@ export default async function LandingPage() {
               {/* Best Value Badge */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="px-4 py-1 rounded-full text-[10px] font-medium tracking-[0.08em] uppercase bg-[#E8B84A] text-black">
-                  Save 40%
+                  Save 37%
                 </span>
               </div>
               
               <p className="text-[13px] text-[#E8B84A]/80 uppercase tracking-wider mb-2">Yearly</p>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-[42px] font-medium text-white/90">$36</span>
+                <span className="text-[42px] font-medium text-white/90">$60</span>
                 <span className="text-[15px] text-white/40">/year</span>
               </div>
-              <p className="text-[14px] text-[#E8B84A]/70 mb-6 h-5">Just $3/month. Best value.</p>
+              <p className="text-[14px] text-[#E8B84A]/70 mb-6 h-5">Just $5/month. Best value.</p>
               <div className="space-y-3 mb-8">
                 {[
                   "Unlimited email sends",
