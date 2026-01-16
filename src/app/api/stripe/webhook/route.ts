@@ -154,17 +154,21 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return;
   }
 
-  let status: 'active' | 'canceled' | 'past_due' = 'active';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subStatus = (subscription as any).status;
-  if (subStatus === 'canceled' || subStatus === 'unpaid') {
+  const subAny = subscription as any;
+  const subStatus = subAny.status;
+  const cancelAtPeriodEnd = subAny.cancel_at_period_end;
+  
+  // Determine the status to store
+  // If cancel_at_period_end is true, the subscription is canceled but still active until period end
+  let status: 'active' | 'canceled' | 'past_due' = 'active';
+  if (subStatus === 'canceled' || subStatus === 'unpaid' || cancelAtPeriodEnd === true) {
     status = 'canceled';
   } else if (subStatus === 'past_due') {
     status = 'past_due';
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentPeriodEnd = (subscription as any).current_period_end;
+  const currentPeriodEnd = subAny.current_period_end;
   let endsAt: Date | null = null;
   if (currentPeriodEnd && typeof currentPeriodEnd === 'number') {
     endsAt = new Date(currentPeriodEnd * 1000);
@@ -178,7 +182,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     subscription_ends_at: endsAt,
   });
 
-  console.log(`Subscription updated for tribe ${tribe.id}: ${status}`);
+  console.log(`Subscription updated for tribe ${tribe.id}: ${status}, cancel_at_period_end: ${cancelAtPeriodEnd}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {

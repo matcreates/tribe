@@ -60,15 +60,18 @@ export async function POST() {
     }
 
     const subscription = subscriptions.data[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cancelAtPeriodEnd = (subscription as any).cancel_at_period_end;
     
     // Determine status
+    // If cancel_at_period_end is true, treat as canceled (but still active until period end)
     let status: 'active' | 'canceled' | 'past_due' | 'free' = 'free';
-    if (subscription.status === 'active' || subscription.status === 'trialing') {
+    if (subscription.status === 'canceled' || subscription.status === 'unpaid' || cancelAtPeriodEnd === true) {
+      status = 'canceled';
+    } else if (subscription.status === 'active' || subscription.status === 'trialing') {
       status = 'active';
     } else if (subscription.status === 'past_due') {
       status = 'past_due';
-    } else if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-      status = 'canceled';
     }
 
     // Determine plan from price
