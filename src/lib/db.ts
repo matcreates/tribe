@@ -2,11 +2,17 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 
 // Create connection pool using TRIBE_DATABASE_URL (using custom name to avoid Vercel overrides)
+// IMPORTANT: On serverless (Vercel), each function instance creates its own pool.
+// Keep max connections LOW to avoid exhausting database connection limits.
 export const pool = new Pool({
   connectionString: process.env.TRIBE_DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
+  // Serverless-optimized settings
+  max: 3,                    // Max 3 connections per function instance
+  idleTimeoutMillis: 10000,  // Close idle connections after 10s
+  connectionTimeoutMillis: 5000, // Fail fast if can't connect in 5s
 });
 
 // Helper to run queries
@@ -259,7 +265,7 @@ export interface DbEmailReply {
 // User functions
 export async function createUser(email: string, password: string, name?: string): Promise<DbUser> {
   const id = crypto.randomUUID();
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
   
   await pool.query(
     `INSERT INTO users (id, email, password, name) VALUES ($1, $2, $3, $4)`,
@@ -280,8 +286,8 @@ export async function getUserById(id: string): Promise<DbUser | null> {
   return rows[0] || null;
 }
 
-export function verifyPassword(password: string, hashedPassword: string): boolean {
-  return bcrypt.compareSync(password, hashedPassword);
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword);
 }
 
 // Tribe functions
