@@ -133,9 +133,9 @@ export default async function LandingPage() {
                 description: "Every creator gets a unique @username page. Professional and memorable."
               },
               {
-                icon: "🌙",
-                title: "Dark & minimal",
-                description: "A beautiful interface that stays out of your way. No clutter, no distractions."
+                icon: "💬",
+                title: "Replies enabled",
+                description: "Let your tribe reply directly to your emails. Every response lands in your dashboard."
               },
             ].map((feature, i) => (
               <div 
@@ -178,7 +178,7 @@ export default async function LandingPage() {
               <p className="text-[14px] text-white/40 mb-6 h-5">Billed monthly. Cancel anytime.</p>
               <div className="space-y-3 mb-8">
                 {[
-                  "Unlimited email sends",
+                  "2 emails per week",
                   "Email scheduling",
                   "Open rate analytics",
                   "Reply management",
@@ -218,7 +218,7 @@ export default async function LandingPage() {
               <p className="text-[14px] text-[#E8B84A]/70 mb-6 h-5">Just $5/month. Best value.</p>
               <div className="space-y-3 mb-8">
                 {[
-                  "Unlimited email sends",
+                  "2 emails per week",
                   "Email scheduling",
                   "Open rate analytics",
                   "Reply management",

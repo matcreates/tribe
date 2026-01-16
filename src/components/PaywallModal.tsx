@@ -88,7 +88,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             Unlock Email Sending
           </h2>
           <p className="text-[14px] text-white/50 leading-relaxed">
-            Subscribe to Tribe to send unlimited emails to your community
+            Subscribe to Tribe to send emails to your community
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             <p className="text-[11px] text-white/40 uppercase tracking-[0.08em] mb-3">What's included</p>
             <div className="space-y-2">
               {[
-                "Unlimited email sends",
+                "2 emails per week",
                 "Email scheduling",
                 "Open rate tracking",
                 "Reply management",
