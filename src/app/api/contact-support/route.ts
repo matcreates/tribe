@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     // Send the support email
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "Tribe <onboarding@resend.dev>",
-      to: ["matgarciadesign@gmail.com"],
+      to: ["matcreatespro@gmail.com"],
       subject: "TRIBE CUSTOMER SUPPORT",
       replyTo: email,
       html: `
