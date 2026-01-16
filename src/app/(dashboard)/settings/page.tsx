@@ -263,13 +263,22 @@ export default function SettingsPage() {
                     {subscription.status === 'canceled' ? 'Access until' : 'Renews'}: {new Date(subscription.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
                 )}
-                <button
-                  onClick={handleManageSubscription}
-                  disabled={isLoadingPortal}
-                  className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
-                >
-                  <span className="btn-glass-text">{isLoadingPortal ? "Loading..." : "Manage billing"}</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleManageSubscription}
+                    disabled={isLoadingPortal}
+                    className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-secondary"
+                  >
+                    <span className="btn-glass-text">{isLoadingPortal ? "Loading..." : "Manage billing"}</span>
+                  </button>
+                  <button
+                    onClick={syncSubscription}
+                    disabled={isLoadingPortal}
+                    className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase text-white/40 hover:text-white/60 transition-colors"
+                  >
+                    {isLoadingPortal ? "Syncing..." : "Sync status"}
+                  </button>
+                </div>
               </>
             ) : subscription?.status === 'past_due' ? (
               <>
