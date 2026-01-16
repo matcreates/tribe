@@ -62,26 +62,39 @@ export async function POST() {
     const subscription = subscriptions.data[0];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subAny = subscription as any;
-    const cancelAtPeriodEnd = subAny.cancel_at_period_end;
     
-    console.log("Subscription details:", {
-      status: subscription.status,
-      cancel_at_period_end: cancelAtPeriodEnd,
-      current_period_end: subAny.current_period_end,
-      canceled_at: subAny.canceled_at,
-      cancel_at: subAny.cancel_at,
-    });
+    // Check cancel_at_period_end - be very explicit about the check
+    const cancelAtPeriodEnd = subAny.cancel_at_period_end === true || subAny.cancel_at_period_end === 'true';
+    const cancelAt = subAny.cancel_at; // Unix timestamp when subscription will be canceled
+    
+    console.log("=== SUBSCRIPTION SYNC DEBUG ===");
+    console.log("Raw subscription object keys:", Object.keys(subAny));
+    console.log("subscription.status:", subscription.status);
+    console.log("subAny.cancel_at_period_end (raw):", subAny.cancel_at_period_end, "type:", typeof subAny.cancel_at_period_end);
+    console.log("cancelAtPeriodEnd (computed):", cancelAtPeriodEnd);
+    console.log("cancel_at:", cancelAt);
+    console.log("current_period_end:", subAny.current_period_end);
+    console.log("canceled_at:", subAny.canceled_at);
     
     // Determine status
-    // If cancel_at_period_end is true, treat as canceled (but still active until period end)
+    // If cancel_at_period_end is true OR cancel_at is set, treat as canceled (but still active until period end)
     let status: 'active' | 'canceled' | 'past_due' | 'free' = 'free';
-    if (subscription.status === 'canceled' || subscription.status === 'unpaid' || cancelAtPeriodEnd === true) {
+    const isCanceled = subscription.status === 'canceled' || 
+                       subscription.status === 'unpaid' || 
+                       cancelAtPeriodEnd || 
+                       (cancelAt && cancelAt > 0);
+    
+    console.log("isCanceled:", isCanceled);
+    
+    if (isCanceled) {
       status = 'canceled';
     } else if (subscription.status === 'active' || subscription.status === 'trialing') {
       status = 'active';
     } else if (subscription.status === 'past_due') {
       status = 'past_due';
     }
+    
+    console.log("Final status:", status);
 
     // Determine plan from price
     let plan: 'monthly' | 'yearly' | null = null;
