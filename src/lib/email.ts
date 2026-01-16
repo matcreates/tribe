@@ -300,3 +300,110 @@ export async function sendVerificationEmail(
   return { success: true, emailId: data.id };
 }
 
+
+export async function sendTestEmail(
+  to: string,
+  subject: string,
+  plainTextBody: string,
+  ownerName: string,
+  emailSignature?: string
+): Promise<{ success: boolean; error?: string }> {
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(to)) {
+    return { success: false, error: "Invalid email address format" };
+  }
+
+  const client = getResendClient();
+  const fromEmail = getFromEmail(ownerName);
+
+  // Format body as ebook-style paragraphs
+  const formattedBody = formatBodyAsEbook(plainTextBody);
+
+  // Format signature for HTML
+  let signatureHtml = '';
+  let signatureText = '';
+  if (emailSignature && emailSignature.trim()) {
+    const escapedSig = emailSignature.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const linkedSig = escapedSig.replace(
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" style="color: #E8B84A; text-decoration: underline;">$1</a>'
+    );
+    signatureHtml = \`
+      <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <p style="color: rgba(255,255,255,0.5); font-size: 15px; line-height: 1.7; margin: 0; white-space: pre-wrap;">\${linkedSig}</p>
+      </div>
+    \`;
+    signatureText = \`\n\n---\n\${emailSignature}\`;
+  }
+
+  // Test email HTML template
+  const htmlBody = \`
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>\${subject}</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #0a0a0a;">
+    <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #0a0a0a;">
+      <tr>
+        <td align="center" style="padding: 48px 24px;">
+          <table role="presentation" style="width: 100%; max-width: 560px; border: 0; border-spacing: 0;">
+            <tr>
+              <td style="padding: 0;">
+                <div style="margin-bottom: 32px; padding: 16px 20px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 8px; text-align: center;">
+                  <p style="color: rgba(234, 179, 8, 0.9); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; font-weight: 500;">
+                    This is a test email - only you can see this preview
+                  </p>
+                </div>
+                <div style="font-family: Georgia, serif;">
+                  \${formattedBody}
+                </div>
+                \${signatureHtml}
+                <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0 0 12px 0;">
+                    Sent by \${ownerName}
+                  </p>
+                  <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0;">
+                    [Unsubscribe link will appear here in real emails]
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>\`;
+
+  const textBody = \`[TEST EMAIL - Only you can see this preview]\n\n\${plainTextBody}\${signatureText}\n\n---\nSent by \${ownerName}\`;
+
+  try {
+    const { data, error } = await client.emails.send({
+      from: fromEmail,
+      to: [to],
+      subject: \`[TEST] \${subject}\`,
+      html: htmlBody,
+      text: textBody,
+    });
+
+    if (error) {
+      console.error("Test email send error:", error);
+      return { success: false, error: error.message || "Failed to send test email" };
+    }
+
+    if (!data || !data.id) {
+      return { success: false, error: "No email ID returned" };
+    }
+
+    console.log(\`Test email sent successfully to \${to}, email ID: \${data.id}\`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to send test email";
+    console.error("Test email exception:", msg);
+    return { success: false, error: msg };
+  }
+}
