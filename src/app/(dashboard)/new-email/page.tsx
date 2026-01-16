@@ -424,17 +424,9 @@ export default function NewEmailPage() {
 
             {!testEmailSent ? (
               <>
-                <div className="flex items-center gap-3 mb-4">
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ background: 'rgba(139, 92, 246, 0.15)' }}
-                  >
-                    <TestTubeIcon className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-[16px] font-medium text-white/90">Send test email</h3>
-                    <p className="text-[12px] text-white/40">Preview how your email will look</p>
-                  </div>
+                <div className="mb-4">
+                  <h3 className="text-[16px] font-medium text-white/90">Send test email</h3>
+                  <p className="text-[12px] text-white/40 mt-1">Preview how your email will look</p>
                 </div>
 
                 <div className="mb-4">
@@ -530,7 +522,7 @@ export default function NewEmailPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Enter email subject..."
-              className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/80 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
+              className="w-full px-4 py-3.5 rounded-[10px] text-[18px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
               style={{ background: 'rgba(255, 255, 255, 0.03)' }}
             />
           </div>
@@ -630,11 +622,10 @@ export default function NewEmailPage() {
           <button
             onClick={() => setShowTestModal(true)}
             disabled={isSending || isScheduling || isEmpty || !subject.trim()}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/50 hover:text-white/70 hover:border-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/50 hover:text-white/70 hover:border-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           >
-            <TestTubeIcon className="w-3 h-3" />
-            <span>SEND TEST</span>
+            SEND TEST
           </button>
         </div>
 
@@ -761,15 +752,6 @@ function InfoIcon({ className }: { className?: string }) {
   );
 }
 
-function TestTubeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 2L10 10.5C10 12.433 8.433 14 6.5 14C4.567 14 3 12.433 3 10.5L3 2" />
-      <path d="M3 2h7" />
-      <path d="M3 6h7" />
-    </svg>
-  );
-}
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (

@@ -117,11 +117,11 @@ export async function sendBulkEmailWithUnsubscribe(
         replyNoticeHtml = `
           <div style="margin-top: 40px; padding: 20px 24px; background: rgba(255,255,255,0.03); border-radius: 8px;">
             <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0; text-align: center;">
-              💬 Feel free to reply to this email — ${ownerName} reads every response.
+              Replies are on, feel free to answer this email and ${ownerName} will receive your reply.
             </p>
           </div>
         `;
-        replyNoticeText = `\n\n---\nFeel free to reply to this email — ${ownerName} reads every response.`;
+        replyNoticeText = `\n\n---\nReplies are on, feel free to answer this email and ${ownerName} will receive your reply.`;
       }
 
       // Format body as ebook-style paragraphs
@@ -344,11 +344,11 @@ export async function sendTestEmail(
     replyNoticeHtml = `
       <div style="margin-top: 40px; padding: 20px 24px; background: rgba(255,255,255,0.03); border-radius: 8px;">
         <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0; text-align: center;">
-          💬 Feel free to reply to this email — ${ownerName} reads every response.
+          Replies are on, feel free to answer this email and ${ownerName} will receive your reply.
         </p>
       </div>
     `;
-    replyNoticeText = `\n\n---\nFeel free to reply to this email — ${ownerName} reads every response.`;
+    replyNoticeText = `\n\n---\nReplies are on, feel free to answer this email and ${ownerName} will receive your reply.`;
   }
 
   // Test email HTML template (similar to regular emails but with test notice)
