@@ -305,7 +305,8 @@ export async function sendTestEmail(
   subject: string,
   plainTextBody: string,
   ownerName: string,
-  emailSignature?: string
+  emailSignature?: string,
+  allowReplies: boolean = true
 ): Promise<{ success: boolean; error?: string }> {
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -334,6 +335,20 @@ export async function sendTestEmail(
       </div>
     `;
     signatureText = `\n\n---\n${emailSignature}`;
+  }
+
+  // Reply notice when replies are enabled (same as bulk email)
+  let replyNoticeHtml = '';
+  let replyNoticeText = '';
+  if (allowReplies) {
+    replyNoticeHtml = `
+      <div style="margin-top: 40px; padding: 20px 24px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+        <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0; text-align: center;">
+          💬 Feel free to reply to this email — ${ownerName} reads every response.
+        </p>
+      </div>
+    `;
+    replyNoticeText = `\n\n---\nFeel free to reply to this email — ${ownerName} reads every response.`;
   }
 
   // Test email HTML template (similar to regular emails but with test notice)
@@ -368,6 +383,9 @@ export async function sendTestEmail(
                 <!-- Signature -->
                 ${signatureHtml}
                 
+                <!-- Reply Notice -->
+                ${replyNoticeHtml}
+                
                 <!-- Footer -->
                 <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
                   <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
@@ -386,7 +404,7 @@ export async function sendTestEmail(
   </body>
 </html>`;
 
-  const textBody = `[TEST EMAIL - Only you can see this preview]\n\n${plainTextBody}${signatureText}\n\n---\nSent by ${ownerName}`;
+  const textBody = `[TEST EMAIL - Only you can see this preview]\n\n${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}`;
 
   try {
     const { data, error } = await client.emails.send({

@@ -629,7 +629,8 @@ export async function getRecipientCounts(): Promise<{
 export async function sendTestEmailAction(
   testEmail: string,
   subject: string,
-  body: string
+  body: string,
+  allowReplies: boolean = true
 ): Promise<{ success: boolean; error?: string }> {
   const tribe = await getTribe();
   
@@ -642,7 +643,8 @@ export async function sendTestEmailAction(
     subject,
     body,
     ownerName,
-    emailSignature
+    emailSignature,
+    allowReplies
   );
   
   return result;

@@ -362,7 +362,7 @@ export default function NewEmailPage() {
     setTestEmailError("");
     
     try {
-      const result = await sendTestEmailAction(testEmail.trim(), subject.trim(), body);
+      const result = await sendTestEmailAction(testEmail.trim(), subject.trim(), body, allowReplies);
       
       if (!result.success) {
         setTestEmailError(result.error || "Failed to send test email");
