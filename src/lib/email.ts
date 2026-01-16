@@ -300,7 +300,6 @@ export async function sendVerificationEmail(
   return { success: true, emailId: data.id };
 }
 
-
 export async function sendTestEmail(
   to: string,
   subject: string,
@@ -329,44 +328,52 @@ export async function sendTestEmail(
       /(https?:\/\/[^\s]+)/g,
       '<a href="$1" style="color: #E8B84A; text-decoration: underline;">$1</a>'
     );
-    signatureHtml = \`
+    signatureHtml = `
       <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
-        <p style="color: rgba(255,255,255,0.5); font-size: 15px; line-height: 1.7; margin: 0; white-space: pre-wrap;">\${linkedSig}</p>
+        <p style="color: rgba(255,255,255,0.5); font-size: 15px; line-height: 1.7; margin: 0; white-space: pre-wrap;">${linkedSig}</p>
       </div>
-    \`;
-    signatureText = \`\n\n---\n\${emailSignature}\`;
+    `;
+    signatureText = `\n\n---\n${emailSignature}`;
   }
 
-  // Test email HTML template
-  const htmlBody = \`
+  // Test email HTML template (similar to regular emails but with test notice)
+  const htmlBody = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>\${subject}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>${subject}</title>
   </head>
-  <body style="margin: 0; padding: 0; background-color: #0a0a0a;">
+  <body style="margin: 0; padding: 0; background-color: #0a0a0a; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
     <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #0a0a0a;">
       <tr>
         <td align="center" style="padding: 48px 24px;">
           <table role="presentation" style="width: 100%; max-width: 560px; border: 0; border-spacing: 0;">
             <tr>
               <td style="padding: 0;">
+                <!-- Test Email Notice -->
                 <div style="margin-bottom: 32px; padding: 16px 20px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 8px; text-align: center;">
-                  <p style="color: rgba(234, 179, 8, 0.9); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; font-weight: 500;">
-                    This is a test email - only you can see this preview
+                  <p style="color: rgba(234, 179, 8, 0.9); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; font-weight: 500;">
+                    🧪 This is a test email — only you can see this preview
                   </p>
                 </div>
-                <div style="font-family: Georgia, serif;">
-                  \${formattedBody}
+                
+                <!-- Main Content -->
+                <div style="font-family: Georgia, 'Times New Roman', serif;">
+                  ${formattedBody}
                 </div>
-                \${signatureHtml}
+                
+                <!-- Signature -->
+                ${signatureHtml}
+                
+                <!-- Footer -->
                 <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
-                  <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0 0 12px 0;">
-                    Sent by \${ownerName}
+                  <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
+                    Sent by ${ownerName}
                   </p>
-                  <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0;">
+                  <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0;">
                     [Unsubscribe link will appear here in real emails]
                   </p>
                 </div>
@@ -377,15 +384,15 @@ export async function sendTestEmail(
       </tr>
     </table>
   </body>
-</html>\`;
+</html>`;
 
-  const textBody = \`[TEST EMAIL - Only you can see this preview]\n\n\${plainTextBody}\${signatureText}\n\n---\nSent by \${ownerName}\`;
+  const textBody = `[TEST EMAIL - Only you can see this preview]\n\n${plainTextBody}${signatureText}\n\n---\nSent by ${ownerName}`;
 
   try {
     const { data, error } = await client.emails.send({
       from: fromEmail,
       to: [to],
-      subject: \`[TEST] \${subject}\`,
+      subject: `[TEST] ${subject}`,
       html: htmlBody,
       text: textBody,
     });
@@ -399,7 +406,7 @@ export async function sendTestEmail(
       return { success: false, error: "No email ID returned" };
     }
 
-    console.log(\`Test email sent successfully to \${to}, email ID: \${data.id}\`);
+    console.log(`Test email sent successfully to ${to}, email ID: ${data.id}`);
     return { success: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to send test email";
