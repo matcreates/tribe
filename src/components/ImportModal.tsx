@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ContactSupportModal } from "./ContactSupportModal";
 
 export interface ImportPreview {
   totalInFile: number;
@@ -21,6 +22,8 @@ interface ImportModalProps {
   onImportWithoutVerification: () => void;
 }
 
+const MAX_IMPORT_LIMIT = 10000;
+
 export function ImportModal({
   isOpen,
   preview,
@@ -29,6 +32,7 @@ export function ImportModal({
   onImportWithVerification,
   onImportWithoutVerification,
 }: ImportModalProps) {
+  const [showContactSupport, setShowContactSupport] = useState(false);
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -44,8 +48,65 @@ export function ImportModal({
   if (!isOpen || !preview) return null;
 
   const hasEmailsToImport = preview.toImport > 0;
+  const exceedsLimit = preview.toImport > MAX_IMPORT_LIMIT;
+
+  // Show contact support modal for imports over 10,000
+  if (exceedsLimit) {
+    return (
+      <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <div 
+            className="relative w-full max-w-[420px] mx-4 rounded-2xl border border-white/[0.08] p-8"
+            style={{ background: 'rgb(24, 24, 24)' }}
+          >
+            <div className="text-center">
+              <div 
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'rgba(234, 179, 8, 0.15)' }}
+              >
+                <svg className="w-7 h-7 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] font-medium text-white/90 mb-2">Import limit exceeded</h3>
+              <p className="text-[14px] text-white/50 mb-2">
+                Your file contains <span className="text-white/80 font-medium">{preview.toImport.toLocaleString()}</span> contacts.
+              </p>
+              <p className="text-[13px] text-white/40 mb-6">
+                The maximum import limit is {MAX_IMPORT_LIMIT.toLocaleString()} contacts at a time. Please contact support for bulk imports.
+              </p>
+              <button
+                onClick={() => setShowContactSupport(true)}
+                className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass mb-3"
+              >
+                <span className="btn-glass-text">Contact Support</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full py-3 text-[11px] font-medium tracking-[0.1em] uppercase text-white/40 hover:text-white/60 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+        <ContactSupportModal
+          isOpen={showContactSupport}
+          onClose={() => setShowContactSupport(false)}
+          reason={`Bulk import request: ${preview.toImport.toLocaleString()} contacts`}
+        />
+      </>
+    );
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div 
@@ -146,6 +207,7 @@ export function ImportModal({
         )}
       </div>
     </div>
+    </>
   );
 }
 

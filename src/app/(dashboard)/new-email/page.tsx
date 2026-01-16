@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, RecipientFilter, SubscriptionStatus } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus, RecipientFilter, SubscriptionStatus, WeeklyEmailStatus } from "@/lib/actions";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
 import { PaywallModal } from "@/components/PaywallModal";
+import { ContactSupportModal } from "@/components/ContactSupportModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -30,10 +31,13 @@ export default function NewEmailPage() {
   const [testEmailError, setTestEmailError] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testEmailSent, setTestEmailSent] = useState(false);
+  const [weeklyStatus, setWeeklyStatus] = useState<WeeklyEmailStatus | null>(null);
+  const [showContactSupport, setShowContactSupport] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
 
   const hasSignature = !!signature?.trim();
+  const isWeeklyLimitReached = subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail;
 
   useEffect(() => {
     loadCounts();
@@ -49,6 +53,8 @@ export default function NewEmailPage() {
     } else {
       loadSubscription();
     }
+    
+    loadWeeklyStatus();
   }, []);
 
   const syncAndLoadSubscription = async () => {
@@ -104,6 +110,15 @@ export default function NewEmailPage() {
       // Don't show paywall on load - only when trying to send/schedule
     } catch (error) {
       console.error("Failed to load subscription:", error);
+    }
+  };
+
+  const loadWeeklyStatus = async () => {
+    try {
+      const status = await getWeeklyEmailStatus();
+      setWeeklyStatus(status);
+    } catch (error) {
+      console.error("Failed to load weekly email status:", error);
     }
   };
 
@@ -292,6 +307,8 @@ export default function NewEmailPage() {
       setSubject("");
       setLastSentCount(result.sentCount);
       setShowSuccess(true);
+      // Reload weekly status after sending
+      loadWeeklyStatus();
       router.refresh();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Failed to send email";
@@ -338,6 +355,8 @@ export default function NewEmailPage() {
         minute: "2-digit",
       });
       showToast(`Email scheduled for ${formattedDate}`);
+      // Reload weekly status after scheduling
+      loadWeeklyStatus();
       router.refresh();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Failed to schedule email";
@@ -399,6 +418,13 @@ export default function NewEmailPage() {
       <PaywallModal 
         isOpen={showPaywall} 
         onClose={() => setShowPaywall(false)}
+      />
+
+      {/* Contact Support Modal */}
+      <ContactSupportModal
+        isOpen={showContactSupport}
+        onClose={() => setShowContactSupport(false)}
+        reason="Weekly email limit inquiry"
       />
 
       {/* Test Email Modal */}
@@ -512,8 +538,56 @@ export default function NewEmailPage() {
             </div>
           )}
 
+          {/* Weekly email limit reached banner (for premium users) */}
+          {subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail && (
+            <div 
+              className="p-6 rounded-[12px] border border-red-500/20 mb-5"
+              style={{ background: 'rgba(239, 68, 68, 0.06)' }}
+            >
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
+                  <LimitIcon className="w-4 h-4 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-medium text-white/90 mb-1">
+                    You reached the limit of emails you can send to your Tribe per week.
+                  </h3>
+                  <p className="text-[13px] text-white/50">
+                    You will be able to send the next email on Monday.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="ml-11 mb-4">
+                <p className="text-[12px] text-white/40 mb-3">Please keep in mind:</p>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2 text-[12px] text-white/50">
+                    <span className="text-red-400/70 mt-0.5">•</span>
+                    Each email sent has a carbon emission cost, it&apos;s our duty to send emails responsibly
+                  </li>
+                  <li className="flex items-start gap-2 text-[12px] text-white/50">
+                    <span className="text-red-400/70 mt-0.5">•</span>
+                    People don&apos;t like to be spammed, as much as the members of your Tribe love you, receiving 1 or 2 emails per week from you is probably enough.
+                  </li>
+                  <li className="flex items-start gap-2 text-[12px] text-white/50">
+                    <span className="text-red-400/70 mt-0.5">•</span>
+                    We don&apos;t want your emails to end up in the Junk/Spam folder: when email senders send too many emails, email providers often will consider those as Junk/Spam
+                  </li>
+                </ul>
+              </div>
+              
+              <button
+                onClick={() => setShowContactSupport(true)}
+                className="ml-11 px-4 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.08em] uppercase text-white/60 hover:text-white/80 transition-colors border border-white/10 hover:border-white/20"
+                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              >
+                Contact support
+              </button>
+            </div>
+          )}
+
           {/* Subject Field */}
-          <div className="mb-4">
+          <div className={`mb-4 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
             <label className="block text-[11px] text-white/40 uppercase tracking-[0.08em] mb-2">
               Subject
             </label>
@@ -522,19 +596,21 @@ export default function NewEmailPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Enter email subject..."
-              className="w-full px-4 py-3.5 rounded-[10px] text-[18px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
+              disabled={isWeeklyLimitReached}
+              className="w-full px-4 py-3.5 rounded-[10px] text-[18px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12] disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.03)' }}
             />
           </div>
 
         {/* Recipient Selector */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className={`flex items-center gap-3 mb-4 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
           <span className="text-[13px] text-white/40">to</span>
           <div className="relative">
             <select
               value={recipientFilter}
               onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
-              className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06]"
+              disabled={isWeeklyLimitReached}
+              className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
               style={{ background: 'rgba(255, 255, 255, 0.04)' }}
             >
               <option value="verified">All verified ({counts.verified})</option>
@@ -546,10 +622,10 @@ export default function NewEmailPage() {
         </div>
 
         {/* Smart Editor */}
-        <div className="relative mb-5">
+        <div className={`relative mb-5 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
           <div
             ref={editorRef}
-            contentEditable
+            contentEditable={!isWeeklyLimitReached}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
@@ -566,13 +642,13 @@ export default function NewEmailPage() {
         </div>
 
         {/* Helper text */}
-        <p className="text-[11px] text-white/25 mb-5">
+        <p className={`text-[11px] text-white/25 mb-5 ${isWeeklyLimitReached ? 'opacity-40' : ''}`}>
           Links are auto-detected • Type <span className="text-white/35">-</span> for bullet lists
         </p>
 
         {/* Allow Replies Toggle */}
         <div 
-          className="flex items-center justify-between p-4 rounded-[10px] border border-white/[0.06] mb-5"
+          className={`flex items-center justify-between p-4 rounded-[10px] border border-white/[0.06] mb-5 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}
           style={{ background: 'rgba(255, 255, 255, 0.02)' }}
         >
           <div className="flex items-center gap-3">
@@ -590,9 +666,10 @@ export default function NewEmailPage() {
           <button
             type="button"
             onClick={() => setAllowReplies(!allowReplies)}
+            disabled={isWeeklyLimitReached}
             className={`relative w-11 h-6 rounded-full transition-colors ${
               allowReplies ? 'bg-emerald-500/60' : 'bg-white/10'
-            }`}
+            } disabled:cursor-not-allowed`}
           >
             <span 
               className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
@@ -606,14 +683,14 @@ export default function NewEmailPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleSend}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0 || isWeeklyLimitReached}
             className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
           >
             <span className="btn-glass-text">{isSending ? "SENDING..." : "SEND"}</span>
           </button>
           <button
             onClick={() => setShowScheduleModal(true)}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0 || isWeeklyLimitReached}
             className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
           >
             <ClockIcon className="w-3 h-3 text-white/60" />
@@ -621,7 +698,7 @@ export default function NewEmailPage() {
           </button>
           <button
             onClick={() => setShowTestModal(true)}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim()}
+            disabled={isSending || isScheduling || isEmpty || !subject.trim() || isWeeklyLimitReached}
             className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/50 hover:text-white/70 hover:border-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           >
@@ -752,6 +829,14 @@ function InfoIcon({ className }: { className?: string }) {
   );
 }
 
+function LimitIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M5 5l6 6M11 5l-6 6" />
+    </svg>
+  );
+}
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (

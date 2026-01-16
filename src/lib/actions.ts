@@ -609,6 +609,50 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
   };
 }
 
+// Weekly email limit for premium users
+const WEEKLY_EMAIL_LIMIT = 2;
+
+export interface WeeklyEmailStatus {
+  emailsSentThisWeek: number;
+  limit: number;
+  canSendEmail: boolean;
+  nextResetDate: string; // ISO date string for next Monday
+}
+
+export async function getWeeklyEmailStatus(): Promise<WeeklyEmailStatus> {
+  const tribe = await getTribe();
+  
+  // Get start of current week (Monday 00:00:00 UTC)
+  const now = new Date();
+  const dayOfWeek = now.getUTCDay();
+  const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday is 0, so it's 6 days from Monday
+  const startOfWeek = new Date(now);
+  startOfWeek.setUTCDate(now.getUTCDate() - daysFromMonday);
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+  
+  // Get next Monday
+  const nextMonday = new Date(startOfWeek);
+  nextMonday.setUTCDate(startOfWeek.getUTCDate() + 7);
+  
+  // Count sent emails this week (only actual sends to tribe, not scheduled)
+  const result = await pool.query(
+    `SELECT COUNT(*) FROM sent_emails 
+     WHERE tribe_id = $1 
+     AND status = 'sent' 
+     AND sent_at >= $2`,
+    [tribe.id, startOfWeek.toISOString()]
+  );
+  
+  const emailsSentThisWeek = parseInt(result.rows[0].count) || 0;
+  
+  return {
+    emailsSentThisWeek,
+    limit: WEEKLY_EMAIL_LIMIT,
+    canSendEmail: emailsSentThisWeek < WEEKLY_EMAIL_LIMIT,
+    nextResetDate: nextMonday.toISOString(),
+  };
+}
+
 export async function getRecipientCounts(): Promise<{
   verified: number;
   nonVerified: number;
