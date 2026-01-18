@@ -74,26 +74,41 @@ export async function POST(request: NextRequest) {
     // Sanitize filename for Vercel Blob (only alphanumeric, dash, underscore, dot)
     const sanitizedFileName = file.name
       .replace(/[^a-zA-Z0-9._-]/g, '_')
-      .replace(/_+/g, '_');
+      .replace(/_+/g, '_')
+      .substring(0, 100); // Limit filename length
+    
+    // Sanitize content type
+    const fileContentType = file.type && file.type.match(/^[a-zA-Z0-9-+./]+$/) 
+      ? file.type 
+      : 'application/octet-stream';
+    
     const fileBlob = await put(
       `gifts/${tribe.id}/${timestamp}-${sanitizedFileName}`,
       file,
       {
         access: 'public',
-        contentType: file.type || 'application/octet-stream',
+        contentType: fileContentType,
       }
     );
 
     // Upload thumbnail if provided
     let thumbnailUrl: string | null = null;
     if (thumbnail) {
-      const thumbExtension = (thumbnail.name.split('.').pop() || 'jpg').replace(/[^a-zA-Z0-9]/g, '');
+      const thumbExtension = (thumbnail.name.split('.').pop() || 'jpg')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 10);
+      
+      // Sanitize thumbnail content type
+      const thumbContentType = thumbnail.type && thumbnail.type.match(/^image\/[a-zA-Z0-9-+.]+$/)
+        ? thumbnail.type
+        : 'image/jpeg';
+      
       const thumbBlob = await put(
         `gifts/${tribe.id}/thumb-${timestamp}.${thumbExtension}`,
         thumbnail,
         {
           access: 'public',
-          contentType: thumbnail.type,
+          contentType: thumbContentType,
         }
       );
       thumbnailUrl = thumbBlob.url;
