@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus, updateTribeSettings } from "@/lib/actions";
 import type { RecipientFilter, SubscriptionStatus, WeeklyEmailStatus } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
@@ -10,7 +10,6 @@ import { PaywallModal } from "@/components/PaywallModal";
 import { ContactSupportModal } from "@/components/ContactSupportModal";
 import { TipsCarousel } from "@/components/TipsCarousel";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 export default function NewEmailPage() {
   const router = useRouter();
@@ -24,7 +23,8 @@ export default function NewEmailPage() {
   const [lastCampaignId, setLastCampaignId] = useState<string | null>(null);
   const [lastTotalRecipients, setLastTotalRecipients] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
-  const [signature, setSignature] = useState<string | null>(null);
+  const [signature, setSignature] = useState("");
+  const [isSavingSignature, setIsSavingSignature] = useState(false);
   const [allowReplies, setAllowReplies] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -36,10 +36,12 @@ export default function NewEmailPage() {
   const [testEmailSent, setTestEmailSent] = useState(false);
   const [weeklyStatus, setWeeklyStatus] = useState<WeeklyEmailStatus | null>(null);
   const [showContactSupport, setShowContactSupport] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
+  const signatureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const hasSignature = !!signature?.trim();
   const isWeeklyLimitReached = !!(subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail);
 
   useEffect(() => {
@@ -49,9 +51,7 @@ export default function NewEmailPage() {
     // Check for subscription success from Stripe redirect
     const subscriptionParam = searchParams.get('subscription');
     if (subscriptionParam === 'success') {
-      // Sync subscription status from Stripe (fallback if webhook didn't work)
       syncAndLoadSubscription();
-      // Remove the query param
       router.replace('/new-email');
     } else {
       loadSubscription();
@@ -60,9 +60,19 @@ export default function NewEmailPage() {
     loadWeeklyStatus();
   }, []);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const syncAndLoadSubscription = async () => {
     try {
-      // Call the verify endpoint to sync subscription from Stripe
       const response = await fetch('/api/stripe/verify-subscription', {
         method: 'POST',
       });
@@ -73,7 +83,6 @@ export default function NewEmailPage() {
         setShowPaywall(false);
       }
       
-      // Now load the subscription status from our database
       const status = await getSubscriptionStatus();
       setSubscription(status);
       
@@ -100,7 +109,7 @@ export default function NewEmailPage() {
   const loadSignature = async () => {
     try {
       const sig = await getEmailSignature();
-      setSignature(sig);
+      setSignature(sig || "");
     } catch (error) {
       console.error("Failed to load signature:", error);
     }
@@ -110,7 +119,6 @@ export default function NewEmailPage() {
     try {
       const status = await getSubscriptionStatus();
       setSubscription(status);
-      // Don't show paywall on load - only when trying to send/schedule
     } catch (error) {
       console.error("Failed to load subscription:", error);
     }
@@ -133,31 +141,20 @@ export default function NewEmailPage() {
     }
   };
 
-  // Get plain text content from editor
   const getPlainText = useCallback(() => {
     if (!editorRef.current) return "";
     return editorRef.current.innerText || "";
   }, []);
 
-  // Get HTML content from editor
-  const getHtmlContent = useCallback(() => {
-    if (!editorRef.current) return "";
-    return editorRef.current.innerHTML || "";
-  }, []);
-
-  // Handle input and auto-format
   const handleInput = useCallback(() => {
     if (!editorRef.current) return;
-    
     const text = getPlainText();
     setIsEmpty(!text.trim());
   }, [getPlainText]);
 
-  // Handle key events for smart formatting
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!editorRef.current) return;
 
-    // Handle Enter key for list continuation
     if (e.key === "Enter") {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
@@ -166,7 +163,6 @@ export default function NewEmailPage() {
       const node = range.startContainer;
       const textContent = node.textContent || "";
       
-      // Check if current line starts with bullet
       const lines = textContent.split("\n");
       const cursorPos = range.startOffset;
       let charCount = 0;
@@ -184,7 +180,6 @@ export default function NewEmailPage() {
       const bulletMatch = currentLine.match(/^(\s*[-•*]\s*)/);
       
       if (bulletMatch) {
-        // If line only has bullet, remove it
         if (currentLine.trim() === "-" || currentLine.trim() === "•" || currentLine.trim() === "*") {
           e.preventDefault();
           document.execCommand("delete");
@@ -193,14 +188,12 @@ export default function NewEmailPage() {
           return;
         }
         
-        // Continue bullet on next line
         e.preventDefault();
         document.execCommand("insertLineBreak");
         document.execCommand("insertText", false, bulletMatch[1].trim() + " ");
       }
     }
 
-    // Auto-format bullets when typing "- " at start of line
     if (e.key === " ") {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
@@ -212,7 +205,6 @@ export default function NewEmailPage() {
         const text = node.textContent || "";
         const offset = range.startOffset;
         
-        // Check if we just typed "- " at start or after newline
         const beforeCursor = text.slice(0, offset);
         const lastNewline = beforeCursor.lastIndexOf("\n");
         const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
@@ -220,12 +212,10 @@ export default function NewEmailPage() {
         
         if (lineText === "-" || lineText === "*") {
           e.preventDefault();
-          // Replace with bullet
           const before = text.slice(0, lineStart);
           const after = text.slice(offset);
           node.textContent = before + "• " + after;
           
-          // Move cursor after bullet
           const newRange = document.createRange();
           newRange.setStart(node, lineStart + 2);
           newRange.collapse(true);
@@ -236,28 +226,18 @@ export default function NewEmailPage() {
     }
   }, []);
 
-  // Paste as plain text and auto-detect links
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData("text/plain");
-    
-    // Insert plain text
     document.execCommand("insertText", false, text);
-    
-    // Trigger input handler
     handleInput();
   }, [handleInput]);
 
-  // Format content for display (linkify URLs)
   const formatContent = useCallback((html: string) => {
-    // URL regex
     const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    
-    // Replace URLs with underlined spans
     return html.replace(urlRegex, '<span class="underline text-white/70">$1</span>');
   }, []);
 
-  // Handle blur to format links
   const handleBlur = useCallback(() => {
     if (!editorRef.current) return;
     
@@ -271,22 +251,42 @@ export default function NewEmailPage() {
       editorRef.current.innerHTML = formatted;
     }
     
-    // Restore cursor position if possible
     if (savedRange && selection) {
       try {
         selection.removeAllRanges();
         selection.addRange(savedRange);
       } catch {
-        // Cursor restore failed, that's ok
+        // Cursor restore failed
       }
     }
   }, [formatContent]);
+
+  // Auto-save signature with debounce
+  const handleSignatureChange = (newSignature: string) => {
+    setSignature(newSignature);
+    
+    // Clear existing timeout
+    if (signatureTimeoutRef.current) {
+      clearTimeout(signatureTimeoutRef.current);
+    }
+    
+    // Debounce save
+    signatureTimeoutRef.current = setTimeout(async () => {
+      setIsSavingSignature(true);
+      try {
+        await updateTribeSettings({ emailSignature: newSignature });
+      } catch (error) {
+        console.error("Failed to save signature:", error);
+      } finally {
+        setIsSavingSignature(false);
+      }
+    }, 1000);
+  };
 
   const handleSend = async () => {
     const body = getPlainText();
     if (!body.trim() || !subject.trim() || isSending) return;
 
-    // Check subscription before sending
     if (!subscription?.canSendEmails) {
       setShowPaywall(true);
       return;
@@ -311,7 +311,6 @@ export default function NewEmailPage() {
       setLastCampaignId(result.id);
       setLastTotalRecipients(result.totalRecipients);
       setShowSuccess(true);
-      // Reload weekly status after sending
       loadWeeklyStatus();
       router.refresh();
     } catch (error) {
@@ -326,7 +325,6 @@ export default function NewEmailPage() {
     const body = getPlainText();
     if (!body.trim() || !subject.trim() || isScheduling) return;
 
-    // Check subscription before scheduling
     if (!subscription?.canSendEmails) {
       setShowPaywall(true);
       setShowScheduleModal(false);
@@ -351,7 +349,6 @@ export default function NewEmailPage() {
       setSubject("");
       setShowScheduleModal(false);
       
-      // Format the scheduled time for toast
       const formattedDate = scheduledAt.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -359,7 +356,6 @@ export default function NewEmailPage() {
         minute: "2-digit",
       });
       showToast(`Email scheduled for ${formattedDate}`);
-      // Reload weekly status after scheduling
       loadWeeklyStatus();
       router.refresh();
     } catch (error) {
@@ -374,7 +370,6 @@ export default function NewEmailPage() {
     const body = getPlainText();
     if (!body.trim() || !subject.trim() || !testEmail.trim()) return;
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(testEmail.trim())) {
       setTestEmailError("Please enter a valid email address");
@@ -406,6 +401,8 @@ export default function NewEmailPage() {
     setTestEmailError("");
     setTestEmailSent(false);
   };
+
+  const canSend = !isEmpty && subject.trim() && getCurrentCount() > 0 && !isWeeklyLimitReached;
 
   if (showSuccess) {
     return (
@@ -443,7 +440,6 @@ export default function NewEmailPage() {
             className="relative w-full max-w-[400px] mx-4 rounded-[16px] p-6"
             style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            {/* Close button */}
             <button
               onClick={closeTestModal}
               className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors"
@@ -543,7 +539,7 @@ export default function NewEmailPage() {
             </div>
           )}
 
-          {/* Weekly email limit reached banner (for premium users) */}
+          {/* Weekly email limit reached banner */}
           {subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail && (
             <div 
               className="p-6 rounded-[12px] border border-red-500/20 mb-5"
@@ -591,204 +587,193 @@ export default function NewEmailPage() {
             </div>
           )}
 
-          {/* Subject Field */}
-          <div className={`mb-4 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
-            <label className="block text-[11px] text-white/40 uppercase tracking-[0.08em] mb-2">
-              Subject
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Enter email subject..."
-              disabled={isWeeklyLimitReached}
-              className="w-full px-4 py-3.5 rounded-[10px] text-[18px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12] disabled:cursor-not-allowed"
-              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
-            />
-          </div>
-
-        {/* Recipient Selector */}
-        <div className={`flex items-center gap-3 mb-4 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
-          <span className="text-[13px] text-white/40">to</span>
-          <div className="relative">
-            <select
-              value={recipientFilter}
-              onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
-              disabled={isWeeklyLimitReached}
-              className="appearance-none px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-            >
-              <option value="verified">All verified ({counts.verified})</option>
-              <option value="all">Everyone ({counts.all})</option>
-              <option value="non-verified">Non-verified only ({counts.nonVerified})</option>
-            </select>
-            <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/35 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Smart Editor */}
-        <div className={`relative mb-5 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}>
-          <div
-            ref={editorRef}
-            contentEditable={!isWeeklyLimitReached}
-            onInput={handleInput}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            onBlur={handleBlur}
-            className="w-full min-h-[200px] px-4 py-3 rounded-[10px] text-[14px] leading-relaxed text-white/70 focus:outline-none transition-colors whitespace-pre-wrap break-words border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-            suppressContentEditableWarning
-          />
-          {isEmpty && (
-            <div className="absolute left-4 top-3 text-[14px] text-white/25 pointer-events-none">
-              Write your email...
-            </div>
-          )}
-        </div>
-
-        {/* Helper text */}
-        <p className={`text-[11px] text-white/25 mb-5 ${isWeeklyLimitReached ? 'opacity-40' : ''}`}>
-          Links are auto-detected • Type <span className="text-white/35">-</span> for bullet lists
-        </p>
-
-        {/* Allow Replies Toggle */}
-        <div 
-          className={`flex items-center justify-between p-4 rounded-[10px] border border-white/[0.06] mb-5 ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}
-          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: allowReplies ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)' }}
-            >
-              <ReplyToggleIcon className={`w-4 h-4 ${allowReplies ? 'text-emerald-400' : 'text-white/40'}`} />
-            </div>
-            <div>
-              <p className="text-[13px] text-white/70">Allow replies</p>
-              <p className="text-[11px] text-white/30">Members can reply to this email</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setAllowReplies(!allowReplies)}
-            disabled={isWeeklyLimitReached}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              allowReplies ? 'bg-emerald-500/60' : 'bg-white/10'
-            } disabled:cursor-not-allowed`}
-          >
-            <span 
-              className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                allowReplies ? 'translate-x-5' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={handleSend}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0 || isWeeklyLimitReached}
-            className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
-          >
-            <span className="btn-glass-text">{isSending ? "SENDING..." : "SEND"}</span>
-          </button>
-          <button
-            onClick={() => setShowScheduleModal(true)}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim() || getCurrentCount() === 0 || isWeeklyLimitReached}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
-          >
-            <ClockIcon className="w-3 h-3 text-white/60" />
-            <span className="btn-glass-text">SCHEDULE</span>
-          </button>
-          <button
-            onClick={() => setShowTestModal(true)}
-            disabled={isSending || isScheduling || isEmpty || !subject.trim() || isWeeklyLimitReached}
-            className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase border border-white/[0.08] text-white/50 hover:text-white/70 hover:border-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          {/* Main Compose Card */}
+          <div 
+            className={`rounded-[14px] border border-white/[0.06] overflow-hidden ${isWeeklyLimitReached ? 'opacity-40 pointer-events-none' : ''}`}
             style={{ background: 'rgba(255, 255, 255, 0.02)' }}
           >
-            SEND TEST
-          </button>
-        </div>
-
-        {getCurrentCount() === 0 && (
-          <p className="mt-3 text-[12px] text-white/30">
-            {recipientFilter === "verified" 
-              ? "No verified members yet" 
-              : recipientFilter === "non-verified"
-              ? "No non-verified members"
-              : "Add members to your tribe first"}
-          </p>
-        )}
-
-        {/* Signature Preview or Prompt */}
-        {hasSignature ? (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] text-white/30 uppercase tracking-[0.08em]">Your signature</p>
-              <Link
-                href="/settings"
-                className="text-[11px] text-white/40 hover:text-white/60 transition-colors underline"
-              >
-                Edit
-              </Link>
+            {/* Recipients */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]">
+              <span className="text-[13px] text-white/40">To</span>
+              <div className="relative flex-1">
+                <select
+                  value={recipientFilter}
+                  onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
+                  disabled={isWeeklyLimitReached}
+                  className="appearance-none w-full px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
+                  style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+                >
+                  <option value="verified">All verified members ({counts.verified})</option>
+                  <option value="all">Everyone ({counts.all})</option>
+                  <option value="non-verified">Non-verified only ({counts.nonVerified})</option>
+                </select>
+                <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/35 pointer-events-none" />
+              </div>
             </div>
-            <div 
-              className="p-4 rounded-[10px] border border-white/[0.06]"
-              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-            >
-              <div 
-                className="text-[13px] text-white/40 leading-relaxed whitespace-pre-wrap [&_a]:text-[#E8B84A] [&_a]:underline"
-                dangerouslySetInnerHTML={{ 
-                  __html: (signature || '')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-                }}
+
+            {/* Subject */}
+            <div className="px-5 py-4 border-b border-white/[0.04]">
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject"
+                disabled={isWeeklyLimitReached}
+                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none bg-transparent disabled:cursor-not-allowed"
               />
             </div>
-            <p className="text-[10px] text-white/20 mt-2">
-              This will be added at the end of your email
-            </p>
-          </div>
-        ) : (
-          <div 
-            className="mt-6 p-4 rounded-[10px] border border-white/[0.06] flex items-center justify-between gap-4"
-            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
-                <SignatureIcon className="w-4 h-4 text-white/40" />
+
+            {/* Message Editor */}
+            <div className="relative px-5 py-4 border-b border-white/[0.04]">
+              <div
+                ref={editorRef}
+                contentEditable={!isWeeklyLimitReached}
+                onInput={handleInput}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                onBlur={handleBlur}
+                className="w-full min-h-[180px] text-[14px] leading-relaxed text-white/70 focus:outline-none whitespace-pre-wrap break-words"
+                suppressContentEditableWarning
+              />
+              {isEmpty && (
+                <div className="absolute left-5 top-4 text-[14px] text-white/25 pointer-events-none">
+                  Write your message...
+                </div>
+              )}
+            </div>
+
+            {/* Signature */}
+            <div className="px-5 py-4 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] text-white/30 uppercase tracking-[0.08em]">
+                  Signature
+                </span>
+                {isSavingSignature && (
+                  <span className="text-[10px] text-white/30">Saving...</span>
+                )}
               </div>
-              <div>
-                <p className="text-[13px] text-white/60">Add your email signature</p>
-                <p className="text-[11px] text-white/30">Automatically added to every email</p>
+              <textarea
+                value={signature}
+                onChange={(e) => handleSignatureChange(e.target.value)}
+                placeholder="Add your signature (e.g., Best, John)"
+                disabled={isWeeklyLimitReached}
+                rows={2}
+                className="w-full text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none bg-transparent resize-none disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Allow Replies Toggle */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: allowReplies ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)' }}
+                >
+                  <ReplyToggleIcon className={`w-3.5 h-3.5 ${allowReplies ? 'text-emerald-400' : 'text-white/40'}`} />
+                </div>
+                <div>
+                  <p className="text-[13px] text-white/70">Allow replies</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAllowReplies(!allowReplies)}
+                disabled={isWeeklyLimitReached}
+                className={`relative w-10 h-5 rounded-full transition-colors ${
+                  allowReplies ? 'bg-emerald-500/60' : 'bg-white/10'
+                } disabled:cursor-not-allowed`}
+              >
+                <span 
+                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                    allowReplies ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Send Actions */}
+            <div className="flex items-center justify-between px-5 py-4">
+              {getCurrentCount() === 0 ? (
+                <p className="text-[12px] text-white/30">
+                  {recipientFilter === "verified" 
+                    ? "No verified members yet" 
+                    : recipientFilter === "non-verified"
+                    ? "No non-verified members"
+                    : "Add members to your tribe first"}
+                </p>
+              ) : (
+                <p className="text-[11px] text-white/25">
+                  Links auto-detected • Type <span className="text-white/35">-</span> for bullets
+                </p>
+              )}
+              
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={handleSend}
+                  disabled={isSending || isScheduling || !canSend}
+                  className="px-5 py-2.5 rounded-l-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span className="btn-glass-text">{isSending ? "SENDING..." : "SEND"}</span>
+                </button>
+                
+                {/* More Options Dropdown */}
+                <div className="relative" ref={moreMenuRef}>
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    disabled={isSending || isScheduling || !canSend}
+                    className="px-2.5 py-2.5 rounded-r-[10px] text-[10px] btn-glass disabled:opacity-40 disabled:cursor-not-allowed border-l border-white/[0.08]"
+                  >
+                    <ChevronDownIcon className="w-3.5 h-3.5 text-white/60" />
+                  </button>
+                  
+                  {showMoreMenu && (
+                    <div 
+                      className="absolute right-0 bottom-full mb-2 w-44 rounded-[10px] border border-white/[0.08] overflow-hidden shadow-xl z-10"
+                      style={{ background: 'rgb(28, 28, 28)' }}
+                    >
+                      <button
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          setShowScheduleModal(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-[12px] text-white/70 hover:bg-white/[0.05] transition-colors text-left"
+                      >
+                        <ClockIcon className="w-4 h-4 text-white/50" />
+                        Schedule for later
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          setShowTestModal(true);
+                        }}
+                        disabled={!subject.trim() || isEmpty}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-[12px] text-white/70 hover:bg-white/[0.05] transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed border-t border-white/[0.04]"
+                      >
+                        <TestIcon className="w-4 h-4 text-white/50" />
+                        Send test email
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <Link
-              href="/settings"
-              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
-            >
-              <span className="btn-glass-text">SETUP</span>
-            </Link>
           </div>
-        )}
 
-        {/* Tips for Creators */}
-        <div className="mt-8">
-          <TipsCarousel />
+          {/* Tips for Creators - Outside the main card */}
+          <div className="mt-8">
+            <TipsCarousel />
+          </div>
+
+          <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
         </div>
 
-        <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
-      </div>
-
-      {/* Schedule Modal */}
-      <ScheduleModal
-        isOpen={showScheduleModal}
-        isScheduling={isScheduling}
-        onClose={() => setShowScheduleModal(false)}
-        onSchedule={handleSchedule}
-      />
+        {/* Schedule Modal */}
+        <ScheduleModal
+          isOpen={showScheduleModal}
+          isScheduling={isScheduling}
+          onClose={() => setShowScheduleModal(false)}
+          onSchedule={handleSchedule}
+        />
       </div>
     </>
   );
@@ -811,11 +796,11 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
-function SignatureIcon({ className }: { className?: string }) {
+function TestIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 12c1.5-2 3-4.5 4-4.5s2 3 3 3 2.5-3 4-5" />
-      <line x1="2" y1="14" x2="14" y2="14" />
+      <path d="M2 4l6 4 6-4" />
+      <rect x="1" y="3" width="14" height="10" rx="2" />
     </svg>
   );
 }
