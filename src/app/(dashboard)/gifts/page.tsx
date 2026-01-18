@@ -112,55 +112,86 @@ export default function GiftsPage() {
               </p>
             </div>
           ) : (
-            gifts.map((gift) => (
-              <div
-                key={gift.id}
-                className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-white/[0.04] transition-colors group border border-white/[0.06]"
-                style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-              >
-                {/* Thumbnail or file icon */}
+            gifts.map((gift) => {
+              const giftUrl = gift.short_code 
+                ? `${typeof window !== 'undefined' ? window.location.origin : ''}/g/${gift.short_code}`
+                : null;
+              
+              return (
                 <div
-                  className="w-12 h-12 rounded-[8px] flex items-center justify-center flex-shrink-0 overflow-hidden relative"
-                  style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+                  key={gift.id}
+                  className="rounded-[10px] border border-white/[0.06] overflow-hidden"
+                  style={{ background: 'rgba(255, 255, 255, 0.02)' }}
                 >
-                  {gift.thumbnail_url ? (
-                    <Image
-                      src={gift.thumbnail_url}
-                      alt={gift.file_name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <FileIcon className="w-5 h-5 text-white/40" />
+                  {/* Main row */}
+                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors group">
+                    {/* Thumbnail or file icon */}
+                    <div
+                      className="w-12 h-12 rounded-[8px] flex items-center justify-center flex-shrink-0 overflow-hidden relative"
+                      style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+                    >
+                      {gift.thumbnail_url ? (
+                        <Image
+                          src={gift.thumbnail_url}
+                          alt={gift.file_name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <FileIcon className="w-5 h-5 text-white/40" />
+                      )}
+                    </div>
+
+                    {/* File info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] text-white/70 truncate">{gift.file_name}</p>
+                      <p className="text-[11px] text-white/40">{formatFileSize(gift.file_size)}</p>
+                    </div>
+
+                    {/* Actions */}
+                    <a
+                      href={gift.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
+                      aria-label="Download"
+                    >
+                      <DownloadIcon className="w-4 h-4 text-white/50" />
+                    </a>
+                    <button
+                      onClick={() => handleDelete(gift.id)}
+                      disabled={deletingId === gift.id}
+                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all disabled:opacity-20"
+                      aria-label="Delete gift"
+                    >
+                      <TrashIcon className="w-4 h-4 text-white/50" />
+                    </button>
+                  </div>
+                  
+                  {/* Gift Link Row */}
+                  {giftUrl && (
+                    <div 
+                      className="px-4 py-2.5 flex items-center gap-2 border-t border-white/[0.04]"
+                      style={{ background: 'rgba(34, 197, 94, 0.03)' }}
+                    >
+                      <LinkIcon className="w-3.5 h-3.5 text-emerald-400/60 flex-shrink-0" />
+                      <span className="text-[11px] text-emerald-400/70 truncate flex-1 font-mono">
+                        {giftUrl.replace('https://', '').replace('http://', '')}
+                      </span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(giftUrl);
+                          showToast("Link copied!");
+                        }}
+                        className="px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider text-emerald-400/80 hover:bg-emerald-400/10 transition-colors"
+                      >
+                        Copy
+                      </button>
+                    </div>
                   )}
                 </div>
-
-                {/* File info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] text-white/70 truncate">{gift.file_name}</p>
-                  <p className="text-[11px] text-white/40">{formatFileSize(gift.file_size)}</p>
-                </div>
-
-                {/* Actions */}
-                <a
-                  href={gift.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
-                  aria-label="Download"
-                >
-                  <DownloadIcon className="w-4 h-4 text-white/50" />
-                </a>
-                <button
-                  onClick={() => handleDelete(gift.id)}
-                  disabled={deletingId === gift.id}
-                  className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all disabled:opacity-20"
-                  aria-label="Delete gift"
-                >
-                  <TrashIcon className="w-4 h-4 text-white/50" />
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -210,6 +241,15 @@ function TrashIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 10 11" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M2.5 1.5C2.5 0.671575 3.17158 0 4 0H6C6.82845 0 7.5 0.671575 7.5 1.5V2H9.5C9.77615 2 10 2.22386 10 2.5C10 2.77614 9.77615 3 9.5 3H8.9697L8.55765 9.59355C8.5082 10.3841 7.85265 11 7.06055 11H2.93945C2.14736 11 1.49178 10.3841 1.44237 9.59355L1.03028 3H0.5C0.22386 3 0 2.77614 0 2.5C0 2.22386 0.22386 2 0.5 2H2.5V1.5ZM3.5 2H6.5V1.5C6.5 1.22386 6.27615 1 6 1H4C3.72386 1 3.5 1.22386 3.5 1.5V2ZM2.03222 3L2.44042 9.5312C2.45689 9.7947 2.67542 10 2.93945 10H7.06055C7.3246 10 7.5431 9.7947 7.55955 9.5312L7.96775 3H2.03222Z" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   );
 }

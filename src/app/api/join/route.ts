@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTribeBySlug, addSubscriber } from "@/lib/db";
+import { getTribeBySlug, addSubscriber, getGiftByShortCode, getGiftById } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { slug, email, baseUrl } = body;
+    const { slug, email, baseUrl, giftCode, giftId: directGiftId } = body;
 
     if (!slug || !email) {
       return NextResponse.json(
@@ -22,7 +22,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscriber = await addSubscriber(tribe.id, email);
+    // Resolve gift ID from code or direct ID
+    let giftId: string | undefined;
+    if (giftCode) {
+      const gift = await getGiftByShortCode(giftCode);
+      if (gift && gift.tribe_id === tribe.id) {
+        giftId = gift.id;
+      }
+    } else if (directGiftId) {
+      const gift = await getGiftById(directGiftId);
+      if (gift && gift.tribe_id === tribe.id) {
+        giftId = gift.id;
+      }
+    }
+
+    const subscriber = await addSubscriber(tribe.id, email, undefined, giftId);
     if (!subscriber) {
       return NextResponse.json(
         { error: "Already subscribed" },
@@ -34,13 +48,14 @@ export async function POST(request: NextRequest) {
     let emailError: string | null = null;
     if (subscriber.verification_token && baseUrl) {
       try {
-        console.log("Attempting to send verification email...", { email, hasToken: !!subscriber.verification_token, baseUrl });
+        console.log("Attempting to send verification email...", { email, hasToken: !!subscriber.verification_token, baseUrl, giftId });
         const emailResult = await sendVerificationEmail(
           email,
           tribe.name,
           tribe.owner_name || "Anonymous",
           subscriber.verification_token,
-          baseUrl
+          baseUrl,
+          giftId
         );
         console.log("Verification email sent successfully:", emailResult);
       } catch (err) {

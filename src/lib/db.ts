@@ -211,9 +211,24 @@ export async function initDatabase() {
       file_url TEXT NOT NULL,
       file_size INTEGER NOT NULL,
       thumbnail_url TEXT,
+      short_code TEXT UNIQUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add short_code column if it doesn't exist (for existing tables)
+  try {
+    await pool.query(`ALTER TABLE gifts ADD COLUMN IF NOT EXISTS short_code TEXT UNIQUE`);
+  } catch {
+    // Column might already exist
+  }
+
+  // Add gift_id column to subscribers table (for tracking gift signups)
+  try {
+    await pool.query(`ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS gift_id TEXT`);
+  } catch {
+    // Column might already exist
+  }
 
   // Performance index for gifts table
   try {
@@ -257,6 +272,7 @@ export interface DbSubscriber {
   verification_token: string | null;
   unsubscribed: boolean;
   unsubscribe_token: string | null;
+  gift_id: string | null;
   created_at: Date;
 }
 
@@ -289,6 +305,7 @@ export interface DbGift {
   file_url: string;
   file_size: number;
   thumbnail_url: string | null;
+  short_code: string | null;
   created_at: Date;
 }
 
@@ -406,15 +423,15 @@ export async function getTribeByStripeCustomerId(customerId: string): Promise<Db
 }
 
 // Subscriber functions
-export async function addSubscriber(tribeId: string, email: string, name?: string): Promise<DbSubscriber | null> {
+export async function addSubscriber(tribeId: string, email: string, name?: string, giftId?: string): Promise<DbSubscriber | null> {
   const id = crypto.randomUUID();
   const verificationToken = crypto.randomUUID();
   const unsubscribeToken = crypto.randomUUID();
   
   try {
     await pool.query(
-      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token, unsubscribed, unsubscribe_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken, false, unsubscribeToken]
+      `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token, unsubscribed, unsubscribe_token, gift_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken, false, unsubscribeToken, giftId || null]
     );
     return await getSubscriberById(id);
   } catch {
@@ -757,6 +774,17 @@ export async function getOpenRateSince(tribeId: string, since: Date): Promise<{ 
 }
 
 // Gift functions
+
+// Generate a unique 8-character alphanumeric code
+function generateShortCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export async function createGift(
   tribeId: string,
   fileName: string,
@@ -766,9 +794,19 @@ export async function createGift(
 ): Promise<DbGift> {
   const id = crypto.randomUUID();
   
+  // Generate a unique short code with retry logic
+  let shortCode = generateShortCode();
+  let attempts = 0;
+  while (attempts < 5) {
+    const existing = await getGiftByShortCode(shortCode);
+    if (!existing) break;
+    shortCode = generateShortCode();
+    attempts++;
+  }
+  
   await pool.query(
-    `INSERT INTO gifts (id, tribe_id, file_name, file_url, file_size, thumbnail_url) VALUES ($1, $2, $3, $4, $5, $6)`,
-    [id, tribeId, fileName, fileUrl, fileSize, thumbnailUrl]
+    `INSERT INTO gifts (id, tribe_id, file_name, file_url, file_size, thumbnail_url, short_code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [id, tribeId, fileName, fileUrl, fileSize, thumbnailUrl, shortCode]
   );
   
   const gift = await getGiftById(id);
@@ -777,6 +815,11 @@ export async function createGift(
 
 export async function getGiftById(id: string): Promise<DbGift | null> {
   const rows = await query<DbGift>(`SELECT * FROM gifts WHERE id = $1`, [id]);
+  return rows[0] || null;
+}
+
+export async function getGiftByShortCode(shortCode: string): Promise<DbGift | null> {
+  const rows = await query<DbGift>(`SELECT * FROM gifts WHERE short_code = $1`, [shortCode]);
   return rows[0] || null;
 }
 

@@ -242,19 +242,30 @@ export async function sendVerificationEmail(
   tribeName: string,
   ownerName: string,
   verificationToken: string,
-  baseUrl: string
+  baseUrl: string,
+  giftId?: string | null
 ) {
   const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
+  const isGiftSignup = !!giftId;
 
   const client = getResendClient();
-  console.log(`Sending verification email to: ${to}, token: ${verificationToken.substring(0, 8)}...`);
+  console.log(`Sending verification email to: ${to}, token: ${verificationToken.substring(0, 8)}..., gift: ${giftId || 'none'}`);
   console.log(`Resend API key present: ${!!process.env.RESEND_API_KEY}`);
   console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
+  
+  const subject = isGiftSignup 
+    ? `Verify to receive your gift from ${ownerName}`
+    : `Confirm your subscription to ${ownerName}'s tribe`;
+  
+  const buttonText = isGiftSignup ? 'VERIFY AND DOWNLOAD GIFT' : 'CONFIRM SUBSCRIPTION';
+  const description = isGiftSignup
+    ? `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe and receive a gift. Click the button below to verify your email and download your gift.`
+    : `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm.`;
   
   const { data, error } = await client.emails.send({
     from: getFromEmail(ownerName),
     to: [to],
-    subject: `Confirm your subscription to ${ownerName}'s tribe`,
+    subject,
     html: `
       <!DOCTYPE html>
       <html>
@@ -264,15 +275,20 @@ export async function sendVerificationEmail(
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
           <div style="max-width: 400px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
+            ${isGiftSignup ? `
+            <div style="text-align: center; margin-bottom: 24px;">
+              <span style="font-size: 40px;">🎁</span>
+            </div>
+            ` : ''}
             <h1 style="color: rgba(255,255,255,0.9); font-size: 20px; font-weight: 500; margin: 0 0 16px; text-align: center;">
-              Confirm your subscription
+              ${isGiftSignup ? 'Verify to get your gift' : 'Confirm your subscription'}
             </h1>
             <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0 0 24px; text-align: center;">
-              You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm.
+              ${description}
             </p>
             <div style="text-align: center;">
-              <a href="${verifyUrl}" style="display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.05em;">
-                CONFIRM SUBSCRIPTION
+              <a href="${verifyUrl}" style="display: inline-block; background: ${isGiftSignup ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.08)'}; border: 1px solid ${isGiftSignup ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)'}; color: ${isGiftSignup ? 'rgba(34, 197, 94, 0.9)' : 'rgba(255,255,255,0.8)'}; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.05em;">
+                ${buttonText}
               </a>
             </div>
             <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 0; text-align: center;">

@@ -911,6 +911,7 @@ export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGif
       file_url: g.file_url,
       file_size: g.file_size,
       thumbnail_url: g.thumbnail_url,
+      short_code: g.short_code,
       created_at: g.created_at.toISOString(),
     })),
     count,

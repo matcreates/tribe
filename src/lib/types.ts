@@ -103,6 +103,7 @@ export interface Gift {
   file_url: string;
   file_size: number;
   thumbnail_url: string | null;
+  short_code: string | null;
   created_at: string;
 }
 

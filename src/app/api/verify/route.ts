@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySubscriber } from "@/lib/db";
+import { verifySubscriber, getGiftById } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
@@ -13,6 +13,16 @@ export async function GET(request: NextRequest) {
 
     if (!subscriber) {
       return NextResponse.redirect(new URL("/verified?status=error&message=invalid-token", request.url));
+    }
+
+    // Check if this subscriber joined via a gift page
+    if (subscriber.gift_id) {
+      const gift = await getGiftById(subscriber.gift_id);
+      if (gift) {
+        // Redirect to gift download page with file URL
+        const downloadUrl = `/gift-download?file=${encodeURIComponent(gift.file_url)}&name=${encodeURIComponent(gift.file_name)}`;
+        return NextResponse.redirect(new URL(downloadUrl, request.url));
+      }
     }
 
     return NextResponse.redirect(new URL("/verified?status=success", request.url));
