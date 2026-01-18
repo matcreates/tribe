@@ -28,6 +28,9 @@ import {
   getEmailsSentSince,
   getOpenRateSince,
   deleteSentEmail as dbDeleteSentEmail,
+  getGiftsByTribeId,
+  getGiftCountByTribeId,
+  deleteGift as dbDeleteGift,
 } from "./db";
 import { sendVerificationEmail, sendBulkEmailWithUnsubscribe, sendTestEmail } from "./email";
 import { revalidatePath } from "next/cache";
@@ -925,4 +928,47 @@ export async function joinTribe(slug: string, email: string, baseUrl?: string) {
   }
   
   return { success: true, needsVerification: true };
+}
+
+// Gift actions
+export interface Gift {
+  id: string;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  thumbnail_url: string | null;
+  created_at: string;
+}
+
+export const MAX_GIFTS = 5;
+
+export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGifts: number }> {
+  const tribe = await getTribe();
+  const gifts = await getGiftsByTribeId(tribe.id);
+  const count = await getGiftCountByTribeId(tribe.id);
+  
+  return {
+    gifts: gifts.map(g => ({
+      id: g.id,
+      file_name: g.file_name,
+      file_url: g.file_url,
+      file_size: g.file_size,
+      thumbnail_url: g.thumbnail_url,
+      created_at: g.created_at.toISOString(),
+    })),
+    count,
+    maxGifts: MAX_GIFTS,
+  };
+}
+
+export async function deleteGift(giftId: string): Promise<{ success: boolean }> {
+  const tribe = await getTribe();
+  const deleted = await dbDeleteGift(giftId, tribe.id);
+  
+  if (!deleted) {
+    throw new Error("Gift not found");
+  }
+  
+  revalidatePath("/gifts");
+  return { success: true };
 }

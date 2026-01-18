@@ -201,6 +201,26 @@ export async function initDatabase() {
   } catch {
     // Index might already exist
   }
+
+  // Gifts table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS gifts (
+      id TEXT PRIMARY KEY,
+      tribe_id TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_url TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      thumbnail_url TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Performance index for gifts table
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_gifts_tribe ON gifts(tribe_id, created_at DESC)`);
+  } catch {
+    // Index might already exist
+  }
 }
 
 export interface DbUser {
@@ -260,6 +280,16 @@ export interface DbEmailReply {
   subscriber_email: string;
   reply_text: string;
   received_at: Date;
+}
+
+export interface DbGift {
+  id: string;
+  tribe_id: string;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  thumbnail_url: string | null;
+  created_at: Date;
 }
 
 // User functions
@@ -724,4 +754,51 @@ export async function getOpenRateSince(tribeId: string, since: Date): Promise<{ 
     opens: Number(rows[0].opens),
     sent: Number(rows[0].sent),
   };
+}
+
+// Gift functions
+export async function createGift(
+  tribeId: string,
+  fileName: string,
+  fileUrl: string,
+  fileSize: number,
+  thumbnailUrl: string | null
+): Promise<DbGift> {
+  const id = crypto.randomUUID();
+  
+  await pool.query(
+    `INSERT INTO gifts (id, tribe_id, file_name, file_url, file_size, thumbnail_url) VALUES ($1, $2, $3, $4, $5, $6)`,
+    [id, tribeId, fileName, fileUrl, fileSize, thumbnailUrl]
+  );
+  
+  const gift = await getGiftById(id);
+  return gift!;
+}
+
+export async function getGiftById(id: string): Promise<DbGift | null> {
+  const rows = await query<DbGift>(`SELECT * FROM gifts WHERE id = $1`, [id]);
+  return rows[0] || null;
+}
+
+export async function getGiftsByTribeId(tribeId: string): Promise<DbGift[]> {
+  return await query<DbGift>(
+    `SELECT * FROM gifts WHERE tribe_id = $1 ORDER BY created_at DESC`,
+    [tribeId]
+  );
+}
+
+export async function getGiftCountByTribeId(tribeId: string): Promise<number> {
+  const rows = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM gifts WHERE tribe_id = $1`,
+    [tribeId]
+  );
+  return Number(rows[0].count);
+}
+
+export async function deleteGift(giftId: string, tribeId: string): Promise<boolean> {
+  const result = await pool.query(
+    `DELETE FROM gifts WHERE id = $1 AND tribe_id = $2`,
+    [giftId, tribeId]
+  );
+  return (result.rowCount ?? 0) > 0;
 }
