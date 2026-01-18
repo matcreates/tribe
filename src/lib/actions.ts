@@ -44,8 +44,10 @@ import {
   getGiftsByTribeId,
   getGiftCountByTribeId,
   deleteGift as dbDeleteGift,
+  createQueuedCampaign,
+  getSentEmailById,
 } from "./db";
-import { sendVerificationEmail, sendBulkEmailWithUnsubscribe, sendTestEmail } from "./email";
+import { sendVerificationEmail, sendTestEmail } from "./email";
 import { revalidatePath } from "next/cache";
 
 async function getTribe() {
@@ -442,6 +444,23 @@ export async function getSentEmails() {
   }));
 }
 
+export async function getCampaignStatus(campaignId: string) {
+  const tribe = await getTribe();
+  const email = await getSentEmailById(campaignId);
+  
+  if (!email || email.tribe_id !== tribe.id) {
+    throw new Error("Campaign not found");
+  }
+  
+  return {
+    id: email.id,
+    status: email.status,
+    totalRecipients: email.total_recipients,
+    sentCount: email.sent_count,
+    errorMessage: email.error_message,
+  };
+}
+
 export async function deleteSentEmail(emailId: string) {
   const tribe = await getTribe();
   const deleted = await dbDeleteSentEmail(emailId, tribe.id);
@@ -452,7 +471,7 @@ export async function deleteSentEmail(emailId: string) {
   return { success: true };
 }
 
-export async function getSentEmailById(emailId: string) {
+export async function getEmailDetails(emailId: string) {
   const tribe = await getTribe();
   const emails = await getSentEmailsByTribeId(tribe.id);
   const email = emails.find(e => e.id === emailId);
@@ -691,44 +710,34 @@ export async function sendEmail(
     throw new Error("No recipients to send to");
   }
 
-  // Get base URL from environment or default
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://madewithtribe.com";
-  const ownerName = tribe.owner_name || 'Anonymous';
-  const escapedBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const emailSignature = tribe.email_signature || '';
+  // Prepare recipients for queue
+  const recipients = filteredSubscribers.map(s => ({
+    email: s.email,
+    unsubscribeToken: s.unsubscribe_token || ''
+  }));
 
-  // Create email record FIRST to get the emailId for tracking pixel
-  const email = await createSentEmail(tribe.id, subject, body, 0);
-  console.log(`Created email record with id: ${email.id}, allowReplies: ${allowReplies}`);
-
-  // Send emails with personalized unsubscribe links and tracking pixel
-  const result = await sendBulkEmailWithUnsubscribe(
-    filteredSubscribers.map(s => ({ email: s.email, unsubscribeToken: s.unsubscribe_token || '' })),
+  // Queue the campaign for async processing
+  const campaign = await createQueuedCampaign(
+    tribe.id,
     subject,
-    escapedBody,
     body,
-    ownerName,
-    baseUrl,
-    email.id, // Pass emailId for open tracking
-    emailSignature, // Pass email signature
-    allowReplies // Pass allowReplies flag
+    recipients,
+    filter,
+    allowReplies
   );
   
-  if (!result.success && result.sentCount === 0) {
-    throw new Error(`Failed to send emails: ${result.errors.join(", ")}`);
-  }
-
-  // Update the recipient count after sending
-  await updateSentEmailRecipientCount(email.id, result.sentCount);
+  console.log(`Queued campaign ${campaign.id} with ${recipients.length} recipients`);
   
   revalidatePath("/new-email");
   revalidatePath("/dashboard");
   
   return { 
-    ...email, 
-    sentCount: result.sentCount,
-    totalRecipients: filteredSubscribers.length,
-    errors: result.errors 
+    id: campaign.id,
+    subject: campaign.subject,
+    body: campaign.body,
+    status: campaign.status,
+    totalRecipients: recipients.length,
+    sentCount: 0,
   };
 }
 

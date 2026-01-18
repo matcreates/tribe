@@ -20,7 +20,8 @@ export default function NewEmailPage() {
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [lastSentCount, setLastSentCount] = useState(0);
+  const [lastCampaignId, setLastCampaignId] = useState<string | null>(null);
+  const [lastTotalRecipients, setLastTotalRecipients] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const [signature, setSignature] = useState<string | null>(null);
   const [allowReplies, setAllowReplies] = useState(true);
@@ -306,7 +307,8 @@ export default function NewEmailPage() {
       }
       setIsEmpty(true);
       setSubject("");
-      setLastSentCount(result.sentCount);
+      setLastCampaignId(result.id);
+      setLastTotalRecipients(result.totalRecipients);
       setShowSuccess(true);
       // Reload weekly status after sending
       loadWeeklyStatus();
@@ -407,7 +409,8 @@ export default function NewEmailPage() {
   if (showSuccess) {
     return (
       <EmailSentSuccess 
-        sentCount={lastSentCount} 
+        campaignId={lastCampaignId || undefined}
+        totalRecipients={lastTotalRecipients} 
         onClose={() => setShowSuccess(false)} 
       />
     );

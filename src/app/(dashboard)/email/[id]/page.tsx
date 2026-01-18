@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, useCallback } from "react";
-import { getSentEmailById, getEmailRepliesPaginated, deleteSentEmail } from "@/lib/actions";
+import { getEmailDetails, getEmailRepliesPaginated, deleteSentEmail } from "@/lib/actions";
 import type { PaginatedRepliesResult } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -70,7 +70,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
 
   const loadEmail = useCallback(async () => {
     try {
-      const data = await getSentEmailById(resolvedParams.id);
+      const data = await getEmailDetails(resolvedParams.id);
       setEmail(data);
     } catch (err) {
       console.error("Failed to load email:", err);

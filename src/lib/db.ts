@@ -160,6 +160,47 @@ export async function initDatabase() {
     // Column already exists
   }
 
+  // Add campaign queue columns for async email sending
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN total_recipients INTEGER DEFAULT 0`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN sent_count INTEGER DEFAULT 0`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN last_processed_at TIMESTAMP`);
+  } catch {
+    // Column already exists
+  }
+  try {
+    await query(`ALTER TABLE sent_emails ADD COLUMN error_message TEXT`);
+  } catch {
+    // Column already exists
+  }
+
+  // Campaign recipients table for queued email sending
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS campaign_recipients (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      email TEXT NOT NULL,
+      unsubscribe_token TEXT NOT NULL,
+      sent BOOLEAN DEFAULT FALSE,
+      sent_at TIMESTAMP
+    )
+  `);
+
+  // Index for efficient batch processing
+  try {
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_campaign_recipients_pending ON campaign_recipients(campaign_id, sent) WHERE sent = FALSE`);
+  } catch {
+    // Index might already exist
+  }
+
   // Email replies table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS email_replies (
@@ -289,9 +330,23 @@ export interface DbSentEmail {
   open_count: number;
   sent_at: Date;
   scheduled_at: Date | null;
-  status: 'sent' | 'scheduled' | 'processing';
+  status: 'queued' | 'sending' | 'sent' | 'scheduled' | 'processing' | 'failed';
   recipient_filter: string;
   allow_replies: boolean;
+  // Campaign queue fields
+  total_recipients: number;
+  sent_count: number;
+  last_processed_at: Date | null;
+  error_message: string | null;
+}
+
+export interface DbCampaignRecipient {
+  id: string;
+  campaign_id: string;
+  email: string;
+  unsubscribe_token: string;
+  sent: boolean;
+  sent_at: Date | null;
 }
 
 export interface DbEmailReply {
@@ -638,6 +693,108 @@ export async function deleteSentEmail(emailId: string, tribeId: string): Promise
 export async function getTotalEmailsSent(tribeId: string): Promise<number> {
   const rows = await query<{ total: string | null }>(`SELECT COALESCE(SUM(recipient_count), 0) as total FROM sent_emails WHERE tribe_id = $1`, [tribeId]);
   return Number(rows[0].total || 0);
+}
+
+// Campaign queue functions
+export async function createQueuedCampaign(
+  tribeId: string,
+  subject: string,
+  body: string,
+  recipients: { email: string; unsubscribeToken: string }[],
+  recipientFilter: string,
+  allowReplies: boolean = true
+): Promise<DbSentEmail> {
+  const campaignId = crypto.randomUUID();
+  
+  // Create the campaign record with 'queued' status
+  await pool.query(
+    `INSERT INTO sent_emails (id, tribe_id, subject, body, recipient_count, status, recipient_filter, allow_replies, total_recipients, sent_count) 
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [campaignId, tribeId, subject, body, 0, 'queued', recipientFilter, allowReplies, recipients.length, 0]
+  );
+  
+  // Insert all recipients into the campaign_recipients table
+  if (recipients.length > 0) {
+    // Batch insert recipients (100 at a time to avoid query size limits)
+    const batchSize = 100;
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const values: (string | boolean)[] = [];
+      const placeholders: string[] = [];
+      
+      batch.forEach((recipient, index) => {
+        const recipientId = crypto.randomUUID();
+        const offset = index * 4;
+        placeholders.push(`($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4})`);
+        values.push(recipientId, campaignId, recipient.email, recipient.unsubscribeToken);
+      });
+      
+      await pool.query(
+        `INSERT INTO campaign_recipients (id, campaign_id, email, unsubscribe_token) VALUES ${placeholders.join(', ')}`,
+        values
+      );
+    }
+  }
+  
+  const email = await getSentEmailById(campaignId);
+  return email!;
+}
+
+export async function getQueuedCampaigns(): Promise<DbSentEmail[]> {
+  return await query<DbSentEmail>(
+    `SELECT * FROM sent_emails WHERE status IN ('queued', 'sending') ORDER BY sent_at ASC`
+  );
+}
+
+export async function getPendingRecipientsForCampaign(
+  campaignId: string,
+  limit: number
+): Promise<DbCampaignRecipient[]> {
+  return await query<DbCampaignRecipient>(
+    `SELECT * FROM campaign_recipients WHERE campaign_id = $1 AND sent = FALSE LIMIT $2`,
+    [campaignId, limit]
+  );
+}
+
+export async function markRecipientsSent(recipientIds: string[]): Promise<void> {
+  if (recipientIds.length === 0) return;
+  
+  const placeholders = recipientIds.map((_, i) => `$${i + 1}`).join(', ');
+  await pool.query(
+    `UPDATE campaign_recipients SET sent = TRUE, sent_at = CURRENT_TIMESTAMP WHERE id IN (${placeholders})`,
+    recipientIds
+  );
+}
+
+export async function updateCampaignProgress(
+  campaignId: string,
+  sentCount: number,
+  status?: 'queued' | 'sending' | 'sent' | 'failed',
+  errorMessage?: string
+): Promise<void> {
+  if (status && errorMessage) {
+    await pool.query(
+      `UPDATE sent_emails SET sent_count = $1, status = $2, error_message = $3, last_processed_at = CURRENT_TIMESTAMP WHERE id = $4`,
+      [sentCount, status, errorMessage, campaignId]
+    );
+  } else if (status) {
+    await pool.query(
+      `UPDATE sent_emails SET sent_count = $1, status = $2, last_processed_at = CURRENT_TIMESTAMP, recipient_count = $1 WHERE id = $3`,
+      [sentCount, status, campaignId]
+    );
+  } else {
+    await pool.query(
+      `UPDATE sent_emails SET sent_count = $1, last_processed_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [sentCount, campaignId]
+    );
+  }
+}
+
+export async function cleanupCompletedCampaignRecipients(campaignId: string): Promise<void> {
+  await pool.query(
+    `DELETE FROM campaign_recipients WHERE campaign_id = $1`,
+    [campaignId]
+  );
 }
 
 // Email reply functions
