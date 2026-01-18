@@ -160,6 +160,10 @@ export async function sendBulkEmailWithUnsubscribe(
                   <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
                     Sent by ${ownerName}
                   </p>
+                  <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: none; display: inline-block; margin-bottom: 12px;">
+                    made with <span style="font-weight: 600;">tribe</span>
+                  </a>
+                  <br>
                   <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.2); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
                     Unsubscribe
                   </a>
@@ -175,7 +179,7 @@ export async function sendBulkEmailWithUnsubscribe(
   </body>
 </html>`;
 
-      const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nUnsubscribe: ${unsubscribeUrl}`;
+      const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nmade with tribe: https://www.madewithtribe.com\nUnsubscribe: ${unsubscribeUrl}`;
 
       // Build the email configuration with proper headers for deliverability
       // Note: Resend SDK uses camelCase field names
@@ -291,9 +295,12 @@ export async function sendVerificationEmail(
                 ${buttonText}
               </a>
             </div>
-            <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 0; text-align: center;">
+            <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 16px; text-align: center;">
               If you didn't request this, you can safely ignore this email.
             </p>
+            <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; text-decoration: none; display: block; text-align: center;">
+              made with <span style="font-weight: 600;">tribe</span>
+            </a>
           </div>
         </body>
       </html>
@@ -407,6 +414,10 @@ export async function sendTestEmail(
                   <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
                     Sent by ${ownerName}
                   </p>
+                  <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: none; display: inline-block; margin-bottom: 12px;">
+                    made with <span style="font-weight: 600;">tribe</span>
+                  </a>
+                  <br>
                   <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0;">
                     [Unsubscribe link will appear here in real emails]
                   </p>
@@ -420,7 +431,7 @@ export async function sendTestEmail(
   </body>
 </html>`;
 
-  const textBody = `[TEST EMAIL - Only you can see this preview]\n\n${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}`;
+  const textBody = `[TEST EMAIL - Only you can see this preview]\n\n${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nmade with tribe: https://www.madewithtribe.com`;
 
   try {
     const { data, error } = await client.emails.send({
