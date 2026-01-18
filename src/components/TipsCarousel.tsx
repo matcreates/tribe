@@ -32,13 +32,14 @@ const CREATOR_TIPS = [
 
 function LightbulbIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 14h4" />
-      <path d="M6 12h4" />
-      <path d="M5.5 10c-1.5-1-2.5-2.5-2.5-4.5a5 5 0 1 1 10 0c0 2-1 3.5-2.5 4.5" />
-      <path d="M8 2v1" />
-      <path d="M12 4l-.7.7" />
-      <path d="M4 4l.7.7" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 2L20 3" />
+      <path d="M3 2L4 3" />
+      <path d="M21 16L20 15" />
+      <path d="M3 16L4 15" />
+      <path d="M9 18H15" />
+      <path d="M10 21H14" />
+      <path d="M11.9998 3C7.9997 3 5.95186 4.95029 5.99985 8C6.02324 9.48689 6.4997 10.5 7.49985 11.5C8.5 12.5 9 13 8.99985 15H14.9998C15 13.0001 15.5 12.5 16.4997 11.5001L16.4998 11.5C17.4997 10.5 17.9765 9.48689 17.9998 8C18.0478 4.95029 16 3 11.9998 3Z" />
     </svg>
   );
 }
@@ -112,7 +113,7 @@ export function TipsCarousel() {
       </div>
 
       {/* Dot Navigation */}
-      <div className="flex items-center justify-center gap-1.5 mt-4 pt-3 border-t border-amber-400/10">
+      <div className="flex items-center justify-center gap-1.5 mt-4">
         {CREATOR_TIPS.map((_, index) => (
           <button
             key={index}
