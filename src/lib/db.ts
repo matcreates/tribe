@@ -999,6 +999,36 @@ export async function getGiftCountByTribeId(tribeId: string): Promise<number> {
   return Number(rows[0].count);
 }
 
+export async function updateGiftName(giftId: string, tribeId: string, newName: string): Promise<boolean> {
+  const result = await pool.query(
+    `UPDATE gifts SET file_name = $1 WHERE id = $2 AND tribe_id = $3`,
+    [newName, giftId, tribeId]
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function getSubscriberCountByGiftId(giftId: string): Promise<number> {
+  const rows = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM subscribers WHERE gift_id = $1 AND verified = true`,
+    [giftId]
+  );
+  return Number(rows[0].count);
+}
+
+export async function getGiftMemberCounts(tribeId: string): Promise<Record<string, number>> {
+  const rows = await query<{ gift_id: string; count: string }>(
+    `SELECT gift_id, COUNT(*) as count FROM subscribers 
+     WHERE tribe_id = $1 AND gift_id IS NOT NULL AND verified = true 
+     GROUP BY gift_id`,
+    [tribeId]
+  );
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.gift_id] = Number(row.count);
+  }
+  return counts;
+}
+
 export async function deleteGift(giftId: string, tribeId: string): Promise<boolean> {
   const result = await pool.query(
     `DELETE FROM gifts WHERE id = $1 AND tribe_id = $2`,

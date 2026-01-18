@@ -105,6 +105,7 @@ export interface Gift {
   thumbnail_url: string | null;
   short_code: string | null;
   created_at: string;
+  member_count?: number;
 }
 
 // Constants that need to be shared with client components

@@ -44,6 +44,8 @@ import {
   getGiftsByTribeId,
   getGiftCountByTribeId,
   deleteGift as dbDeleteGift,
+  updateGiftName as dbUpdateGiftName,
+  getGiftMemberCounts,
   createQueuedCampaign,
   getSentEmailById,
 } from "./db";
@@ -912,6 +914,7 @@ export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGif
   const tribe = await getTribe();
   const gifts = await getGiftsByTribeId(tribe.id);
   const count = await getGiftCountByTribeId(tribe.id);
+  const memberCounts = await getGiftMemberCounts(tribe.id);
   
   return {
     gifts: gifts.map(g => ({
@@ -922,10 +925,27 @@ export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGif
       thumbnail_url: g.thumbnail_url,
       short_code: g.short_code,
       created_at: g.created_at.toISOString(),
+      member_count: memberCounts[g.id] || 0,
     })),
     count,
     maxGifts: MAX_GIFTS,
   };
+}
+
+export async function renameGift(giftId: string, newName: string): Promise<{ success: boolean }> {
+  const tribe = await getTribe();
+  
+  if (!newName || newName.trim().length === 0) {
+    throw new Error("Name cannot be empty");
+  }
+  
+  const updated = await dbUpdateGiftName(giftId, tribe.id, newName.trim());
+  if (!updated) {
+    throw new Error("Gift not found or could not be renamed");
+  }
+  
+  revalidatePath("/gifts");
+  return { success: true };
 }
 
 export async function deleteGift(giftId: string): Promise<{ success: boolean }> {

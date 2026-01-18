@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { getGifts, deleteGift } from "@/lib/actions";
+import { getGifts, deleteGift, renameGift } from "@/lib/actions";
 import type { Gift } from "@/lib/types";
 import { MAX_GIFTS } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
@@ -20,6 +20,10 @@ export default function GiftsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [renamingGift, setRenamingGift] = useState<Gift | null>(null);
+  const [newName, setNewName] = useState("");
+  const [isRenaming, setIsRenaming] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
   const loadGifts = useCallback(async () => {
@@ -57,6 +61,35 @@ export default function GiftsPage() {
       showToast("Failed to delete gift");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleStartRename = (gift: Gift) => {
+    setRenamingGift(gift);
+    setNewName(gift.file_name);
+    setTimeout(() => renameInputRef.current?.focus(), 50);
+  };
+
+  const handleRename = async () => {
+    if (!renamingGift || !newName.trim() || isRenaming) return;
+    if (newName.trim() === renamingGift.file_name) {
+      setRenamingGift(null);
+      return;
+    }
+
+    setIsRenaming(true);
+    try {
+      await renameGift(renamingGift.id, newName.trim());
+      setGifts(gifts.map(g => 
+        g.id === renamingGift.id ? { ...g, file_name: newName.trim() } : g
+      ));
+      showToast("Gift renamed");
+      setRenamingGift(null);
+    } catch (error) {
+      console.error("Failed to rename gift:", error);
+      showToast("Failed to rename gift");
+    } finally {
+      setIsRenaming(false);
     }
   };
 
@@ -145,10 +178,27 @@ export default function GiftsPage() {
                     {/* File info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] text-white/70 truncate">{gift.file_name}</p>
-                      <p className="text-[11px] text-white/40">{formatFileSize(gift.file_size)}</p>
+                      <div className="flex items-center gap-2 text-[11px] text-white/40">
+                        <span>{formatFileSize(gift.file_size)}</span>
+                        {(gift.member_count ?? 0) > 0 && (
+                          <>
+                            <span className="text-white/20">•</span>
+                            <span className="text-emerald-400/70">
+                              {gift.member_count} {gift.member_count === 1 ? 'member' : 'members'} joined
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     {/* Actions */}
+                    <button
+                      onClick={() => handleStartRename(gift)}
+                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
+                      aria-label="Rename gift"
+                    >
+                      <PencilIcon className="w-4 h-4 text-white/50" />
+                    </button>
                     <a
                       href={gift.file_url}
                       target="_blank"
@@ -206,6 +256,53 @@ export default function GiftsPage() {
         currentGiftCount={giftCount}
         maxGifts={MAX_GIFTS}
       />
+
+      {/* Rename Modal */}
+      {renamingGift && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          onClick={() => !isRenaming && setRenamingGift(null)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[360px] rounded-[14px] border border-white/[0.08] p-6"
+            style={{ background: 'rgba(18, 18, 18, 0.98)' }}
+          >
+            <h3 className="text-[15px] font-medium text-white/90 mb-4">Rename Gift</h3>
+            <input
+              ref={renameInputRef}
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRename();
+                if (e.key === 'Escape') setRenamingGift(null);
+              }}
+              disabled={isRenaming}
+              className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/90 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12] disabled:opacity-50"
+              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              placeholder="Enter new name..."
+            />
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setRenamingGift(null)}
+                disabled={isRenaming}
+                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRename}
+                disabled={isRenaming || !newName.trim() || newName.trim() === renamingGift.file_name}
+                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium bg-white/[0.08] text-white/80 hover:bg-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isRenaming ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -233,6 +330,14 @@ function DownloadIcon({ className }: { className?: string }) {
       <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
       <polyline points="7,10 12,15 17,10" />
       <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function PencilIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </svg>
   );
 }
