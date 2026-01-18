@@ -69,7 +69,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col items-center pt-14 px-6">
+    <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* Header with Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

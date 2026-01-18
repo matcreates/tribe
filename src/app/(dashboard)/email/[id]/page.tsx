@@ -129,7 +129,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
 
   if (error || !email) {
     return (
-      <div className="flex flex-col items-center pt-14 px-6">
+      <div className="flex flex-col items-center pt-14 px-6 pb-12">
         <div className="w-full max-w-[540px] text-center">
           <p className="text-[13px] text-white/50 mb-4">{error || "Email not found"}</p>
           <Link 

@@ -63,7 +63,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
   };
 
   return (
-    <div className="flex flex-col items-center pt-14 px-6">
+    <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* URL Bar */}
         <div className="mb-6">
