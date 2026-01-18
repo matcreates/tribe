@@ -96,7 +96,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
           {/* People in your tribe */}
           <div 
             className="rounded-[12px] p-5 border border-white/[0.06]"
@@ -197,7 +197,7 @@ export default function DashboardPage() {
 
         {/* Growth Chart */}
         <div 
-          className="rounded-[12px] p-5 border border-white/[0.06]"
+          className="rounded-[12px] p-5 border border-white/[0.06] mt-3"
           style={{ background: 'rgba(255, 255, 255, 0.02)' }}
         >
           <div className="flex items-center justify-between mb-4">
@@ -283,7 +283,7 @@ export default function DashboardPage() {
         )}
 
         {/* Tips for Creators */}
-        <div className="mt-6">
+        <div className="mt-3">
           <TipsCarousel />
         </div>
       </div>
