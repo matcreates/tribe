@@ -8,7 +8,6 @@ import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
 import { PaywallModal } from "@/components/PaywallModal";
 import { ContactSupportModal } from "@/components/ContactSupportModal";
-import { TipsCarousel } from "@/components/TipsCarousel";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function NewEmailPage() {
@@ -632,7 +631,8 @@ export default function NewEmailPage() {
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Subject"
                 disabled={isWeeklyLimitReached}
-                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none focus:ring-0 border-none bg-transparent disabled:cursor-not-allowed"
+                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal bg-transparent disabled:cursor-not-allowed"
+                style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
               />
             </div>
 
@@ -675,7 +675,8 @@ export default function NewEmailPage() {
                 }}
                 placeholder="Add your signature (e.g., Best, John)"
                 disabled={isWeeklyLimitReached}
-                className="w-full min-h-[24px] text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none focus:ring-0 border-none bg-transparent resize-none disabled:cursor-not-allowed overflow-hidden"
+                className="w-full min-h-[24px] text-[13px] text-white/50 placeholder:text-white/20 bg-transparent resize-none disabled:cursor-not-allowed overflow-hidden"
+                style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
               />
             </div>
 
@@ -776,12 +777,7 @@ export default function NewEmailPage() {
             </div>
           </div>
 
-          {/* Tips for Creators - Outside the main card */}
-          <div className="mt-8">
-            <TipsCarousel />
-          </div>
-
-          <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
+<Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
         </div>
 
         {/* Schedule Modal */}

@@ -113,6 +113,17 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
               <span className="flex-1 text-[11px] text-white/50 truncate font-mono">{displayUrl}</span>
             </div>
             
+            {/* Open in new tab */}
+            <a
+              href={fullJoinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-md hover:bg-white/[0.06] transition-colors group"
+              aria-label="Open in new tab"
+            >
+              <ExternalLinkIcon className="w-4 h-4 text-white/35 group-hover:text-white/60 transition-colors" />
+            </a>
+            
             {/* Copy Button */}
             <button
               onClick={copyLink}
@@ -199,6 +210,16 @@ function LockIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M6 0C4.34315 0 3 1.34315 3 3V4C2.44772 4 2 4.44772 2 5V10C2 10.5523 2.44772 11 3 11H9C9.55228 11 10 10.5523 10 10V5C10 4.44772 9.55228 4 9 4V3C9 1.34315 7.65685 0 6 0ZM8 4V3C8 1.89543 7.10457 1 6 1C4.89543 1 4 1.89543 4 3V4H8ZM6 7C6.55228 7 7 6.55228 7 6C7 5.44772 6.55228 5 6 5C5.44772 5 5 5.44772 5 6C5 6.55228 5.44772 7 6 7Z" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 6.5V10a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1h3.5" />
+      <path d="M7 1h4v4" />
+      <path d="M5 7L11 1" />
     </svg>
   );
 }
