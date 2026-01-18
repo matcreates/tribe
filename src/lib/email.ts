@@ -126,18 +126,37 @@ export async function sendBulkEmailWithUnsubscribe(
 
       // Format body as ebook-style paragraphs
       const formattedBody = formatBodyAsEbook(plainTextBody);
+      
+      // Generate preheader text (first ~100 chars of content for inbox preview)
+      const preheaderText = plainTextBody.substring(0, 120).replace(/\n/g, ' ').trim() + '...';
 
       // Clean, ebook-style HTML email template
       const htmlBody = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
     <title>${subject}</title>
+    <!--[if mso]>
+    <noscript>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+    </noscript>
+    <![endif]-->
   </head>
   <body style="margin: 0; padding: 0; background-color: #0a0a0a; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+    <!-- Preheader text (hidden but shows in inbox preview) -->
+    <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+      ${preheaderText}
+      &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    </div>
     <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #0a0a0a;">
       <tr>
         <td align="center" style="padding: 48px 24px;">
@@ -164,9 +183,12 @@ export async function sendBulkEmailWithUnsubscribe(
                     <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
                   </a>
                   <br>
-                  <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.2); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
+                  <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.3); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
                     Unsubscribe
                   </a>
+                  <p style="color: rgba(255,255,255,0.15); font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 16px 0 0 0; line-height: 1.5;">
+                    You're receiving this because you joined ${ownerName}'s tribe.
+                  </p>
                 </div>
                 
                 ${trackingPixel}
@@ -202,10 +224,15 @@ export async function sendBulkEmailWithUnsubscribe(
         subject,
         html: htmlBody,
         text: textBody,
-        // Add List-Unsubscribe header for better deliverability
+        // Headers for maximum deliverability
         headers: {
+          // RFC 8058 compliant one-click unsubscribe (required by Gmail/Yahoo since Feb 2024)
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          // Indicates this is bulk/marketing email (helps spam filters categorize correctly)
+          'Precedence': 'bulk',
+          // Feedback loop identifier (helps ISPs route complaints)
+          'Feedback-ID': `${emailId || 'campaign'}:${ownerName.replace(/[^a-zA-Z0-9]/g, '')}:tribe`,
         },
       };
 
@@ -266,18 +293,41 @@ export async function sendVerificationEmail(
     ? `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe and receive a gift. Click the button below to verify your email and download your gift.`
     : `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm your spot.`;
   
+  // Plain text version for better deliverability
+  const plainTextDescription = isGiftSignup
+    ? `You requested to join ${ownerName}'s tribe and receive a gift. Click the link below to verify your email and download your gift.`
+    : `You requested to join ${ownerName}'s tribe. Click the link below to confirm your spot.`;
+  
+  const plainTextBody = `${isGiftSignup ? 'Verify to get your gift' : 'Confirm your spot'}
+
+${plainTextDescription}
+
+Verify your email: ${verifyUrl}
+
+If you didn't request this, you can safely ignore this email.
+
+---
+made with tribe: https://www.madewithtribe.com`;
+
   const { data, error } = await client.emails.send({
     from: getFromEmail(ownerName),
     to: [to],
     subject,
+    text: plainTextBody,
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="x-apple-disable-message-reformatting">
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
+          <!-- Preheader -->
+          <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+            ${isGiftSignup ? 'Verify your email to download your gift' : 'One click to confirm your spot'}
+            &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+          </div>
           <div style="max-width: 400px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
             ${isGiftSignup ? `
             <div style="text-align: center; margin-bottom: 24px;">
@@ -305,6 +355,10 @@ export async function sendVerificationEmail(
         </body>
       </html>
     `,
+    // Transactional emails should be marked as such
+    headers: {
+      'X-Entity-Ref-ID': verificationToken.substring(0, 16),
+    },
   });
 
   if (error) {
