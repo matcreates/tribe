@@ -75,8 +75,8 @@ export async function middleware(request: NextRequest) {
   }
   
   // Allow public pages
-  const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/@");
-  const isPublicPage = pathname === "/" || pathname === "/verified" || pathname === "/unsubscribed";
+  const isPublicJoinPage = pathname.startsWith("/j/") || pathname.startsWith("/g/") || pathname.startsWith("/@");
+  const isPublicPage = pathname === "/" || pathname === "/verified" || pathname === "/unsubscribed" || pathname === "/gift-download";
   
   if (isPublicJoinPage || isPublicPage) {
     return NextResponse.next();
