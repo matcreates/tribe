@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import { upload } from "@vercel/blob/client";
 
 interface GiftUploadModalProps {
   isOpen: boolean;
@@ -18,6 +19,14 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Sanitize filename for Vercel Blob
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .substring(0, 100);
 }
 
 export function GiftUploadModal({
@@ -93,26 +102,58 @@ export function GiftUploadModal({
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
+      const timestamp = Date.now();
+      
+      // Upload main file using client-side upload (bypasses 4.5MB serverless limit)
+      const fileBlob = await upload(
+        `gifts/${timestamp}-${sanitizeFilename(selectedFile.name)}`,
+        selectedFile,
+        {
+          access: 'public',
+          handleUploadUrl: '/api/upload-gift',
+        }
+      );
+
+      // Upload thumbnail if provided
+      let thumbnailUrl: string | null = null;
       if (selectedThumbnail) {
-        formData.append("thumbnail", selectedThumbnail);
+        const thumbExtension = (selectedThumbnail.name.split('.').pop() || 'jpg')
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .substring(0, 10);
+        
+        const thumbBlob = await upload(
+          `gifts/thumb-${timestamp}.${thumbExtension}`,
+          selectedThumbnail,
+          {
+            access: 'public',
+            handleUploadUrl: '/api/upload-gift',
+          }
+        );
+        thumbnailUrl = thumbBlob.url;
       }
 
-      const response = await fetch("/api/upload-gift", {
+      // Finalize: Save to database
+      const response = await fetch("/api/finalize-gift", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          fileUrl: fileBlob.url,
+          fileSize: selectedFile.size,
+          thumbnailUrl,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to upload gift");
+        throw new Error(data.error || "Failed to save gift");
       }
 
       onSuccess();
       handleClose();
     } catch (err) {
+      console.error("Upload error:", err);
       setError(err instanceof Error ? err.message : "Failed to upload gift");
     } finally {
       setIsUploading(false);
