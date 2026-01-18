@@ -8,6 +8,7 @@ import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
 import { PaywallModal } from "@/components/PaywallModal";
 import { ContactSupportModal } from "@/components/ContactSupportModal";
+import { TipsCarousel } from "@/components/TipsCarousel";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -772,6 +773,11 @@ export default function NewEmailPage() {
             </Link>
           </div>
         )}
+
+        {/* Tips for Creators */}
+        <div className="mt-8">
+          <TipsCarousel />
+        </div>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
