@@ -218,16 +218,20 @@ export async function initDatabase() {
 
   // Add short_code column if it doesn't exist (for existing tables)
   try {
-    await pool.query(`ALTER TABLE gifts ADD COLUMN IF NOT EXISTS short_code TEXT UNIQUE`);
-  } catch {
-    // Column might already exist
+    await pool.query(`ALTER TABLE gifts ADD COLUMN short_code TEXT UNIQUE`);
+    console.log("Added short_code column to gifts table");
+  } catch (e) {
+    // Column might already exist - this is expected
+    console.log("short_code column already exists or error:", e);
   }
 
   // Add gift_id column to subscribers table (for tracking gift signups)
   try {
-    await pool.query(`ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS gift_id TEXT`);
-  } catch {
-    // Column might already exist
+    await pool.query(`ALTER TABLE subscribers ADD COLUMN gift_id TEXT`);
+    console.log("Added gift_id column to subscribers table");
+  } catch (e) {
+    // Column might already exist - this is expected
+    console.log("gift_id column already exists or error:", e);
   }
 
   // Performance index for gifts table
