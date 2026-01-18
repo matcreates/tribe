@@ -206,7 +206,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
               {email.recipient_count}
             </p>
             <p className="text-[11px] text-white/30 mt-1">
-              subscribers received this email
+              members received this email
             </p>
           </div>
 
@@ -364,7 +364,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
                 </div>
                 <p className="text-[13px] text-white/40">No replies yet</p>
                 <p className="text-[11px] text-white/25 mt-1">
-                  When subscribers reply to this email, their responses will appear here
+                  When members reply to this email, their responses will appear here
                 </p>
               </div>
             ) : (

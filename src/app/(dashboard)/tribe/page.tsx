@@ -178,7 +178,7 @@ export default function TribePage() {
       a.download = "tribe-subscribers.csv";
       a.click();
       URL.revokeObjectURL(url);
-      showToast("Exported subscribers");
+      showToast("Exported members");
     } catch {
       showToast("Failed to export");
     }
@@ -287,7 +287,7 @@ export default function TribePage() {
       if (result.errors.length > 0) {
         showToast(`Imported ${result.added}. ${result.errors.length} failed to send verification.`);
       } else {
-        showToast(`Imported ${result.added} subscribers. Verification emails sent!`);
+        showToast(`Imported ${result.added} members. Verification emails sent!`);
       }
     } catch (error) {
       console.error("Import failed:", error);
@@ -307,7 +307,7 @@ export default function TribePage() {
     try {
       const result = await importSubscribers(pendingEmails, false);
       await loadSubscribers();
-      showToast(`Imported ${result.added} subscribers as verified`);
+      showToast(`Imported ${result.added} members as verified`);
     } catch (error) {
       console.error("Import failed:", error);
       showToast("Import failed. Please try again.");
@@ -451,7 +451,7 @@ export default function TribePage() {
           ) : subscribers.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-[13px] text-white/35">
-                {search ? "No subscribers found" : "No subscribers yet"}
+                {search ? "No members found" : "No members yet"}
               </p>
               {!search && (
                 <p className="text-[12px] text-white/25 mt-1">

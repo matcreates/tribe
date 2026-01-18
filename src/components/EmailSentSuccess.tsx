@@ -125,7 +125,7 @@ export function EmailSentSuccess({ sentCount, onClose }: EmailSentSuccessProps) 
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          Successfully delivered to {sentCount} {sentCount === 1 ? "subscriber" : "subscribers"}
+          Successfully delivered to {sentCount} {sentCount === 1 ? "member" : "members"}
         </p>
 
         {/* Done button */}

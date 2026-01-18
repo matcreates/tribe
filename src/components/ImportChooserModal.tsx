@@ -193,7 +193,7 @@ export function ManualEntryModal({
 
           {/* Info */}
           <p className="text-[11px] text-white/30 mb-6">
-            A verification email will be sent to confirm their subscription.
+            A verification email will be sent to confirm their spot.
           </p>
 
           {/* Action Buttons */}

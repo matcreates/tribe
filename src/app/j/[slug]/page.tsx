@@ -66,7 +66,7 @@ export default function PublicJoinPage({ params }: PageProps) {
 
       if (!response.ok || !data.success) {
         if (data.error === "Already subscribed") {
-          setError("You're already subscribed!");
+          setError("You're already a member!");
         } else if (data.error === "Tribe not found") {
           setError("This tribe doesn't exist");
         } else {
@@ -144,7 +144,7 @@ export default function PublicJoinPage({ params }: PageProps) {
                 Check your email
               </p>
               <p className="text-[12px] text-white/50">
-                We sent a confirmation link to verify your subscription.
+                We sent a confirmation link to verify your email.
               </p>
             </div>
           ) : (

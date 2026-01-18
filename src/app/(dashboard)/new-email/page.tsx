@@ -615,7 +615,7 @@ export default function NewEmailPage() {
               style={{ background: 'rgba(255, 255, 255, 0.04)' }}
             >
               <option value="verified">All verified ({counts.verified})</option>
-              <option value="all">All subscribers ({counts.all})</option>
+              <option value="all">Everyone ({counts.all})</option>
               <option value="non-verified">Non-verified only ({counts.nonVerified})</option>
             </select>
             <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/35 pointer-events-none" />
@@ -661,7 +661,7 @@ export default function NewEmailPage() {
             </div>
             <div>
               <p className="text-[13px] text-white/70">Allow replies</p>
-              <p className="text-[11px] text-white/30">Subscribers can reply to this email</p>
+              <p className="text-[11px] text-white/30">Members can reply to this email</p>
             </div>
           </div>
           <button
@@ -710,10 +710,10 @@ export default function NewEmailPage() {
         {getCurrentCount() === 0 && (
           <p className="mt-3 text-[12px] text-white/30">
             {recipientFilter === "verified" 
-              ? "No verified subscribers yet" 
+              ? "No verified members yet" 
               : recipientFilter === "non-verified"
-              ? "No non-verified subscribers"
-              : "Add subscribers to your tribe first"}
+              ? "No non-verified members"
+              : "Add members to your tribe first"}
           </p>
         )}
 

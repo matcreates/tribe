@@ -124,7 +124,7 @@ export default async function LandingPage() {
               },
               {
                 icon: "✓",
-                title: "Verified subscribers",
+                title: "Verified members",
                 description: "Double opt-in keeps your list clean and your engagement rates high."
               },
               {
@@ -160,7 +160,7 @@ export default async function LandingPage() {
               Simple, transparent pricing
             </h2>
             <p className="text-[15px] text-white/40 max-w-lg mx-auto">
-              Explore all features for free. Subscribe when you&apos;re ready to send.
+              Explore all features for free. Upgrade when you&apos;re ready to send.
             </p>
           </div>
 

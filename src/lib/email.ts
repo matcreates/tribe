@@ -259,12 +259,12 @@ export async function sendVerificationEmail(
   
   const subject = isGiftSignup 
     ? `Verify to receive your gift from ${ownerName}`
-    : `Confirm your subscription to ${ownerName}'s tribe`;
+    : `You're Almost In! Confirm Your Spot in ${ownerName}'s Tribe.`;
   
-  const buttonText = isGiftSignup ? 'VERIFY AND DOWNLOAD GIFT' : 'CONFIRM SUBSCRIPTION';
+  const buttonText = isGiftSignup ? 'VERIFY AND DOWNLOAD GIFT' : 'CONFIRM';
   const description = isGiftSignup
     ? `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe and receive a gift. Click the button below to verify your email and download your gift.`
-    : `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm.`;
+    : `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm your spot.`;
   
   const { data, error } = await client.emails.send({
     from: getFromEmail(ownerName),
@@ -285,7 +285,7 @@ export async function sendVerificationEmail(
             </div>
             ` : ''}
             <h1 style="color: rgba(255,255,255,0.9); font-size: 20px; font-weight: 500; margin: 0 0 16px; text-align: center;">
-              ${isGiftSignup ? 'Verify to get your gift' : 'Confirm your subscription'}
+              ${isGiftSignup ? 'Verify to get your gift' : 'Confirm your spot'}
             </h1>
             <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0 0 24px; text-align: center;">
               ${description}

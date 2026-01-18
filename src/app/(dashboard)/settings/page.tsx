@@ -310,7 +310,7 @@ export default function SettingsPage() {
                   <span className="text-[13px] text-white/70 font-medium">Free plan</span>
                 </div>
                 <p className="text-[12px] text-white/40 mb-4">
-                  Subscribe to unlock email sending. Starts at $5/month.
+                  Upgrade to unlock email sending. Starts at $5/month.
                 </p>
                 <div className="flex items-center gap-3">
                   <button

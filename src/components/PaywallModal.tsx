@@ -88,7 +88,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             Unlock Email Sending
           </h2>
           <p className="text-[14px] text-white/50 leading-relaxed">
-            Subscribe to Tribe to send emails to your community
+            Upgrade to Tribe to send emails to your community
           </p>
         </div>
 
@@ -201,7 +201,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
               color: '#000',
             }}
           >
-            <span>{isLoading ? "Loading..." : `Subscribe ${selectedPlan === "yearly" ? "for $60/year" : "for $8/month"}`}</span>
+            <span>{isLoading ? "Loading..." : `Upgrade ${selectedPlan === "yearly" ? "for $60/year" : "for $8/month"}`}</span>
           </button>
           <p className="text-[11px] text-white/30 text-center mt-3">
             Secure payment powered by Stripe

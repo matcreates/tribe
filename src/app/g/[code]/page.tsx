@@ -76,7 +76,7 @@ export default function GiftJoinPage({ params }: PageProps) {
 
       if (!response.ok || !data.success) {
         if (data.error === "Already subscribed") {
-          setError("You're already subscribed!");
+          setError("You're already a member!");
         } else if (data.error === "Tribe not found") {
           setError("This tribe doesn't exist");
         } else {

@@ -47,7 +47,7 @@ function UnsubscribedContent() {
                 href="/"
                 className="text-white/50 underline hover:text-white/70 transition-colors"
               >
-                Resubscribe anytime
+                Rejoin anytime
               </a>
             </p>
           </>
