@@ -613,7 +613,7 @@ export default function NewEmailPage() {
                   value={recipientFilter}
                   onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
                   disabled={isWeeklyLimitReached}
-                  className="appearance-none w-full px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
+                  className="appearance-none w-full px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none focus:ring-0 cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
                   style={{ background: 'rgba(255, 255, 255, 0.04)' }}
                 >
                   <option value="verified">All verified members ({counts.verified})</option>
@@ -632,7 +632,7 @@ export default function NewEmailPage() {
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Subject"
                 disabled={isWeeklyLimitReached}
-                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none bg-transparent disabled:cursor-not-allowed"
+                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal focus:outline-none focus:ring-0 border-none bg-transparent disabled:cursor-not-allowed"
               />
             </div>
 
@@ -645,7 +645,8 @@ export default function NewEmailPage() {
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 onBlur={handleBlur}
-                className="w-full min-h-[180px] text-[14px] leading-relaxed text-white/70 focus:outline-none whitespace-pre-wrap break-words"
+                className="w-full min-h-[180px] text-[14px] leading-relaxed text-white/70 focus:outline-none focus:ring-0 whitespace-pre-wrap break-words"
+                style={{ outline: 'none' }}
                 suppressContentEditableWarning
               />
               {isEmpty && (
@@ -674,7 +675,7 @@ export default function NewEmailPage() {
                 }}
                 placeholder="Add your signature (e.g., Best, John)"
                 disabled={isWeeklyLimitReached}
-                className="w-full min-h-[24px] text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none bg-transparent resize-none disabled:cursor-not-allowed overflow-hidden"
+                className="w-full min-h-[24px] text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none focus:ring-0 border-none bg-transparent resize-none disabled:cursor-not-allowed overflow-hidden"
               />
             </div>
 
