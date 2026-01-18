@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, use, useCallback } from "react";
-import { getSentEmailById, getEmailRepliesPaginated, deleteSentEmail, PaginatedRepliesResult } from "@/lib/actions";
+import { getSentEmailById, getEmailRepliesPaginated, deleteSentEmail } from "@/lib/actions";
+import type { PaginatedRepliesResult } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

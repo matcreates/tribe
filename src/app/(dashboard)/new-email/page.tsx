@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus, RecipientFilter, SubscriptionStatus, WeeklyEmailStatus } from "@/lib/actions";
+import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus } from "@/lib/actions";
+import type { RecipientFilter, SubscriptionStatus, WeeklyEmailStatus } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";

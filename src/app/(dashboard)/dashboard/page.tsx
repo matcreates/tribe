@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getDashboardStats, getSentEmails, TimePeriod } from "@/lib/actions";
+import { getDashboardStats, getSentEmails } from "@/lib/actions";
+import type { TimePeriod } from "@/lib/types";
 import Link from "next/link";
 
 interface DashboardStats {

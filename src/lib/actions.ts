@@ -1,6 +1,19 @@
 "use server";
 
 import { auth } from "./auth";
+import type {
+  SubscriberFilter,
+  SubscriberSort,
+  PaginatedSubscribersResult,
+  ImportPreviewResult,
+  PaginatedRepliesResult,
+  RecipientFilter,
+  SubscriptionStatus,
+  WeeklyEmailStatus,
+  TimePeriod,
+  Gift,
+} from "./types";
+import { MAX_GIFTS } from "./types";
 import {
   pool,
   getTribeByUserId,
@@ -125,24 +138,7 @@ export async function getSubscribers() {
 }
 
 // Paginated subscriber list with server-side filtering/sorting
-export type SubscriberFilter = "all" | "verified" | "non-verified";
-export type SubscriberSort = "newest" | "oldest" | "a-z" | "z-a" | "verified-first" | "unverified-first";
-
-export interface PaginatedSubscribersResult {
-  subscribers: {
-    id: string;
-    email: string;
-    name: string | null;
-    verified: boolean;
-    created_at: string;
-  }[];
-  total: number;
-  totalVerified: number;
-  totalNonVerified: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+// Types imported from ./types
 
 export async function getSubscribersPaginated(
   page: number = 1,
@@ -321,15 +317,7 @@ function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email.trim().toLowerCase());
 }
 
-export interface ImportPreviewResult {
-  totalInFile: number;
-  duplicates: number;
-  invalid: number;
-  toImport: number;
-  emails: string[];
-  invalidEmails: string[];
-  duplicateEmails: string[];
-}
+// ImportPreviewResult imported from ./types
 
 // Preview import - returns counts and valid emails without adding them
 export async function previewImport(rawEmails: string[]): Promise<ImportPreviewResult> {
@@ -499,19 +487,7 @@ export async function getEmailReplies(emailId: string) {
 }
 
 // Paginated version of getEmailReplies
-export interface PaginatedRepliesResult {
-  replies: {
-    id: string;
-    email_id: string;
-    subscriber_email: string;
-    reply_text: string;
-    received_at: string;
-  }[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+// PaginatedRepliesResult imported from ./types
 
 export async function getEmailRepliesPaginated(
   emailId: string,
@@ -560,19 +536,14 @@ export async function getEmailRepliesPaginated(
   };
 }
 
-export type RecipientFilter = "verified" | "non-verified" | "all";
+// RecipientFilter imported from ./types
 
 export async function getEmailSignature(): Promise<string> {
   const tribe = await getTribe();
   return tribe.email_signature || "";
 }
 
-export interface SubscriptionStatus {
-  status: 'free' | 'active' | 'canceled' | 'past_due';
-  plan: 'monthly' | 'yearly' | null;
-  endsAt: string | null;
-  canSendEmails: boolean;
-}
+// SubscriptionStatus imported from ./types
 
 export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
   const tribe = await getTribe();
@@ -615,12 +586,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
 // Weekly email limit for premium users
 const WEEKLY_EMAIL_LIMIT = 2;
 
-export interface WeeklyEmailStatus {
-  emailsSentThisWeek: number;
-  limit: number;
-  canSendEmail: boolean;
-  nextResetDate: string; // ISO date string for next Monday
-}
+// WeeklyEmailStatus imported from ./types
 
 export async function getWeeklyEmailStatus(): Promise<WeeklyEmailStatus> {
   const tribe = await getTribe();
@@ -809,7 +775,7 @@ export async function scheduleEmail(
 }
 
 // Dashboard stats
-export type TimePeriod = "24h" | "7d" | "30d";
+// TimePeriod imported from ./types
 
 export async function getDashboardStats(period: TimePeriod = "7d") {
   const tribe = await getTribe();
@@ -931,16 +897,7 @@ export async function joinTribe(slug: string, email: string, baseUrl?: string) {
 }
 
 // Gift actions
-export interface Gift {
-  id: string;
-  file_name: string;
-  file_url: string;
-  file_size: number;
-  thumbnail_url: string | null;
-  created_at: string;
-}
-
-export const MAX_GIFTS = 5;
+// Gift and MAX_GIFTS imported from ./types
 
 export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGifts: number }> {
   const tribe = await getTribe();

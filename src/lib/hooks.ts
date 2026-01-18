@@ -1,7 +1,8 @@
 "use client";
 
 import useSWR from "swr";
-import { getTribeSettings, getSubscriptionStatus, SubscriptionStatus } from "./actions";
+import { getTribeSettings, getSubscriptionStatus } from "./actions";
+import type { SubscriptionStatus } from "./types";
 
 // Cache keys
 export const CACHE_KEYS = {

@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { getGifts, deleteGift, Gift, MAX_GIFTS } from "@/lib/actions";
+import { getGifts, deleteGift } from "@/lib/actions";
+import type { Gift } from "@/lib/types";
+import { MAX_GIFTS } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { GiftUploadModal } from "@/components/GiftUploadModal";
 

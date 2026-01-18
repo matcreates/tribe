@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getSubscribersPaginated, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually, SubscriberFilter, SubscriberSort, PaginatedSubscribersResult } from "@/lib/actions";
+import { getSubscribersPaginated, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually } from "@/lib/actions";
+import type { SubscriberFilter, SubscriberSort, PaginatedSubscribersResult } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
 import { ImportChooserModal, ManualEntryModal } from "@/components/ImportChooserModal";
