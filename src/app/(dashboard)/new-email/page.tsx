@@ -41,6 +41,7 @@ export default function NewEmailPage() {
   const { toast, showToast, hideToast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
   const signatureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const signatureRef = useRef<HTMLTextAreaElement>(null);
 
   const isWeeklyLimitReached = !!(subscription?.canSendEmails && weeklyStatus && !weeklyStatus.canSendEmail);
 
@@ -70,6 +71,18 @@ export default function NewEmailPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Auto-resize signature textarea
+  const resizeSignature = useCallback(() => {
+    if (signatureRef.current) {
+      signatureRef.current.style.height = 'auto';
+      signatureRef.current.style.height = signatureRef.current.scrollHeight + 'px';
+    }
+  }, []);
+
+  useEffect(() => {
+    resizeSignature();
+  }, [signature, resizeSignature]);
 
   const syncAndLoadSubscription = async () => {
     try {
@@ -653,12 +666,15 @@ export default function NewEmailPage() {
                 )}
               </div>
               <textarea
+                ref={signatureRef}
                 value={signature}
-                onChange={(e) => handleSignatureChange(e.target.value)}
+                onChange={(e) => {
+                  handleSignatureChange(e.target.value);
+                  resizeSignature();
+                }}
                 placeholder="Add your signature (e.g., Best, John)"
                 disabled={isWeeklyLimitReached}
-                rows={2}
-                className="w-full text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none bg-transparent resize-none disabled:cursor-not-allowed"
+                className="w-full min-h-[24px] text-[13px] text-white/50 placeholder:text-white/20 focus:outline-none bg-transparent resize-none disabled:cursor-not-allowed overflow-hidden"
               />
             </div>
 

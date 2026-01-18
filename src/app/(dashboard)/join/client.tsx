@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Toast, useToast } from "@/components/Toast";
 import { updateTribeSettings } from "@/lib/actions";
 import { Avatar } from "@/components/Avatar";
@@ -21,24 +21,19 @@ interface JoinPageClientProps {
 export function JoinPageClient({ settings }: JoinPageClientProps) {
   const { toast, showToast, hideToast } = useToast();
 
-  // Show the real, working URL
   const [displayUrl, setDisplayUrl] = useState("");
   const [fullJoinUrl, setFullJoinUrl] = useState("");
   const [description, setDescription] = useState(settings.joinDescription);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const origin = window.location.origin;
     const url = `${origin}/@${settings.slug}`;
     setFullJoinUrl(url);
-    // Show a cleaner version without https://
     setDisplayUrl(url.replace(/^https?:\/\//, ""));
   }, [settings.slug]);
-
-  useEffect(() => {
-    setHasChanges(description !== settings.joinDescription);
-  }, [description, settings.joinDescription]);
 
   const copyLink = async () => {
     try {
@@ -49,115 +44,149 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     }
   };
 
-  const saveDescription = async () => {
-    setIsSaving(true);
-    try {
-      await updateTribeSettings({ joinDescription: description });
-      showToast("Description saved");
-      setHasChanges(false);
-    } catch {
-      showToast("Failed to save description");
-    } finally {
-      setIsSaving(false);
+  // Auto-resize description textarea
+  const resizeDescription = useCallback(() => {
+    if (descriptionRef.current) {
+      descriptionRef.current.style.height = 'auto';
+      descriptionRef.current.style.height = descriptionRef.current.scrollHeight + 'px';
     }
+  }, []);
+
+  useEffect(() => {
+    resizeDescription();
+  }, [description, resizeDescription]);
+
+  // Auto-save description with debounce
+  const handleDescriptionChange = (newDescription: string) => {
+    setDescription(newDescription);
+    resizeDescription();
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (newDescription !== settings.joinDescription) {
+        setIsSaving(true);
+        try {
+          await updateTribeSettings({ joinDescription: newDescription });
+        } catch {
+          showToast("Failed to save");
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    }, 1000);
   };
 
   return (
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
-        {/* URL Bar */}
-        <div className="mb-6">
-          <label className="block text-[11px] text-white/30 mb-2 uppercase tracking-[0.08em]">Shareable link</label>
+        {/* Header */}
+        <h1 className="text-[20px] font-medium text-white/90 mb-5">
+          Join Page
+        </h1>
+
+        {/* Browser Preview Card */}
+        <div 
+          className="rounded-[14px] border border-white/[0.08] overflow-hidden"
+          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+        >
+          {/* Browser Top Bar */}
           <div 
-            className="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full"
-            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+            className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
           >
-            <LinkIcon className="w-4 h-4 text-white/35" />
-            <span className="flex-1 text-[13px] text-white/60 truncate">{displayUrl}</span>
+            {/* Traffic Lights */}
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+            </div>
+            
+            {/* URL Bar */}
+            <div 
+              className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md"
+              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+            >
+              <LockIcon className="w-3 h-3 text-white/30" />
+              <span className="flex-1 text-[11px] text-white/50 truncate font-mono">{displayUrl}</span>
+            </div>
+            
+            {/* Copy Button */}
             <button
               onClick={copyLink}
-              className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors"
+              className="p-2 rounded-md hover:bg-white/[0.06] transition-colors group"
               aria-label="Copy link"
             >
-              <CopyIcon className="w-4 h-4 text-white/35" />
+              <CopyIcon className="w-4 h-4 text-white/35 group-hover:text-white/60 transition-colors" />
             </button>
+          </div>
+
+          {/* Page Preview */}
+          <div className="px-6 py-8">
+            <div className="flex flex-col items-center text-center">
+              {/* Avatar */}
+              <div className="mb-2.5">
+                <Avatar src={settings.ownerAvatar} name={settings.ownerName} size={56} />
+              </div>
+              
+              {/* Name */}
+              <p className="text-[13px] text-white/50 mb-4">{settings.ownerName}</p>
+              
+              {/* Heading */}
+              <h2 className="text-[18px] font-medium text-white/90 mb-1.5">
+                Join my tribe
+              </h2>
+              
+              {/* Description */}
+              <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
+                {description || "Add a description..."}
+              </p>
+              
+              {/* Email Input (disabled preview) */}
+              <div 
+                className="w-full max-w-[280px] px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/25 text-left"
+                style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+              >
+                your email address
+              </div>
+              
+              {/* Join Button (disabled preview) */}
+              <div className="mt-4 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase opacity-60 btn-glass pointer-events-none">
+                <span className="btn-glass-text">JOIN</span>
+              </div>
+              
+              {/* Footer */}
+              <div className="mt-6 flex items-center gap-1 text-[11px] text-white/30">
+                <span>made with</span>
+                <TribeLogo className="h-[11px] w-auto relative -top-[1px]" />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Description Editor */}
-        <div className="mb-6">
-          <label className="block text-[11px] text-white/30 mb-2 uppercase tracking-[0.08em]">Page description</label>
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[11px] text-white/30 uppercase tracking-[0.08em]">
+              Page description
+            </label>
+            {isSaving && (
+              <span className="text-[10px] text-white/30">Saving...</span>
+            )}
+          </div>
           <textarea
+            ref={descriptionRef}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 resize-none focus:outline-none transition-colors"
-            style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            className="w-full min-h-[60px] px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 resize-none focus:outline-none transition-colors overflow-hidden"
+            style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
             placeholder="Describe what people will get by joining your tribe..."
           />
-          <button
-            onClick={saveDescription}
-            disabled={isSaving || !hasChanges}
-            className={`mt-3 px-5 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.1em] uppercase transition-opacity ${
-              hasChanges ? 'btn-glass' : 'btn-glass-secondary opacity-50'
-            }`}
-          >
-            <span className="btn-glass-text">{isSaving ? "SAVING..." : "SAVE"}</span>
-          </button>
-        </div>
-
-        {/* Join Card Preview */}
-        <div 
-          className="w-full rounded-[16px] border border-white/[0.08] p-7"
-          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
-        >
-          <div className="flex flex-col items-center text-center">
-            {/* Avatar */}
-            <div className="mb-2.5">
-              <Avatar src={settings.ownerAvatar} name={settings.ownerName} size={56} />
-            </div>
-            
-            {/* Name */}
-            <p className="text-[13px] text-white/50 mb-4">{settings.ownerName}</p>
-            
-            {/* Heading */}
-            <h2 className="text-[18px] font-medium text-white/90 mb-1.5">
-              Join my tribe
-            </h2>
-            
-            {/* Description */}
-            <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
-              {description}
-            </p>
-            
-            {/* Email Input */}
-            <input
-              type="email"
-              placeholder="your email address"
-              className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 placeholder:text-white/25 mb-4 focus:outline-none transition-colors"
-              style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
-              disabled
-            />
-            
-            {/* Join Button */}
-            <button
-              className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
-              disabled
-            >
-              <span className="btn-glass-text">JOIN</span>
-            </button>
-            
-            {/* Footer */}
-            <a 
-              href="https://madewithtribe.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="mt-6 flex items-center gap-1 text-[11px] text-white/30 hover:text-white/50 transition-colors"
-            >
-              <span>made with</span>
-              <TribeLogo className="h-[11px] w-auto relative -top-[1px]" />
-            </a>
-          </div>
+          <p className="mt-2 text-[11px] text-white/25">
+            Changes are saved automatically
+          </p>
         </div>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
@@ -166,11 +195,10 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
   );
 }
 
-function LinkIcon({ className }: { className?: string }) {
+function LockIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8.66628 0.000128207C7.7832 -0.00759979 6.93318 0.334316 6.29922 0.95093L6.29304 0.957026L5.81778 1.43281C5.5836 1.66726 5.58384 2.04715 5.81826 2.28133C6.05274 2.51551 6.43266 2.5153 6.66684 2.28085L7.1388 1.80832C7.54668 1.41307 8.09136 1.19515 8.65578 1.20009C9.22158 1.20504 9.76368 1.43354 10.165 1.83772C10.5665 2.24203 10.795 2.78983 10.7999 3.36336C10.8049 3.93524 10.5872 4.48549 10.1948 4.89642L8.54082 6.56202C8.32134 6.78312 8.05746 6.95382 7.76724 7.06284C7.47702 7.17186 7.16706 7.21674 6.8583 7.19442C6.5496 7.17216 6.249 7.0833 5.97702 6.93366C5.70504 6.78402 5.4678 6.57702 5.28168 6.32646C5.0841 6.06042 4.70826 6.00498 4.44225 6.20256C4.17624 6.40014 4.12078 6.77598 4.31837 7.04202C4.60688 7.4304 4.9752 7.75212 5.39856 7.98504C5.82198 8.21796 6.29034 8.35662 6.77202 8.39136C7.25364 8.4261 7.737 8.35608 8.18922 8.18622C8.64138 8.01636 9.05172 7.75062 9.39246 7.40742L11.0501 5.7381L11.0575 5.7306C11.6695 5.09244 12.0076 4.23852 11.9999 3.353C11.9923 2.46748 11.6396 1.61959 11.0165 0.992155C10.3933 0.364586 9.54936 0.0078562 8.66628 0.000128207Z" />
-      <path d="M5.22803 3.60866C4.74638 3.57393 4.26303 3.64392 3.81082 3.81379C3.35864 3.98364 2.94829 4.24939 2.60758 4.59258L0.949859 6.26189L0.942581 6.26939C0.33048 6.90755 -0.0075113 7.76147 0.000126689 8.64701C0.00777068 9.53249 0.360456 10.3804 0.983519 11.0078C1.60672 11.6354 2.45063 11.9921 3.33373 11.9999C4.21684 12.0076 5.06681 11.6657 5.70083 11.0491L5.70821 11.0417L6.18071 10.5659C6.41417 10.3308 6.41285 9.95093 6.17771 9.71741C5.94257 9.48395 5.56271 9.48527 5.32919 9.72041L4.86065 10.1923C4.45279 10.5871 3.90841 10.8049 3.34423 10.7999C2.77844 10.795 2.23636 10.5665 1.835 10.1623C1.43351 9.75797 1.20503 9.21017 1.20008 8.63663C1.19514 8.06471 1.41287 7.51451 1.80524 7.10357L3.45922 5.43798C3.6787 5.21688 3.94258 5.04618 4.2328 4.93716C4.52301 4.82814 4.83293 4.78329 5.14169 4.80558C5.45045 4.82784 5.75099 4.9167 6.02297 5.06634C6.29501 5.21598 6.53219 5.42298 6.71831 5.67354C6.91595 5.93958 7.29173 5.99502 7.55777 5.79744C7.82381 5.59986 7.87925 5.22402 7.68167 4.95798C7.39313 4.56959 7.02479 4.24789 6.60143 4.01496C6.17807 3.78202 5.70965 3.64339 5.22803 3.60866Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M6 0C4.34315 0 3 1.34315 3 3V4C2.44772 4 2 4.44772 2 5V10C2 10.5523 2.44772 11 3 11H9C9.55228 11 10 10.5523 10 10V5C10 4.44772 9.55228 4 9 4V3C9 1.34315 7.65685 0 6 0ZM8 4V3C8 1.89543 7.10457 1 6 1C4.89543 1 4 1.89543 4 3V4H8ZM6 7C6.55228 7 7 6.55228 7 6C7 5.44772 6.55228 5 6 5C5.44772 5 5 5.44772 5 6C5 6.55228 5.44772 7 6 7Z" />
     </svg>
   );
 }
@@ -196,4 +224,3 @@ function TribeLogo({ className }: { className?: string }) {
     </svg>
   );
 }
-
