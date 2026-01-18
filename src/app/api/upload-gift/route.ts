@@ -71,9 +71,12 @@ export async function POST(request: NextRequest) {
 
     // Upload gift file to Vercel Blob
     const timestamp = Date.now();
-    const fileExtension = file.name.split('.').pop() || 'bin';
+    // Sanitize filename for Vercel Blob (only alphanumeric, dash, underscore, dot)
+    const sanitizedFileName = file.name
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_+/g, '_');
     const fileBlob = await put(
-      `gifts/${tribe.id}/${timestamp}-${file.name}`,
+      `gifts/${tribe.id}/${timestamp}-${sanitizedFileName}`,
       file,
       {
         access: 'public',
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Upload thumbnail if provided
     let thumbnailUrl: string | null = null;
     if (thumbnail) {
-      const thumbExtension = thumbnail.name.split('.').pop() || 'jpg';
+      const thumbExtension = (thumbnail.name.split('.').pop() || 'jpg').replace(/[^a-zA-Z0-9]/g, '');
       const thumbBlob = await put(
         `gifts/${tribe.id}/thumb-${timestamp}.${thumbExtension}`,
         thumbnail,
