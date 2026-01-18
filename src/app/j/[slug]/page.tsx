@@ -98,10 +98,29 @@ export default function PublicJoinPage({ params }: PageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
         <div 
-          className="w-full max-w-[320px] rounded-[16px] border border-white/[0.08] p-7 text-center"
+          className="w-full max-w-[360px] rounded-[16px] border border-white/[0.08] p-8 text-center"
           style={{ background: 'rgba(255, 255, 255, 0.03)' }}
         >
-          <p className="text-[13px] text-white/50">{error}</p>
+          {/* Logo */}
+          <TribeLogo className="h-6 w-auto mx-auto mb-6 text-white/80" />
+          
+          {/* Error Message */}
+          <h1 className="text-[18px] font-medium text-white/90 mb-3">
+            {error === "Tribe not found" ? "This tribe doesn't exist" : error}
+          </h1>
+          
+          {/* Description */}
+          <p className="text-[13px] text-white/50 leading-relaxed mb-6">
+            Tribe is a platform that helps creators build and connect with their community through beautiful email newsletters.
+          </p>
+          
+          {/* CTA Button */}
+          <a
+            href="https://www.madewithtribe.com"
+            className="inline-block px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+          >
+            <span className="btn-glass-text">DISCOVER TRIBE</span>
+          </a>
         </div>
       </div>
     );

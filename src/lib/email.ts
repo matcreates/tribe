@@ -160,8 +160,8 @@ export async function sendBulkEmailWithUnsubscribe(
                   <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
                     Sent by ${ownerName}
                   </p>
-                  <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: none; display: inline-block; margin-bottom: 12px;">
-                    made with <span style="font-weight: 600;">tribe</span>
+                  <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
+                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
                   </a>
                   <br>
                   <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.2); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
@@ -298,8 +298,8 @@ export async function sendVerificationEmail(
             <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 16px; text-align: center;">
               If you didn't request this, you can safely ignore this email.
             </p>
-            <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; text-decoration: none; display: block; text-align: center;">
-              made with <span style="font-weight: 600;">tribe</span>
+            <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: block; text-align: center;">
+              <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
             </a>
           </div>
         </body>
@@ -414,8 +414,8 @@ export async function sendTestEmail(
                   <p style="color: rgba(255,255,255,0.25); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0 0 12px 0;">
                     Sent by ${ownerName}
                   </p>
-                  <a href="https://www.madewithtribe.com" target="_blank" style="color: rgba(255,255,255,0.3); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: none; display: inline-block; margin-bottom: 12px;">
-                    made with <span style="font-weight: 600;">tribe</span>
+                  <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
+                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
                   </a>
                   <br>
                   <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0;">
