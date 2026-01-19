@@ -72,13 +72,13 @@ export default function DashboardPage() {
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* Header with Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <h1 className="text-[20px] font-medium text-white/90">
             Dashboard
           </h1>
           
           {/* Time Period Filters */}
-          <div className="flex gap-1 p-1 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+          <div className="flex gap-1 p-1 rounded-[10px] border border-white/[0.06] shrink-0" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
             {(["24h", "7d", "30d"] as TimePeriod[]).map((p) => (
               <button
                 key={p}

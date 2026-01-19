@@ -330,32 +330,37 @@ export default function TribePage() {
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-          <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
-            Your tribe is made of <span className="text-white">{total}</span> {total === 1 ? 'person' : 'people'}
-          </h1>
-          <div className="flex-1" />
-          <div className="flex gap-2">
-            <button
-              onClick={handleImportClick}
-              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
-            >
-              <span className="btn-glass-text">IMPORT</span>
-            </button>
-            <button
-              onClick={handleExport}
-              className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
-            >
-              <span className="btn-glass-text">EXPORT</span>
-            </button>
+        <div className="mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+            <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
+              Your tribe is made of <span className="text-white">{total}</span> {total === 1 ? 'person' : 'people'}
+            </h1>
+            <div className="flex-1" />
+            <div className="flex gap-2">
+              <button
+                onClick={handleImportClick}
+                className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+              >
+                <span className="btn-glass-text">IMPORT</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
+              >
+                <span className="btn-glass-text">EXPORT</span>
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.txt,text/csv,text/plain"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.txt,text/csv,text/plain"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          <p className="text-[13px] text-white/40 leading-relaxed">
+            A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.
+          </p>
         </div>
 
         {/* Filter Tabs */}
