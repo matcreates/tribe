@@ -39,8 +39,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.includes("/api/inbound") || 
     pathname.includes("/webhook") ||  // Matches /api/stripe/webhook, /api/webhook-inbound, etc.
-    pathname.includes("/api/test") ||
-    pathname.includes("/api/cleanup")
+    pathname.includes("/api/test")
   ) {
     return NextResponse.next();
   }
@@ -114,7 +113,7 @@ export const config = {
   matcher: [
     // Exclude static files, images, favicon, AND webhook endpoints
     // Note: Using broader patterns to catch all webhook paths
-    "/((?!_next/static|_next/image|favicon.ico|api/inbound|api/stripe/webhook|api/webhook-inbound|api/test|api/cleanup|.*\\..*).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/inbound|api/stripe/webhook|api/webhook-inbound|api/test|.*\\..*).*)",
   ],
 };
 
