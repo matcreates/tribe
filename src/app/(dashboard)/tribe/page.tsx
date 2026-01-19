@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getSubscribersPaginated, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually } from "@/lib/actions";
+import { getSubscribersPaginated, removeSubscriber, previewImport, importSubscribers, exportSubscribers, addSubscriberManually, removeAllUnverifiedSubscribers } from "@/lib/actions";
 import type { SubscriberFilter, SubscriberSort, PaginatedSubscribersResult } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
@@ -75,6 +75,8 @@ export default function TribePage() {
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [pendingEmails, setPendingEmails] = useState<string[]>([]);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -181,6 +183,23 @@ export default function TribePage() {
       showToast("Exported members");
     } catch {
       showToast("Failed to export");
+    }
+  };
+
+  const handleDeleteAllUnverified = async () => {
+    if (isDeletingAll) return;
+    
+    setIsDeletingAll(true);
+    try {
+      const result = await removeAllUnverifiedSubscribers();
+      showToast(`Deleted ${result.deleted} unverified members`);
+      setShowDeleteAllModal(false);
+      // Reload the list
+      loadSubscribers();
+    } catch {
+      showToast("Failed to delete unverified members");
+    } finally {
+      setIsDeletingAll(false);
     }
   };
 
@@ -395,6 +414,16 @@ export default function TribePage() {
           >
             Non-verified ({totalNonVerified})
           </button>
+          
+          {/* Delete All Unverified Button - only shows when non-verified filter is active */}
+          {filter === "non-verified" && totalNonVerified > 0 && (
+            <button
+              onClick={() => setShowDeleteAllModal(true)}
+              className="ml-auto px-3 py-1.5 rounded-[6px] text-[12px] font-medium text-red-400 hover:bg-red-500/10 transition-colors whitespace-nowrap"
+            >
+              Delete all unverified
+            </button>
+          )}
         </div>
 
         {/* Search and Sort Row */}
@@ -579,7 +608,65 @@ export default function TribePage() {
         onImportWithVerification={handleImportWithVerification}
         onImportWithoutVerification={handleImportWithoutVerification}
       />
+
+      {/* Delete All Unverified Confirmation Modal */}
+      {showDeleteAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !isDeletingAll && setShowDeleteAllModal(false)}
+          />
+          <div
+            className="relative w-full max-w-[360px] rounded-[14px] border border-white/[0.08] p-6"
+            style={{ background: 'rgba(18, 18, 18, 0.98)' }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(239, 68, 68, 0.15)' }}
+              >
+                <WarningIcon className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-medium text-white/90">Delete all unverified</h3>
+                <p className="text-[12px] text-white/40">{totalNonVerified} members will be removed</p>
+              </div>
+            </div>
+            
+            <p className="text-[13px] text-white/50 mb-5 leading-relaxed">
+              This action is <span className="text-red-400 font-medium">irreversible</span>. All unverified members will be permanently deleted from your tribe.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteAllModal(false)}
+                disabled={isDeletingAll}
+                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAllUnverified}
+                disabled={isDeletingAll}
+                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+              >
+                {isDeletingAll ? "Deleting..." : "Delete all"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function WarningIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 5v4" />
+      <path d="M8 11.5v.5" />
+      <path d="M3.5 14h9a1 1 0 00.87-1.5l-4.5-8a1 1 0 00-1.74 0l-4.5 8a1 1 0 00.87 1.5z" />
+    </svg>
   );
 }
 

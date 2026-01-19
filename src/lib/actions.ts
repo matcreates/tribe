@@ -314,6 +314,18 @@ export async function removeSubscriber(id: string) {
   revalidatePath("/dashboard");
 }
 
+export async function removeAllUnverifiedSubscribers(): Promise<{ deleted: number }> {
+  const tribe = await getTribe();
+  
+  const { removeAllUnverifiedSubscribers: dbRemoveAllUnverified } = await import("./db");
+  const deleted = await dbRemoveAllUnverified(tribe.id);
+  
+  revalidatePath("/tribe");
+  revalidatePath("/dashboard");
+  
+  return { deleted };
+}
+
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

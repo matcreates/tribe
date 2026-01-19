@@ -605,6 +605,14 @@ export async function removeSubscriber(id: string): Promise<void> {
   await pool.query(`DELETE FROM subscribers WHERE id = $1`, [id]);
 }
 
+export async function removeAllUnverifiedSubscribers(tribeId: string): Promise<number> {
+  const result = await pool.query(
+    `DELETE FROM subscribers WHERE tribe_id = $1 AND verified = false`,
+    [tribeId]
+  );
+  return result.rowCount ?? 0;
+}
+
 export async function getSubscriberCount(tribeId: string): Promise<number> {
   const rows = await query<{ count: string }>(`SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1`, [tribeId]);
   return Number(rows[0].count);
