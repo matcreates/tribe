@@ -2,16 +2,26 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { getGifts, deleteGift, renameGift } from "@/lib/actions";
+import { getGifts, deleteGift, updateGiftFile } from "@/lib/actions";
 import type { Gift } from "@/lib/types";
 import { MAX_GIFTS } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
-import { GiftUploadModal } from "@/components/GiftUploadModal";
+import { upload } from "@vercel/blob/client";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_THUMBNAIL_SIZE = 2 * 1024 * 1024; // 2MB
+
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .substring(0, 100);
 }
 
 export default function GiftsPage() {
@@ -20,10 +30,15 @@ export default function GiftsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [renamingGift, setRenamingGift] = useState<Gift | null>(null);
-  const [newName, setNewName] = useState("");
-  const [isRenaming, setIsRenaming] = useState(false);
-  const renameInputRef = useRef<HTMLInputElement>(null);
+  const [updatingGift, setUpdatingGift] = useState<Gift | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedThumbnail, setSelectedThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateStep, setUpdateStep] = useState<1 | 2>(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const { toast, showToast, hideToast } = useToast();
 
   const loadGifts = useCallback(async () => {
@@ -64,32 +79,154 @@ export default function GiftsPage() {
     }
   };
 
-  const handleStartRename = (gift: Gift) => {
-    setRenamingGift(gift);
-    setNewName(gift.file_name);
-    setTimeout(() => renameInputRef.current?.focus(), 50);
+  const handleStartUpdate = (gift: Gift) => {
+    setUpdatingGift(gift);
+    setSelectedFile(null);
+    setSelectedThumbnail(null);
+    setThumbnailPreview(null);
+    setUpdateError(null);
+    setUpdateStep(1);
+    setTimeout(() => fileInputRef.current?.click(), 50);
   };
 
-  const handleRename = async () => {
-    if (!renamingGift || !newName.trim() || isRenaming) return;
-    if (newName.trim() === renamingGift.file_name) {
-      setRenamingGift(null);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUpdateError(null);
+    
+    if (file.size > MAX_FILE_SIZE) {
+      setUpdateError("File must be less than 20MB");
       return;
     }
+    
+    setSelectedFile(file);
+    setUpdateStep(2);
+  };
 
-    setIsRenaming(true);
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUpdateError(null);
+    
+    if (!file.type.startsWith("image/")) {
+      setUpdateError("Thumbnail must be an image");
+      return;
+    }
+    
+    if (file.size > MAX_THUMBNAIL_SIZE) {
+      setUpdateError("Thumbnail must be less than 2MB");
+      return;
+    }
+    
+    const img = document.createElement("img");
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = img.width / img.height;
+      if (ratio < 0.8 || ratio > 1.2) {
+        setUpdateError("Thumbnail should be a square image");
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      setSelectedThumbnail(file);
+      setThumbnailPreview(objectUrl);
+    };
+    img.src = objectUrl;
+  };
+
+  const handleUpdateFile = async () => {
+    if (!updatingGift || !selectedFile || isUpdating) return;
+
+    setIsUpdating(true);
+    setUpdateError(null);
+
     try {
-      await renameGift(renamingGift.id, newName.trim());
+      const timestamp = Date.now();
+      
+      // Upload new file
+      const fileBlob = await upload(
+        `gifts/${timestamp}-${sanitizeFilename(selectedFile.name)}`,
+        selectedFile,
+        {
+          access: 'public',
+          handleUploadUrl: '/api/upload-gift',
+        }
+      );
+
+      // Upload thumbnail if provided
+      let thumbnailUrl: string | null = updatingGift.thumbnail_url;
+      if (selectedThumbnail) {
+        const thumbExtension = (selectedThumbnail.name.split('.').pop() || 'jpg')
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .substring(0, 10);
+        
+        const thumbBlob = await upload(
+          `gifts/thumb-${timestamp}.${thumbExtension}`,
+          selectedThumbnail,
+          {
+            access: 'public',
+            handleUploadUrl: '/api/upload-gift',
+          }
+        );
+        thumbnailUrl = thumbBlob.url;
+      }
+
+      // Update the gift in database
+      await updateGiftFile(
+        updatingGift.id,
+        selectedFile.name,
+        fileBlob.url,
+        selectedFile.size,
+        thumbnailUrl
+      );
+
+      // Update local state
       setGifts(gifts.map(g => 
-        g.id === renamingGift.id ? { ...g, file_name: newName.trim() } : g
+        g.id === updatingGift.id 
+          ? { 
+              ...g, 
+              file_name: selectedFile.name, 
+              file_url: fileBlob.url,
+              file_size: selectedFile.size,
+              thumbnail_url: thumbnailUrl
+            } 
+          : g
       ));
-      showToast("Gift renamed");
-      setRenamingGift(null);
+      
+      showToast("Gift file updated");
+      handleCloseUpdateModal();
     } catch (error) {
-      console.error("Failed to rename gift:", error);
-      showToast("Failed to rename gift");
+      console.error("Failed to update gift:", error);
+      setUpdateError(error instanceof Error ? error.message : "Failed to update gift");
     } finally {
-      setIsRenaming(false);
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCloseUpdateModal = () => {
+    if (isUpdating) return;
+    setUpdatingGift(null);
+    setSelectedFile(null);
+    setSelectedThumbnail(null);
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setThumbnailPreview(null);
+    setUpdateError(null);
+    setUpdateStep(1);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
+
+  const removeThumbnail = () => {
+    setSelectedThumbnail(null);
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+      setThumbnailPreview(null);
+    }
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = "";
     }
   };
 
@@ -193,11 +330,11 @@ export default function GiftsPage() {
 
                     {/* Actions */}
                     <button
-                      onClick={() => handleStartRename(gift)}
+                      onClick={() => handleStartUpdate(gift)}
                       className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
-                      aria-label="Rename gift"
+                      aria-label="Update file"
                     >
-                      <PencilIcon className="w-4 h-4 text-white/50" />
+                      <RefreshIcon className="w-4 h-4 text-white/50" />
                     </button>
                     <a
                       href={gift.file_url}
@@ -248,61 +385,365 @@ export default function GiftsPage() {
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>
 
-      {/* Upload Modal */}
-      <GiftUploadModal
-        isOpen={showUploadModal}
-        onClose={() => setShowUploadModal(false)}
-        onSuccess={handleUploadSuccess}
-        currentGiftCount={giftCount}
-        maxGifts={MAX_GIFTS}
+      {/* Hidden file inputs */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      <input
+        ref={thumbnailInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleThumbnailSelect}
+        className="hidden"
       />
 
-      {/* Rename Modal */}
-      {renamingGift && (
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <UploadModal
+          onClose={() => setShowUploadModal(false)}
+          onSuccess={handleUploadSuccess}
+          currentGiftCount={giftCount}
+          maxGifts={MAX_GIFTS}
+        />
+      )}
+
+      {/* Update File Modal */}
+      {updatingGift && updateStep === 2 && selectedFile && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          onClick={() => !isRenaming && setRenamingGift(null)}
+          onClick={() => !isUpdating && handleCloseUpdateModal()}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-[360px] rounded-[14px] border border-white/[0.08] p-6"
-            style={{ background: 'rgba(18, 18, 18, 0.98)' }}
+            className="relative w-full max-w-[420px] rounded-[16px] border border-white/[0.08] p-6"
+            style={{ background: 'rgb(24, 24, 24)' }}
           >
-            <h3 className="text-[15px] font-medium text-white/90 mb-4">Rename Gift</h3>
-            <input
-              ref={renameInputRef}
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleRename();
-                if (e.key === 'Escape') setRenamingGift(null);
-              }}
-              disabled={isRenaming}
-              className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/90 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12] disabled:opacity-50"
-              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
-              placeholder="Enter new name..."
-            />
-            <div className="flex gap-3 mt-5">
+            {/* Close button */}
+            <button
+              onClick={handleCloseUpdateModal}
+              disabled={isUpdating}
+              className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M5 5l10 10M15 5L5 15" />
+              </svg>
+            </button>
+
+            <div className="text-center mb-6">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'rgba(232, 184, 74, 0.15)' }}
+              >
+                <RefreshIcon className="w-7 h-7 text-[#E8B84A]" />
+              </div>
+              <h3 className="text-[16px] font-medium text-white/90 mb-1">Update gift file</h3>
+              <p className="text-[13px] text-white/50">
+                Replace the file while keeping the same link
+              </p>
+            </div>
+
+            {/* New file preview */}
+            <div
+              className="flex items-center gap-3 p-4 rounded-[10px] mb-4"
+              style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <div
+                className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+              >
+                <FileIcon className="w-5 h-5 text-white/50" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-white/70 truncate">{selectedFile.name}</p>
+                <p className="text-[11px] text-white/40">{formatFileSize(selectedFile.size)}</p>
+              </div>
+              <span className="text-[10px] text-emerald-400/80 font-medium uppercase px-2 py-1 rounded-md" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
+                New
+              </span>
+            </div>
+
+            {/* Thumbnail area */}
+            {thumbnailPreview ? (
+              <div className="relative mb-4">
+                <div className="w-24 h-24 mx-auto rounded-[10px] overflow-hidden relative">
+                  <Image
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <button
+                  onClick={removeThumbnail}
+                  className="absolute top-0 right-1/2 translate-x-14 -translate-y-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M3 3l6 6M9 3l-6 6" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div
+                className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-6 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4"
+                onClick={() => thumbnailInputRef.current?.click()}
+              >
+                <svg className="w-8 h-8 text-white/30 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+                <p className="text-[12px] text-white/50 mb-1">
+                  Update thumbnail (optional)
+                </p>
+                <p className="text-[10px] text-white/30">
+                  Square image, max 2MB
+                </p>
+              </div>
+            )}
+
+            {updateError && (
+              <p className="text-[12px] text-red-400 text-center mb-4">{updateError}</p>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
               <button
-                onClick={() => setRenamingGift(null)}
-                disabled={isRenaming}
-                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
+                onClick={handleCloseUpdateModal}
+                disabled={isUpdating}
+                className="flex-1 py-3 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                onClick={handleRename}
-                disabled={isRenaming || !newName.trim() || newName.trim() === renamingGift.file_name}
-                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium bg-white/[0.08] text-white/80 hover:bg-white/[0.12] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={handleUpdateFile}
+                disabled={isUpdating}
+                className="flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-50"
               >
-                {isRenaming ? 'Saving...' : 'Save'}
+                <span className="btn-glass-text">
+                  {isUpdating ? "UPDATING..." : "UPDATE"}
+                </span>
               </button>
             </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Upload Modal Component (extracted from GiftUploadModal)
+function UploadModal({
+  onClose,
+  onSuccess,
+  currentGiftCount,
+  maxGifts,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+  currentGiftCount: number;
+  maxGifts: number;
+}) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedThumbnail, setSelectedThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File must be less than 20MB");
+      return;
+    }
+    setSelectedFile(file);
+    setStep(2);
+  };
+
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("Thumbnail must be an image");
+      return;
+    }
+    if (file.size > MAX_THUMBNAIL_SIZE) {
+      setError("Thumbnail must be less than 2MB");
+      return;
+    }
+    const img = document.createElement("img");
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = img.width / img.height;
+      if (ratio < 0.8 || ratio > 1.2) {
+        setError("Thumbnail should be a square image");
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      setSelectedThumbnail(file);
+      setThumbnailPreview(objectUrl);
+    };
+    img.src = objectUrl;
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const timestamp = Date.now();
+      const fileBlob = await upload(
+        `gifts/${timestamp}-${sanitizeFilename(selectedFile.name)}`,
+        selectedFile,
+        { access: 'public', handleUploadUrl: '/api/upload-gift' }
+      );
+
+      let thumbnailUrl: string | null = null;
+      if (selectedThumbnail) {
+        const thumbExtension = (selectedThumbnail.name.split('.').pop() || 'jpg')
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .substring(0, 10);
+        const thumbBlob = await upload(
+          `gifts/thumb-${timestamp}.${thumbExtension}`,
+          selectedThumbnail,
+          { access: 'public', handleUploadUrl: '/api/upload-gift' }
+        );
+        thumbnailUrl = thumbBlob.url;
+      }
+
+      const response = await fetch("/api/finalize-gift", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          fileUrl: fileBlob.url,
+          fileSize: selectedFile.size,
+          thumbnailUrl,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save gift");
+      }
+
+      onSuccess();
+      handleClose();
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError(err instanceof Error ? err.message : "Failed to upload gift");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (isUploading) return;
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    onClose();
+  };
+
+  const handleBack = () => {
+    setStep(1);
+    setSelectedThumbnail(null);
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+      setThumbnailPreview(null);
+    }
+    setError(null);
+  };
+
+  const removeThumbnail = () => {
+    setSelectedThumbnail(null);
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+      setThumbnailPreview(null);
+    }
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={!isUploading ? handleClose : undefined} />
+      <div className="relative w-full max-w-[420px] mx-4 rounded-[16px] p-6" style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <button onClick={handleClose} disabled={isUploading} className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors disabled:opacity-50">
+          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M5 5l10 10M15 5L5 15" /></svg>
+        </button>
+
+        {step === 1 ? (
+          <>
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(232, 184, 74, 0.15)' }}>
+                <GiftIcon className="w-7 h-7 text-[#E8B84A]" />
+              </div>
+              <h3 className="text-[16px] font-medium text-white/90 mb-1">Upload a gift</h3>
+              <p className="text-[13px] text-white/50">Step 1 of 2 — Select a file to share with your tribe</p>
+            </div>
+            <div className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-8 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4" onClick={() => fileInputRef.current?.click()}>
+              <svg className="w-10 h-10 text-white/30 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17,8 12,3 7,8" /><line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <p className="text-[13px] text-white/50 mb-1">Click to select a file</p>
+              <p className="text-[11px] text-white/30">Maximum size: 20MB</p>
+            </div>
+            <input ref={fileInputRef} type="file" onChange={handleFileSelect} className="hidden" />
+            {error && <p className="text-[12px] text-red-400 text-center mb-4">{error}</p>}
+            <p className="text-[11px] text-white/30 text-center">{currentGiftCount}/{maxGifts} gifts uploaded</p>
+          </>
+        ) : (
+          <>
+            <div className="text-center mb-6">
+              <h3 className="text-[16px] font-medium text-white/90 mb-1">Add a thumbnail</h3>
+              <p className="text-[13px] text-white/50">Step 2 of 2 — Optional: add a preview image</p>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-[10px] mb-4" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.06)' }}>
+                <FileIcon className="w-5 h-5 text-white/50" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-white/70 truncate">{selectedFile?.name}</p>
+                <p className="text-[11px] text-white/40">{selectedFile && formatFileSize(selectedFile.size)}</p>
+              </div>
+            </div>
+            {thumbnailPreview ? (
+              <div className="relative mb-4">
+                <div className="w-24 h-24 mx-auto rounded-[10px] overflow-hidden relative">
+                  <Image src={thumbnailPreview} alt="Thumbnail preview" fill className="object-cover" />
+                </div>
+                <button onClick={removeThumbnail} className="absolute top-0 right-1/2 translate-x-14 -translate-y-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white hover:bg-red-500 transition-colors">
+                  <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 3l6 6M9 3l-6 6" /></svg>
+                </button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-6 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4" onClick={() => thumbnailInputRef.current?.click()}>
+                <svg className="w-8 h-8 text-white/30 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" />
+                </svg>
+                <p className="text-[12px] text-white/50 mb-1">Click to add thumbnail</p>
+                <p className="text-[10px] text-white/30">Square image, max 2MB (optional)</p>
+              </div>
+            )}
+            <input ref={thumbnailInputRef} type="file" accept="image/*" onChange={handleThumbnailSelect} className="hidden" />
+            {error && <p className="text-[12px] text-red-400 text-center mb-4">{error}</p>}
+            <div className="flex gap-3">
+              <button onClick={handleBack} disabled={isUploading} className="flex-1 py-3 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50">Back</button>
+              <button onClick={handleUpload} disabled={isUploading} className="flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-50">
+                <span className="btn-glass-text">{isUploading ? "UPLOADING..." : "UPLOAD GIFT"}</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -334,10 +775,12 @@ function DownloadIcon({ className }: { className?: string }) {
   );
 }
 
-function PencilIcon({ className }: { className?: string }) {
+function RefreshIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+      <path d="M23 4v6h-6" />
+      <path d="M1 20v-6h6" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
     </svg>
   );
 }

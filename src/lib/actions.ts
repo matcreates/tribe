@@ -44,7 +44,7 @@ import {
   getGiftsByTribeId,
   getGiftCountByTribeId,
   deleteGift as dbDeleteGift,
-  updateGiftName as dbUpdateGiftName,
+  updateGiftFile as dbUpdateGiftFile,
   getGiftMemberCounts,
   createQueuedCampaign,
   getSentEmailById,
@@ -944,16 +944,22 @@ export async function getGifts(): Promise<{ gifts: Gift[]; count: number; maxGif
   };
 }
 
-export async function renameGift(giftId: string, newName: string): Promise<{ success: boolean }> {
+export async function updateGiftFile(
+  giftId: string, 
+  fileName: string,
+  fileUrl: string,
+  fileSize: number,
+  thumbnailUrl: string | null
+): Promise<{ success: boolean }> {
   const tribe = await getTribe();
   
-  if (!newName || newName.trim().length === 0) {
-    throw new Error("Name cannot be empty");
+  if (!fileName || fileName.trim().length === 0) {
+    throw new Error("File name cannot be empty");
   }
   
-  const updated = await dbUpdateGiftName(giftId, tribe.id, newName.trim());
+  const updated = await dbUpdateGiftFile(giftId, tribe.id, fileName.trim(), fileUrl, fileSize, thumbnailUrl);
   if (!updated) {
-    throw new Error("Gift not found or could not be renamed");
+    throw new Error("Gift not found or could not be updated");
   }
   
   revalidatePath("/gifts");

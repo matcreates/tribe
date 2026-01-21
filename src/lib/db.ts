@@ -1007,10 +1007,17 @@ export async function getGiftCountByTribeId(tribeId: string): Promise<number> {
   return Number(rows[0].count);
 }
 
-export async function updateGiftName(giftId: string, tribeId: string, newName: string): Promise<boolean> {
+export async function updateGiftFile(
+  giftId: string, 
+  tribeId: string, 
+  fileName: string,
+  fileUrl: string,
+  fileSize: number,
+  thumbnailUrl: string | null
+): Promise<boolean> {
   const result = await pool.query(
-    `UPDATE gifts SET file_name = $1 WHERE id = $2 AND tribe_id = $3`,
-    [newName, giftId, tribeId]
+    `UPDATE gifts SET file_name = $1, file_url = $2, file_size = $3, thumbnail_url = $4 WHERE id = $5 AND tribe_id = $6`,
+    [fileName, fileUrl, fileSize, thumbnailUrl, giftId, tribeId]
   );
   return (result.rowCount ?? 0) > 0;
 }
