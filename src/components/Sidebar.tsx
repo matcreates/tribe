@@ -46,7 +46,9 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
     <>
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4" style={{ background: 'rgb(18, 18, 18)' }}>
-        <TribeLogo className="h-[18px] w-auto opacity-90" />
+        <Link href="/dashboard" className="hover:opacity-100 transition-opacity">
+          <TribeLogo className="h-[18px] w-auto opacity-90" />
+        </Link>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 -mr-2 text-white/70 hover:text-white/90 transition-colors"
@@ -80,7 +82,9 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
       >
         {/* Logo - Hidden on mobile (shown in header instead) */}
         <div className="hidden lg:block px-10 pt-12 pb-8">
-          <TribeLogo className="h-[22px] w-auto opacity-90" />
+          <Link href="/dashboard" className="hover:opacity-100 transition-opacity">
+            <TribeLogo className="h-[22px] w-auto opacity-90" />
+          </Link>
         </div>
 
         {/* Mobile close button area */}
