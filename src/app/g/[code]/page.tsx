@@ -31,6 +31,7 @@ export default function GiftJoinPage({ params }: PageProps) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
+  const [directDownloadUrl, setDirectDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [giftData, setGiftData] = useState<GiftData | null>(null);
   const { toast, showToast, hideToast } = useToast();
@@ -73,6 +74,13 @@ export default function GiftJoinPage({ params }: PageProps) {
       });
 
       const data = await response.json();
+
+      // Handle already verified member - give them the gift directly
+      if (data.alreadyVerified && data.giftUrl) {
+        setDirectDownloadUrl(data.giftUrl);
+        showToast("You're already a member! Here's your gift.");
+        return;
+      }
 
       if (!response.ok || !data.success) {
         if (data.error === "Already subscribed") {
@@ -201,7 +209,32 @@ export default function GiftJoinPage({ params }: PageProps) {
             {giftData?.tribe.description || "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."}
           </p>
 
-          {isJoined ? (
+          {directDownloadUrl ? (
+            <div className="py-3">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.2)' }}>
+                <CheckIcon className="w-5 h-5 text-emerald-400" />
+              </div>
+              <p className="text-[14px] text-white/80 font-medium mb-1">
+                You&apos;re already a member!
+              </p>
+              <p className="text-[12px] text-white/50 mb-4">
+                Click below to download your gift.
+              </p>
+              <a
+                href={directDownloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase transition-all hover:opacity-90"
+                style={{ 
+                  background: 'rgba(34, 197, 94, 0.2)', 
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  color: 'rgba(34, 197, 94, 0.9)'
+                }}
+              >
+                DOWNLOAD GIFT
+              </a>
+            </div>
+          ) : isJoined ? (
             <div className="py-3">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(45, 138, 138, 0.2)' }}>
                 <MailIcon className="w-5 h-5 text-[#2d8a8a]" />
@@ -269,6 +302,14 @@ function MailIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="4" width="20" height="16" rx="2" />
       <path d="M22 7l-10 6L2 7" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20,6 9,17 4,12" />
     </svg>
   );
 }

@@ -17,6 +17,7 @@ export interface TribeSettings {
   ownerAvatar: string | null;
   emailSignature: string | null;
   joinDescription: string;
+  userEmail: string;
 }
 
 // Custom hook for tribe settings with SWR caching
@@ -31,6 +32,7 @@ export function useTribeSettings() {
         ownerAvatar: settings.ownerAvatar || null,
         emailSignature: settings.emailSignature || null,
         joinDescription: settings.joinDescription,
+        userEmail: settings.userEmail || "",
       };
     },
     {

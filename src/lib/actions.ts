@@ -69,7 +69,16 @@ const DEFAULT_JOIN_DESCRIPTION = "A tribe is a group of people who choose to fol
 
 // Tribe actions
 export async function getTribeSettings() {
-  const tribe = await getTribe();
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+  
+  const tribe = await getTribeByUserId(session.user.id);
+  if (!tribe) {
+    throw new Error("Tribe not found");
+  }
+  
   return {
     id: tribe.id,
     name: tribe.name,
@@ -78,6 +87,7 @@ export async function getTribeSettings() {
     ownerAvatar: tribe.owner_avatar,
     emailSignature: tribe.email_signature || "",
     joinDescription: tribe.join_description || DEFAULT_JOIN_DESCRIPTION,
+    userEmail: session.user.email || "",
   };
 }
 

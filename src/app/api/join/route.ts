@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTribeBySlug, addSubscriber, getGiftByShortCode, getGiftById } from "@/lib/db";
+import { getTribeBySlug, addSubscriber, getGiftByShortCode, getGiftById, getSubscriberByEmail } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
@@ -24,16 +24,36 @@ export async function POST(request: NextRequest) {
 
     // Resolve gift ID from code or direct ID
     let giftId: string | undefined;
+    let gift = null;
     if (giftCode) {
-      const gift = await getGiftByShortCode(giftCode);
+      gift = await getGiftByShortCode(giftCode);
       if (gift && gift.tribe_id === tribe.id) {
         giftId = gift.id;
       }
     } else if (directGiftId) {
-      const gift = await getGiftById(directGiftId);
+      gift = await getGiftById(directGiftId);
       if (gift && gift.tribe_id === tribe.id) {
         giftId = gift.id;
       }
+    }
+
+    // Check if user is already a verified member
+    const existingSubscriber = await getSubscriberByEmail(tribe.id, email);
+    if (existingSubscriber && existingSubscriber.verified && !existingSubscriber.unsubscribed) {
+      // Already verified member - if there's a gift, let them download it directly
+      if (giftId && gift) {
+        return NextResponse.json({ 
+          success: true, 
+          alreadyVerified: true,
+          giftUrl: gift.file_url,
+          message: "You're already a member! Here's your download."
+        });
+      }
+      // No gift, just tell them they're already subscribed
+      return NextResponse.json(
+        { error: "You're already a member of this tribe!" },
+        { status: 409 }
+      );
     }
 
     const subscriber = await addSubscriber(tribe.id, email, undefined, giftId);

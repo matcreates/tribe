@@ -169,6 +169,20 @@ export default function SettingsPage() {
         <div className="w-full max-w-[540px]">
           <h1 className="text-[20px] font-medium text-white/90 mb-6">Account settings</h1>
 
+        {/* Email (read-only) */}
+        <div className="mb-5">
+          <label className="block text-[12px] text-white/40 mb-2">Email address</label>
+          <div 
+            className="px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/50 border border-white/[0.06]"
+            style={{ background: 'rgba(255, 255, 255, 0.01)' }}
+          >
+            {settings?.userEmail || "—"}
+          </div>
+          <p className="text-[11px] text-white/25 mt-1.5">
+            Contact support to change your email address
+          </p>
+        </div>
+
         {/* Profile Image */}
         <div className="mb-5">
           <label className="block text-[12px] text-white/40 mb-2">Profile image</label>

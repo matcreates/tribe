@@ -706,6 +706,11 @@ export async function getSubscriberByEmailAndTribe(email: string, tribeId: strin
   return rows[0] || null;
 }
 
+// Alias with swapped parameter order for convenience
+export async function getSubscriberByEmail(tribeId: string, email: string): Promise<DbSubscriber | null> {
+  return getSubscriberByEmailAndTribe(email, tribeId);
+}
+
 export async function getSubscribersByTribeId(tribeId: string): Promise<DbSubscriber[]> {
   const rows = await query<DbSubscriber>(`SELECT * FROM subscribers WHERE tribe_id = $1 ORDER BY created_at DESC`, [tribeId]);
   // Ensure unsubscribed field has a default value
