@@ -187,7 +187,8 @@ export async function sendBulkEmailWithUnsubscribe(
                     Unsubscribe
                   </a>
                   <p style="color: rgba(255,255,255,0.15); font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 16px 0 0 0; line-height: 1.5;">
-                    You're receiving this because you joined ${ownerName}'s tribe.
+                    You're receiving this because you joined ${ownerName}'s tribe.<br>
+                    Our mailing address: Tribe, Internet, Worldwide
                   </p>
                 </div>
                 
@@ -201,7 +202,7 @@ export async function sendBulkEmailWithUnsubscribe(
   </body>
 </html>`;
 
-      const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nmade with tribe: https://www.madewithtribe.com\nUnsubscribe: ${unsubscribeUrl}`;
+      const textBody = `${plainTextBody}${signatureText}${replyNoticeText}\n\n---\nSent by ${ownerName}\nmade with tribe: https://www.madewithtribe.com\nUnsubscribe: ${unsubscribeUrl}\n\nYou're receiving this because you joined ${ownerName}'s tribe.\nOur mailing address: Tribe, Internet, Worldwide`;
 
       // Build the email configuration with proper headers for deliverability
       // Note: Resend SDK uses camelCase field names
@@ -227,12 +228,14 @@ export async function sendBulkEmailWithUnsubscribe(
         // Headers for maximum deliverability
         headers: {
           // RFC 8058 compliant one-click unsubscribe (required by Gmail/Yahoo since Feb 2024)
-          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@madewithtribe.com?subject=Unsubscribe>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
           // Indicates this is bulk/marketing email (helps spam filters categorize correctly)
           'Precedence': 'bulk',
           // Feedback loop identifier (helps ISPs route complaints)
           'Feedback-ID': `${emailId || 'campaign'}:${ownerName.replace(/[^a-zA-Z0-9]/g, '')}:tribe`,
+          // Unique message ID for threading and deduplication
+          'X-Entity-Ref-ID': `${emailId}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
         },
       };
 
