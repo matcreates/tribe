@@ -587,3 +587,165 @@ export async function sendTestEmail(
     return { success: false, error: msg };
   }
 }
+
+export async function sendPasswordResetEmail(
+  to: string,
+  resetToken: string,
+  baseUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+  
+  const client = getResendClient();
+  
+  const subject = "Reset your Tribe password";
+  
+  const plainTextBody = `Reset your password
+
+You requested to reset your password for your Tribe account.
+
+Click this link to reset your password: ${resetUrl}
+
+This link will expire in 1 hour.
+
+If you didn't request this, you can safely ignore this email. Your password will remain unchanged.
+
+---
+Tribe - https://www.madewithtribe.com`;
+
+  try {
+    const { data, error } = await client.emails.send({
+      from: getFromEmail("Tribe"),
+      to: [to],
+      subject,
+      text: plainTextBody,
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; -webkit-font-smoothing: antialiased;">
+  <!-- Preheader -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    Reset your Tribe password - this link expires in 1 hour
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+  
+  <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 440px; border: 0; border-spacing: 0;">
+          <tr>
+            <td style="background-color: #ffffff; border-radius: 12px; padding: 48px 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+              
+              <!-- Header -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <h1 style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 22px; font-weight: 600; color: #1a1a1a;">
+                      Reset your password
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Body -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.6; color: #555555;">
+                      You requested to reset your password for your Tribe account. Click the button below to create a new password.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Button -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <a href="${resetUrl}" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px;">
+                      Reset Password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Expiry notice -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #e53e3e; font-weight: 500;">
+                      This link expires in 1 hour
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Link fallback -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                      Or copy this link: <a href="${resetUrl}" style="color: #666666; text-decoration: underline; word-break: break-all;">${resetUrl}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Disclaimer -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                      If you didn't request this, you can safely ignore this email. Your password will remain unchanged.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top: 24px;">
+              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                <a href="https://www.madewithtribe.com" style="color: #666666; text-decoration: none;">Tribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+      `,
+      headers: {
+        'X-Entity-Ref-ID': `pwd-reset-${Date.now()}`,
+      },
+    });
+
+    if (error) {
+      console.error("Password reset email error:", error);
+      return { success: false, error: error.message || "Failed to send email" };
+    }
+
+    if (!data || !data.id) {
+      return { success: false, error: "No email ID returned" };
+    }
+
+    console.log(`Password reset email sent to ${to}, email ID: ${data.id}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to send email";
+    console.error("Password reset email exception:", msg);
+    return { success: false, error: msg };
+  }
+}

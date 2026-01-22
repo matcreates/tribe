@@ -29,8 +29,23 @@ export async function initDatabase() {
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       name TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      password_reset_token TEXT,
+      password_reset_expires TIMESTAMP
     )
+  `);
+  
+  // Add password reset columns if they don't exist (for existing databases)
+  await pool.query(`
+    DO $$ 
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'password_reset_token') THEN
+        ALTER TABLE users ADD COLUMN password_reset_token TEXT;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'password_reset_expires') THEN
+        ALTER TABLE users ADD COLUMN password_reset_expires TIMESTAMP;
+      END IF;
+    END $$;
   `);
 
   await pool.query(`
@@ -390,6 +405,69 @@ export async function getUserByEmail(email: string): Promise<DbUser | null> {
 export async function getUserById(id: string): Promise<DbUser | null> {
   const rows = await query<DbUser>(`SELECT * FROM users WHERE id = $1`, [id]);
   return rows[0] || null;
+}
+
+// Password reset functions
+export async function setPasswordResetToken(email: string): Promise<{ token: string; expires: Date } | null> {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    return null; // Don't reveal if user exists
+  }
+  
+  // Generate a secure random token (64 characters)
+  const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, '');
+  
+  // Token expires in 1 hour
+  const expires = new Date(Date.now() + 60 * 60 * 1000);
+  
+  // Hash the token before storing (so if DB is compromised, tokens are useless)
+  const tokenHash = await hashToken(token);
+  
+  await pool.query(
+    `UPDATE users SET password_reset_token = $1, password_reset_expires = $2 WHERE id = $3`,
+    [tokenHash, expires, user.id]
+  );
+  
+  return { token, expires }; // Return unhashed token to send in email
+}
+
+export async function getUserByResetToken(token: string): Promise<DbUser | null> {
+  // Hash the provided token to compare with stored hash
+  const tokenHash = await hashToken(token);
+  
+  const rows = await query<DbUser>(
+    `SELECT * FROM users WHERE password_reset_token = $1 AND password_reset_expires > NOW()`,
+    [tokenHash]
+  );
+  
+  return rows[0] || null;
+}
+
+export async function resetUserPassword(token: string, newPassword: string): Promise<boolean> {
+  const user = await getUserByResetToken(token);
+  if (!user) {
+    return false;
+  }
+  
+  // Hash the new password
+  const hashedPassword = await hashPassword(newPassword);
+  
+  // Update password and clear reset token (one-time use)
+  await pool.query(
+    `UPDATE users SET password = $1, password_reset_token = NULL, password_reset_expires = NULL WHERE id = $2`,
+    [hashedPassword, user.id]
+  );
+  
+  return true;
+}
+
+// Helper to hash tokens (using SHA-256)
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {

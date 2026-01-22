@@ -1,85 +1,218 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
+function ResetPasswordContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isValidToken, setIsValidToken] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  // Verify token on mount
+  useEffect(() => {
+    async function verifyToken() {
+      if (!token) {
+        setIsVerifying(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/auth/reset-password?token=${token}`);
+        const data = await response.json();
+        setIsValidToken(data.valid === true);
+      } catch {
+        setIsValidToken(false);
+      } finally {
+        setIsVerifying(false);
+      }
+    }
+
+    verifyToken();
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(password)) {
+      setError("Password must contain at least one letter");
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setError("Password must contain at least one number");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else if (result?.ok) {
-        window.location.href = "/dashboard";
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsSuccess(true);
       } else {
-        setError("Something went wrong");
+        setError(data.error || "Failed to reset password");
       }
     } catch {
-      setError("Something went wrong");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Loading state
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+        <div className="w-full max-w-[360px] text-center">
+          <div className="animate-pulse">
+            <div className="w-10 h-10 rounded-full mx-auto mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }} />
+            <p className="text-[13px] text-white/40">Verifying your link...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Invalid or expired token
+  if (!token || !isValidToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+        <div className="w-full max-w-[360px]">
+          <div className="flex justify-center mb-8">
+            <TribeLogo className="h-[26px] w-auto text-white/90" />
+          </div>
+          <div 
+            className="rounded-[16px] border border-white/[0.08] p-7 text-center"
+            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+          >
+            <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
+              <XIcon className="w-6 h-6 text-red-400" />
+            </div>
+            <h2 className="text-[18px] font-medium text-white/90 mb-3">
+              Invalid or expired link
+            </h2>
+            <p className="text-[13px] text-white/50 leading-relaxed mb-6">
+              This password reset link is invalid or has expired. Please request a new one.
+            </p>
+            <Link 
+              href="/forgot-password"
+              className="inline-block w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
+            >
+              <span className="btn-glass-text">REQUEST NEW LINK</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+        <div className="w-full max-w-[360px]">
+          <div className="flex justify-center mb-8">
+            <TribeLogo className="h-[26px] w-auto text-white/90" />
+          </div>
+          <div 
+            className="rounded-[16px] border border-white/[0.08] p-7 text-center"
+            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+          >
+            <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.15)' }}>
+              <CheckIcon className="w-6 h-6 text-emerald-400" />
+            </div>
+            <h2 className="text-[18px] font-medium text-white/90 mb-3">
+              Password reset!
+            </h2>
+            <p className="text-[13px] text-white/50 leading-relaxed mb-6">
+              Your password has been successfully reset. You can now sign in with your new password.
+            </p>
+            <Link 
+              href="/login"
+              className="inline-block w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
+            >
+              <span className="btn-glass-text">SIGN IN</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Reset form
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
       <div className="w-full max-w-[360px]">
-        {/* Logo */}
         <div className="flex justify-center mb-8">
           <TribeLogo className="h-[26px] w-auto text-white/90" />
         </div>
 
-        {/* Form Card */}
         <div 
           className="rounded-[16px] border border-white/[0.08] p-7"
           style={{ background: 'rgba(255, 255, 255, 0.03)' }}
         >
-          <h2 className="text-[18px] font-medium text-white/90 mb-6 text-center">
-            Welcome back
+          <h2 className="text-[18px] font-medium text-white/90 mb-2 text-center">
+            Create new password
           </h2>
+          <p className="text-[13px] text-white/40 text-center mb-6">
+            Your password must be at least 8 characters with a letter and number.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[12px] text-white/40 mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
-                style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[12px] text-white/40">Password</label>
-                <Link href="/forgot-password" className="text-[11px] text-white/40 hover:text-white/60 transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
+              <label className="block text-[12px] text-white/40 mb-2">New password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
                 style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+                placeholder="••••••••"
                 required
+                minLength={8}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-[12px] text-white/40 mb-2">Confirm password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
+                style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+                placeholder="••••••••"
+                required
+                minLength={8}
               />
             </div>
 
@@ -92,19 +225,29 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
             >
-              <span className="btn-glass-text">{isLoading ? "SIGNING IN..." : "SIGN IN"}</span>
+              <span className="btn-glass-text">{isLoading ? "RESETTING..." : "RESET PASSWORD"}</span>
             </button>
           </form>
-
-          <p className="mt-6 text-center text-[12px] text-white/40">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-white/60 hover:text-white/80 underline transition-colors">
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+        <div className="w-full max-w-[360px] text-center">
+          <div className="animate-pulse">
+            <div className="w-10 h-10 rounded-full mx-auto mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }} />
+            <p className="text-[13px] text-white/40">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
 
@@ -121,3 +264,19 @@ function TribeLogo({ className }: { className?: string }) {
   );
 }
 
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20,6 9,17 4,12" />
+    </svg>
+  );
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}

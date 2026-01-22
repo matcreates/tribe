@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,21 +15,25 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email,
+          baseUrl: window.location.origin
+        }),
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else if (result?.ok) {
-        window.location.href = "/dashboard";
+      const data = await response.json();
+      
+      // Always show success (even if email doesn't exist - security best practice)
+      if (data.success) {
+        setIsSubmitted(true);
       } else {
-        setError("Something went wrong");
+        setError(data.error || "Something went wrong");
       }
     } catch {
-      setError("Something went wrong");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -49,59 +52,74 @@ export default function LoginPage() {
           className="rounded-[16px] border border-white/[0.08] p-7"
           style={{ background: 'rgba(255, 255, 255, 0.03)' }}
         >
-          <h2 className="text-[18px] font-medium text-white/90 mb-6 text-center">
-            Welcome back
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[12px] text-white/40 mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
-                style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[12px] text-white/40">Password</label>
-                <Link href="/forgot-password" className="text-[11px] text-white/40 hover:text-white/60 transition-colors">
-                  Forgot password?
-                </Link>
+          {isSubmitted ? (
+            // Success state
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.15)' }}>
+                <CheckIcon className="w-6 h-6 text-emerald-400" />
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
-                style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-                required
-              />
+              <h2 className="text-[18px] font-medium text-white/90 mb-3">
+                Check your email
+              </h2>
+              <p className="text-[13px] text-white/50 leading-relaxed mb-6">
+                If an account exists with <span className="text-white/70">{email}</span>, you&apos;ll receive a password reset link shortly.
+              </p>
+              <p className="text-[12px] text-white/35 mb-6">
+                Didn&apos;t receive it? Check your spam folder.
+              </p>
+              <Link 
+                href="/login"
+                className="text-[12px] text-white/60 hover:text-white/80 underline transition-colors"
+              >
+                Back to login
+              </Link>
             </div>
+          ) : (
+            // Form state
+            <>
+              <h2 className="text-[18px] font-medium text-white/90 mb-2 text-center">
+                Forgot your password?
+              </h2>
+              <p className="text-[13px] text-white/40 text-center mb-6">
+                Enter your email and we&apos;ll send you a reset link.
+              </p>
 
-            {error && (
-              <p className="text-[12px] text-red-400/80">{error}</p>
-            )}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-[12px] text-white/40 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors"
+                    style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+                    placeholder="you@example.com"
+                    required
+                    autoFocus
+                  />
+                </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
-            >
-              <span className="btn-glass-text">{isLoading ? "SIGNING IN..." : "SIGN IN"}</span>
-            </button>
-          </form>
+                {error && (
+                  <p className="text-[12px] text-red-400/80">{error}</p>
+                )}
 
-          <p className="mt-6 text-center text-[12px] text-white/40">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-white/60 hover:text-white/80 underline transition-colors">
-              Sign up
-            </Link>
-          </p>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
+                >
+                  <span className="btn-glass-text">{isLoading ? "SENDING..." : "SEND RESET LINK"}</span>
+                </button>
+              </form>
+
+              <p className="mt-6 text-center text-[12px] text-white/40">
+                Remember your password?{" "}
+                <Link href="/login" className="text-white/60 hover:text-white/80 underline transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -121,3 +139,10 @@ function TribeLogo({ className }: { className?: string }) {
   );
 }
 
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20,6 9,17 4,12" />
+    </svg>
+  );
+}
