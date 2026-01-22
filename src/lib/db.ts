@@ -483,6 +483,39 @@ export async function getTribeByStripeCustomerId(customerId: string): Promise<Db
 
 // Subscriber functions
 export async function addSubscriber(tribeId: string, email: string, name?: string, giftId?: string): Promise<DbSubscriber | null> {
+  const normalizedEmail = email.toLowerCase();
+  
+  // Check if subscriber already exists
+  const existing = await query<DbSubscriber>(
+    `SELECT * FROM subscribers WHERE tribe_id = $1 AND email = $2`,
+    [tribeId, normalizedEmail]
+  );
+  
+  if (existing.length > 0) {
+    const subscriber = existing[0];
+    
+    // If already verified and not unsubscribed, they're fully subscribed - reject
+    if (subscriber.verified && !subscriber.unsubscribed) {
+      return null;
+    }
+    
+    // If unsubscribed or not verified, allow re-joining with new verification token
+    const newVerificationToken = crypto.randomUUID();
+    await pool.query(
+      `UPDATE subscribers SET 
+        verified = false, 
+        verification_token = $1, 
+        unsubscribed = false,
+        gift_id = COALESCE($2, gift_id),
+        created_at = CURRENT_TIMESTAMP
+      WHERE id = $3`,
+      [newVerificationToken, giftId || null, subscriber.id]
+    );
+    
+    return await getSubscriberById(subscriber.id);
+  }
+  
+  // New subscriber - insert
   const id = crypto.randomUUID();
   const verificationToken = crypto.randomUUID();
   const unsubscribeToken = crypto.randomUUID();
@@ -490,11 +523,11 @@ export async function addSubscriber(tribeId: string, email: string, name?: strin
   try {
     await pool.query(
       `INSERT INTO subscribers (id, tribe_id, email, name, verified, verification_token, unsubscribed, unsubscribe_token, gift_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, tribeId, email.toLowerCase(), name || null, false, verificationToken, false, unsubscribeToken, giftId || null]
+      [id, tribeId, normalizedEmail, name || null, false, verificationToken, false, unsubscribeToken, giftId || null]
     );
     return await getSubscriberById(id);
   } catch {
-    // Duplicate email
+    // Race condition - another request created the subscriber
     return null;
   }
 }
