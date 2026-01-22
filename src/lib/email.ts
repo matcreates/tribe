@@ -287,76 +287,147 @@ export async function sendVerificationEmail(
   console.log(`Resend API key present: ${!!process.env.RESEND_API_KEY}`);
   console.log(`Base URL: ${baseUrl}, Verify URL: ${baseUrl}/api/verify?token=${verificationToken}`);
   
+  // Clean, professional subject lines (avoid spam trigger words)
   const subject = isGiftSignup 
-    ? `Verify to receive your gift from ${ownerName}`
-    : `You're Almost In! Confirm Your Spot in ${ownerName}'s Tribe.`;
+    ? `${ownerName} - Please confirm your email`
+    : `${ownerName} - Please confirm your email`;
   
-  const buttonText = isGiftSignup ? 'VERIFY AND DOWNLOAD GIFT' : 'CONFIRM';
+  const buttonText = isGiftSignup ? 'Confirm and Download' : 'Confirm Email';
+  const headline = isGiftSignup ? 'Confirm to get your download' : 'Confirm your email';
   const description = isGiftSignup
-    ? `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe and receive a gift. Click the button below to verify your email and download your gift.`
-    : `You requested to join <strong style="color: rgba(255,255,255,0.7);">${ownerName}'s</strong> tribe. Click the button below to confirm your spot.`;
+    ? `You requested to join <strong style="color: #333333;">${ownerName}'s</strong> community and receive a download. Click the button below to confirm.`
+    : `You requested to join <strong style="color: #333333;">${ownerName}'s</strong> community. Click the button below to confirm.`;
   
   // Plain text version for better deliverability
   const plainTextDescription = isGiftSignup
-    ? `You requested to join ${ownerName}'s tribe and receive a gift. Click the link below to verify your email and download your gift.`
-    : `You requested to join ${ownerName}'s tribe. Click the link below to confirm your spot.`;
+    ? `You requested to join ${ownerName}'s community and receive a download. Click the link below to confirm.`
+    : `You requested to join ${ownerName}'s community. Click the link below to confirm.`;
   
-  const plainTextBody = `${isGiftSignup ? 'Verify to get your gift' : 'Confirm your spot'}
+  const plainTextBody = `${headline}
 
 ${plainTextDescription}
 
-Verify your email: ${verifyUrl}
+Confirm your email: ${verifyUrl}
 
 If you didn't request this, you can safely ignore this email.
 
 ---
-made with tribe: https://www.madewithtribe.com`;
+${ownerName}
+Sent via Tribe - https://www.madewithtribe.com`;
 
+  // Use light theme with solid colors for maximum compatibility
+  // This ensures readability in ALL email clients (light mode, dark mode, etc.)
   const { data, error } = await client.emails.send({
     from: getFromEmail(ownerName),
     to: [to],
     subject,
     text: plainTextBody,
     html: `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta name="x-apple-disable-message-reformatting">
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #121212; margin: 0; padding: 40px 20px;">
-          <!-- Preheader -->
-          <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-            ${isGiftSignup ? 'Verify your email to download your gift' : 'One click to confirm your spot'}
-            &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-          </div>
-          <div style="max-width: 400px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
-            ${isGiftSignup ? `
-            <div style="text-align: center; margin-bottom: 24px;">
-              <span style="font-size: 40px;">🎁</span>
-            </div>
-            ` : ''}
-            <h1 style="color: rgba(255,255,255,0.9); font-size: 20px; font-weight: 500; margin: 0 0 16px; text-align: center;">
-              ${isGiftSignup ? 'Verify to get your gift' : 'Confirm your spot'}
-            </h1>
-            <p style="color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin: 0 0 24px; text-align: center;">
-              ${description}
-            </p>
-            <div style="text-align: center;">
-              <a href="${verifyUrl}" style="display: inline-block; background: ${isGiftSignup ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.08)'}; border: 1px solid ${isGiftSignup ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)'}; color: ${isGiftSignup ? 'rgba(34, 197, 94, 0.9)' : 'rgba(255,255,255,0.8)'}; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.05em;">
-                ${buttonText}
-              </a>
-            </div>
-            <p style="color: rgba(255,255,255,0.3); font-size: 12px; margin: 32px 0 16px; text-align: center;">
-              If you didn't request this, you can safely ignore this email.
-            </p>
-            <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: block; text-align: center;">
-              <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
-            </a>
-          </div>
-        </body>
-      </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>${subject}</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; -webkit-font-smoothing: antialiased;">
+  <!-- Preheader -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${isGiftSignup ? 'Confirm your email to access your download' : 'One click to confirm your email'}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+  
+  <table role="presentation" style="width: 100%; border: 0; border-spacing: 0; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 440px; border: 0; border-spacing: 0;">
+          <tr>
+            <td style="background-color: #ffffff; border-radius: 12px; padding: 48px 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+              
+              <!-- Header -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <h1 style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 22px; font-weight: 600; color: #1a1a1a;">
+                      ${headline}
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Body -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.6; color: #555555;">
+                      ${description}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Button -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <a href="${verifyUrl}" style="display: inline-block; background-color: ${isGiftSignup ? '#059669' : '#1a1a1a'}; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px;">
+                      ${buttonText}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Link fallback -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                      Or copy this link: <a href="${verifyUrl}" style="color: #666666; text-decoration: underline; word-break: break-all;">${verifyUrl}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Disclaimer -->
+              <table role="presentation" style="width: 100%; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                      If you didn't request this, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top: 24px;">
+              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #999999;">
+                Sent by ${ownerName} via <a href="https://www.madewithtribe.com" style="color: #666666; text-decoration: none;">Tribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `,
     // Transactional emails should be marked as such
     headers: {
