@@ -450,7 +450,7 @@ export async function resetUserPassword(token: string, newPassword: string): Pro
   }
   
   // Hash the new password
-  const hashedPassword = await hashPassword(newPassword);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
   
   // Update password and clear reset token (one-time use)
   await pool.query(
