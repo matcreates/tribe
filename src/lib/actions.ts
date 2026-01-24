@@ -715,20 +715,9 @@ export async function sendEmail(
   const tribe = await getTribe();
   const allSubscribers = await getSubscribersByTribeId(tribe.id);
   
-  // Filter recipients based on selection AND exclude unsubscribed
-  let filteredSubscribers = allSubscribers.filter(s => !s.unsubscribed);
-  
-  switch (filter) {
-    case "verified":
-      filteredSubscribers = filteredSubscribers.filter(s => s.verified);
-      break;
-    case "non-verified":
-      filteredSubscribers = filteredSubscribers.filter(s => !s.verified);
-      break;
-    case "all":
-      // Keep all non-unsubscribed
-      break;
-  }
+  // Only send to verified members who haven't unsubscribed
+  // The filter parameter is ignored - we always send to verified only
+  const filteredSubscribers = allSubscribers.filter(s => s.verified && !s.unsubscribed);
 
   if (filteredSubscribers.length === 0) {
     throw new Error("No recipients to send to");
@@ -776,22 +765,12 @@ export async function scheduleEmail(
   const tribe = await getTribe();
   const allSubscribers = await getSubscribersByTribeId(tribe.id);
   
-  // Calculate recipient count for preview (same logic as sendEmail)
-  let filteredSubscribers = allSubscribers.filter(s => !s.unsubscribed);
-  
-  switch (filter) {
-    case "verified":
-      filteredSubscribers = filteredSubscribers.filter(s => s.verified);
-      break;
-    case "non-verified":
-      filteredSubscribers = filteredSubscribers.filter(s => !s.verified);
-      break;
-    case "all":
-      break;
-  }
+  // Only send to verified members who haven't unsubscribed
+  // The filter parameter is ignored - we always send to verified only
+  const filteredSubscribers = allSubscribers.filter(s => s.verified && !s.unsubscribed);
 
   if (filteredSubscribers.length === 0) {
-    throw new Error("No recipients to send to");
+    throw new Error("No verified members to send to");
   }
 
   // Create scheduled email record
@@ -833,9 +812,10 @@ export async function getDashboardStats(period: TimePeriod = "7d") {
       chartDays = 7;
   }
 
-  // Get all subscribers for total count
+  // Get all subscribers for counts - only show verified as the main count
   const subscribers = await getSubscribersByTribeId(tribe.id);
-  const totalSubscribers = subscribers.length;
+  const verifiedSubscribers = subscribers.filter(s => s.verified);
+  const totalSubscribers = verifiedSubscribers.length;
   
   // Get period-specific stats
   const periodSubscribers = await getSubscriberCountSince(tribe.id, since);

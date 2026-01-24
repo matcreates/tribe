@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getRecipientCounts, sendEmail, scheduleEmail, getEmailSignature, getSubscriptionStatus, sendTestEmailAction, getWeeklyEmailStatus, updateTribeSettings } from "@/lib/actions";
-import type { RecipientFilter, SubscriptionStatus, WeeklyEmailStatus } from "@/lib/types";
+import type { SubscriptionStatus, WeeklyEmailStatus } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { EmailSentSuccess } from "@/components/EmailSentSuccess";
 import { ScheduleModal } from "@/components/ScheduleModal";
@@ -14,7 +14,6 @@ export default function NewEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
-  const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("verified");
   const [isSending, setIsSending] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -146,11 +145,8 @@ export default function NewEmailPage() {
   };
 
   const getCurrentCount = () => {
-    switch (recipientFilter) {
-      case "verified": return counts.verified;
-      case "non-verified": return counts.nonVerified;
-      case "all": return counts.all;
-    }
+    // Only send to verified members
+    return counts.verified;
   };
 
   const getPlainText = useCallback(() => {
@@ -313,7 +309,7 @@ export default function NewEmailPage() {
     setIsSending(true);
     
     try {
-      const result = await sendEmail(subject.trim(), body, recipientFilter, allowReplies);
+      const result = await sendEmail(subject.trim(), body, "verified", allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
@@ -352,7 +348,7 @@ export default function NewEmailPage() {
     setIsScheduling(true);
     
     try {
-      await scheduleEmail(subject.trim(), body, scheduledAt, recipientFilter, allowReplies);
+      await scheduleEmail(subject.trim(), body, scheduledAt, "verified", allowReplies);
       
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
@@ -607,19 +603,8 @@ export default function NewEmailPage() {
             {/* Recipients */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]">
               <span className="text-[13px] text-white/40">To</span>
-              <div className="relative flex-1">
-                <select
-                  value={recipientFilter}
-                  onChange={(e) => setRecipientFilter(e.target.value as RecipientFilter)}
-                  disabled={isWeeklyLimitReached}
-                  className="appearance-none w-full px-3.5 py-2 pr-9 rounded-[8px] text-[13px] text-white/60 focus:outline-none focus:ring-0 cursor-pointer border border-white/[0.06] disabled:cursor-not-allowed"
-                  style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-                >
-                  <option value="verified">All verified members ({counts.verified})</option>
-                  <option value="all">Everyone ({counts.all})</option>
-                  <option value="non-verified">Non-verified only ({counts.nonVerified})</option>
-                </select>
-                <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/35 pointer-events-none" />
+              <div className="flex-1 px-3.5 py-2 rounded-[8px] text-[13px] text-white/60 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.04)' }}>
+                All verified members ({counts.verified})
               </div>
             </div>
 
@@ -713,11 +698,7 @@ export default function NewEmailPage() {
             <div className="flex items-center justify-between px-5 py-4">
               {getCurrentCount() === 0 ? (
                 <p className="text-[12px] text-white/30">
-                  {recipientFilter === "verified" 
-                    ? "No verified members yet" 
-                    : recipientFilter === "non-verified"
-                    ? "No non-verified members"
-                    : "Add members to your tribe first"}
+                  No verified members yet
                 </p>
               ) : (
                 <p className="text-[11px] text-white/25">

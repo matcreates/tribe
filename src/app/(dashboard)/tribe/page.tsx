@@ -55,7 +55,7 @@ export default function TribePage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filter, setFilter] = useState<SubscriberFilter>("all");
+  const [filter, setFilter] = useState<SubscriberFilter>("verified");
   const [sort, setSort] = useState<SubscriberSort>("newest");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -352,7 +352,7 @@ export default function TribePage() {
         <div className="mb-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
-              Your tribe is made of <span className="text-white">{total}</span> {total === 1 ? 'person' : 'people'}
+              Your tribe is made of <span className="text-white">{totalVerified}</span> {totalVerified === 1 ? 'person' : 'people'}
             </h1>
             <div className="flex-1" />
             <div className="flex gap-2">
@@ -385,16 +385,6 @@ export default function TribePage() {
         {/* Filter Tabs */}
         <div className="flex gap-1 mb-4 overflow-x-auto">
           <button
-            onClick={() => handleFilterChange("all")}
-            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
-              filter === "all"
-                ? "bg-white/[0.08] text-white/70"
-                : "text-white/40 hover:text-white/60"
-            }`}
-          >
-            All ({total})
-          </button>
-          <button
             onClick={() => handleFilterChange("verified")}
             className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
               filter === "verified"
@@ -403,6 +393,16 @@ export default function TribePage() {
             }`}
           >
             Verified ({totalVerified})
+          </button>
+          <button
+            onClick={() => handleFilterChange("all")}
+            className={`px-3 py-1.5 rounded-[6px] text-[12px] transition-colors whitespace-nowrap ${
+              filter === "all"
+                ? "bg-white/[0.08] text-white/70"
+                : "text-white/40 hover:text-white/60"
+            }`}
+          >
+            All ({total})
           </button>
           <button
             onClick={() => handleFilterChange("non-verified")}
