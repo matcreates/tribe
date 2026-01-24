@@ -978,7 +978,7 @@ export async function getTribeReplyCount(tribeId: string, since?: Date): Promise
   return Number(rows[0].count);
 }
 
-// Get daily subscriber counts for chart
+// Get daily subscriber counts for chart (verified only)
 export async function getDailySubscriberCounts(tribeId: string, days: number): Promise<{ date: string; count: number }[]> {
   const results: { date: string; count: number }[] = [];
   const now = new Date();
@@ -988,9 +988,9 @@ export async function getDailySubscriberCounts(tribeId: string, days: number): P
     date.setDate(date.getDate() - i);
     date.setHours(23, 59, 59, 999);
     
-    // Count subscribers created on or before this date
+    // Count verified subscribers created on or before this date
     const rows = await query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at <= $2`,
+      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = true AND created_at <= $2`,
       [tribeId, date.toISOString()]
     );
     
@@ -1003,7 +1003,7 @@ export async function getDailySubscriberCounts(tribeId: string, days: number): P
   return results;
 }
 
-// Get hourly subscriber counts for 24h chart
+// Get hourly subscriber counts for 24h chart (verified only)
 export async function getHourlySubscriberCounts(tribeId: string): Promise<{ hour: string; count: number }[]> {
   const results: { hour: string; count: number }[] = [];
   const now = new Date();
@@ -1012,9 +1012,9 @@ export async function getHourlySubscriberCounts(tribeId: string): Promise<{ hour
     const date = new Date(now);
     date.setHours(date.getHours() - i, 59, 59, 999);
     
-    // Count subscribers created on or before this hour
+    // Count verified subscribers created on or before this hour
     const rows = await query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at <= $2`,
+      `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = true AND created_at <= $2`,
       [tribeId, date.toISOString()]
     );
     
@@ -1027,10 +1027,10 @@ export async function getHourlySubscriberCounts(tribeId: string): Promise<{ hour
   return results;
 }
 
-// Get subscriber count at a specific point in time
+// Get verified subscriber count since a date
 export async function getSubscriberCountSince(tribeId: string, since: Date): Promise<number> {
   const rows = await query<{ count: string }>(
-    `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND created_at >= $2`,
+    `SELECT COUNT(*) as count FROM subscribers WHERE tribe_id = $1 AND verified = true AND created_at >= $2`,
     [tribeId, since.toISOString()]
   );
   return Number(rows[0].count);
