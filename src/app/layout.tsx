@@ -31,15 +31,15 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Tribe",
-    description: "Minimalist email-list management for creators. Build your community, send beautiful emails, and grow your tribe.",
+    description: "The newsletter tool made for creators.",
     url: "https://madewithtribe.com",
     siteName: "Tribe",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
-        height: 630,
-        alt: "Tribe - Email list management for creators",
+        height: 628,
+        alt: "Tribe - The newsletter tool made for creators",
       },
     ],
     locale: "en_US",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Tribe",
-    description: "Minimalist email-list management for creators. Build your community, send beautiful emails, and grow your tribe.",
+    description: "The newsletter tool made for creators.",
     images: ["/og-image.png"],
   },
 };
