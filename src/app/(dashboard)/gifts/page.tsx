@@ -260,7 +260,7 @@ export default function GiftsPage() {
         </p>
 
         {/* Gift List */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-12">
               <p className="text-[13px] text-white/35">Loading...</p>
