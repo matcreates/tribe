@@ -202,8 +202,8 @@ export async function POST(request: NextRequest) {
     const emailData = body.type === 'email.received' ? body.data : (body.data || body);
     console.log("emailData keys:", Object.keys(emailData || {}));
 
-    let toAddress = extractEmail(emailData?.to) || extractEmail(body.to);
-    let fromAddress = extractEmail(emailData?.from) || extractEmail(body.from);
+    const toAddress = extractEmail(emailData?.to) || extractEmail(body.to);
+    const fromAddress = extractEmail(emailData?.from) || extractEmail(body.from);
     
     console.log("TO:", toAddress, "FROM:", fromAddress);
     

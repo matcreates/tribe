@@ -4,6 +4,22 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getCampaignStatus } from "@/lib/actions";
 
+type Particle = {
+  left: string;
+  top: string;
+  durationSeconds: number;
+  delaySeconds: number;
+};
+
+function generateParticles(count: number = 12): Particle[] {
+  return Array.from({ length: count }, () => ({
+    left: `${20 + Math.random() * 60}%`,
+    top: `${20 + Math.random() * 60}%`,
+    durationSeconds: 3 + Math.random() * 4,
+    delaySeconds: Math.random() * 2,
+  }));
+}
+
 interface EmailSentSuccessProps {
   campaignId?: string;
   totalRecipients: number;
@@ -16,6 +32,7 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
   const [status, setStatus] = useState<'queued' | 'sending' | 'sent' | 'failed'>('queued');
   const [sentCount, setSentCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   const pollStatus = useCallback(async () => {
     if (!campaignId) {
@@ -36,6 +53,10 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
       console.error("Failed to poll campaign status:", error);
     }
   }, [campaignId, totalRecipients]);
+
+  useEffect(() => {
+    setParticles(generateParticles());
+  }, []);
 
   useEffect(() => {
     // Trigger animation after mount
@@ -110,16 +131,18 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
           }}
         />
         {/* Subtle particles */}
-        {[...Array(12)].map((_, i) => (
+        {particles.map((p, i) => (
           <div
             key={i}
             className={`absolute w-1 h-1 rounded-full bg-emerald-400/30 transition-all duration-1000 ${
               isVisible ? "opacity-100" : "opacity-0"
             }`}
             style={{
-              left: `${20 + Math.random() * 60}%`,
-              top: `${20 + Math.random() * 60}%`,
-              animation: isVisible ? `particle ${3 + Math.random() * 4}s ease-in-out infinite ${Math.random() * 2}s` : 'none',
+              left: p.left,
+              top: p.top,
+              animation: isVisible
+                ? `particle ${p.durationSeconds}s ease-in-out infinite ${p.delaySeconds}s`
+                : 'none',
             }}
           />
         ))}

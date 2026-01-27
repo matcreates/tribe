@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Suspense } from "react";
 
 function UnsubscribedContent() {
@@ -43,12 +44,12 @@ function UnsubscribedContent() {
 
             <p className="text-[12px] text-white/30">
               Changed your mind?{" "}
-              <a 
+              <Link 
                 href="/"
                 className="text-white/50 underline hover:text-white/70 transition-colors"
               >
                 Rejoin anytime
-              </a>
+              </Link>
             </p>
           </>
         ) : (

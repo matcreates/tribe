@@ -5,7 +5,11 @@ import bcrypt from "bcryptjs";
 // IMPORTANT: On serverless (Vercel), each function instance creates its own pool.
 // Keep max connections LOW to avoid exhausting database connection limits.
 export const pool = new Pool({
-  connectionString: process.env.TRIBE_DATABASE_URL,
+  connectionString:
+    process.env.TRIBE_DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING,
   ssl: {
     rejectUnauthorized: false,
   },

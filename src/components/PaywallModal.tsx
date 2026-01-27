@@ -167,7 +167,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         {/* Features */}
         <div className="px-6 pb-4">
           <div className="p-4 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-            <p className="text-[11px] text-white/40 uppercase tracking-[0.08em] mb-3">What's included</p>
+            <p className="text-[11px] text-white/40 uppercase tracking-[0.08em] mb-3">What&apos;s included</p>
             <div className="space-y-2">
               {[
                 "2 emails per week",
