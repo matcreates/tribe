@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { PricingSection } from "@/components/landing/PricingSection";
 
 export default async function LandingPage() {
   // If user is already logged in, redirect to dashboard
@@ -57,12 +58,11 @@ export default async function LandingPage() {
           </div>
           
           <h1 className="text-[1.75rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-medium text-white leading-[1.15] sm:leading-[1.1] tracking-tight mb-4 sm:mb-6">
-            Build your tribe,{' '}
-            <span className="text-white/40">one email at a time</span>
+            A newsletter tool that doesn’t s*ck, made for creators
           </h1>
           
           <p className="text-[14px] sm:text-[15px] md:text-[17px] text-white/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">
-            A minimal newsletter platform for creators who want to connect with their audience without the complexity.
+            Build, grow, and engage your audience without the complexity.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -152,99 +152,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="relative py-32 px-6" id="pricing">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-[15px] text-white/40 max-w-lg mx-auto">
-              Explore all features for free. Upgrade when you&apos;re ready to send.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Monthly Plan */}
-            <div 
-              className="p-8 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12]"
-              style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-            >
-              <p className="text-[13px] text-white/50 uppercase tracking-wider mb-2">Monthly</p>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-[42px] font-medium text-white/90">$8</span>
-                <span className="text-[15px] text-white/40">/month</span>
-              </div>
-              <p className="text-[14px] text-white/40 mb-6 h-5">Billed monthly. Cancel anytime.</p>
-              <div className="space-y-3 mb-8">
-                {[
-                  "2 emails per week",
-                  "Email scheduling",
-                  "Open rate analytics",
-                  "Reply management",
-                  "Custom email signatures",
-                ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-400/80" />
-                    <span className="text-[13px] text-white/60">{feature}</span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/signup"
-                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
-              >
-                <span className="btn-glass-text">Get started</span>
-              </Link>
-            </div>
-
-            {/* Yearly Plan */}
-            <div 
-              className="relative p-8 rounded-2xl border border-[#E8B84A]/30 transition-colors"
-              style={{ background: 'linear-gradient(180deg, rgba(232, 184, 74, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)' }}
-            >
-              {/* Best Value Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="px-4 py-1 rounded-full text-[10px] font-medium tracking-[0.08em] uppercase bg-[#E8B84A] text-black">
-                  Save 37%
-                </span>
-              </div>
-              
-              <p className="text-[13px] text-[#E8B84A]/80 uppercase tracking-wider mb-2">Yearly</p>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-[42px] font-medium text-white/90">$60</span>
-                <span className="text-[15px] text-white/40">/year</span>
-              </div>
-              <p className="text-[14px] text-[#E8B84A]/70 mb-6 h-5">Just $5/month. Best value.</p>
-              <div className="space-y-3 mb-8">
-                {[
-                  "2 emails per week",
-                  "Email scheduling",
-                  "Open rate analytics",
-                  "Reply management",
-                  "Custom email signatures",
-                ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-400/80" />
-                    <span className="text-[13px] text-white/60">{feature}</span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/signup"
-                className="block w-full py-3 rounded-full text-center text-[11px] font-medium tracking-[0.1em] uppercase btn-glass-gold"
-            >
-                <span className="btn-glass-text">Get started</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Free tier info */}
-          <p className="text-center text-[13px] text-white/30 mt-8">
-            ✨ Free accounts can explore all features — subscription only required to send emails
-          </p>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* CTA Section */}
       <section className="relative py-32 px-6">
@@ -281,19 +189,18 @@ export default async function LandingPage() {
             <Link href="/signup" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">
               Get started
             </Link>
+            <a
+              href="https://www.instagram.com/matcreates/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[12px] text-white/20 hover:text-white/40 transition-colors"
+            >
+              made by @matcreates
+            </a>
           </div>
         </div>
       </footer>
     </div>
-  );
-}
-
-function CheckCircle({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
 

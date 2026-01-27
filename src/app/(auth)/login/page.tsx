@@ -41,7 +41,13 @@ export default function LoginPage() {
       <div className="w-full max-w-[360px]">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <TribeLogo className="h-[26px] w-auto text-white/90" />
+          <Link
+            href="/"
+            aria-label="Go to landing page"
+            className="inline-flex items-center justify-center hover:opacity-90 transition-opacity"
+          >
+            <TribeLogo className="h-[26px] w-auto text-white/90" />
+          </Link>
         </div>
 
         {/* Form Card */}
