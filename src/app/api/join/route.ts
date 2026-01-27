@@ -66,15 +66,24 @@ export async function POST(request: NextRequest) {
 
     // Send verification email
     let emailError: string | null = null;
-    if (subscriber.verification_token && baseUrl) {
+
+    const resolvedBaseUrl =
+      baseUrl || process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
+
+    if (subscriber.verification_token) {
       try {
-        console.log("Attempting to send verification email...", { email, hasToken: !!subscriber.verification_token, baseUrl, giftId });
+        console.log("Attempting to send verification email...", {
+          email,
+          hasToken: !!subscriber.verification_token,
+          baseUrl: resolvedBaseUrl,
+          giftId,
+        });
         const emailResult = await sendVerificationEmail(
           email,
           tribe.name,
           tribe.owner_name || "Anonymous",
           subscriber.verification_token,
-          baseUrl,
+          resolvedBaseUrl,
           giftId
         );
         console.log("Verification email sent successfully:", emailResult);
@@ -85,15 +94,8 @@ export async function POST(request: NextRequest) {
         console.error("Email error details:", JSON.stringify(err, null, 2));
       }
     } else {
-      const missing = [];
-      if (!subscriber.verification_token) missing.push("token");
-      if (!baseUrl) missing.push("baseUrl");
-      emailError = `Missing: ${missing.join(", ")}`;
-      console.log("Skipping email send - missing:", { 
-        hasToken: !!subscriber.verification_token, 
-        baseUrl,
-        email 
-      });
+      emailError = "Missing verification token";
+      console.log("Skipping email send - missing token", { email });
     }
 
     // If email failed, return error so user knows

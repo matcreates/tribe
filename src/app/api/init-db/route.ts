@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 import { initDatabase, pool } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: Request) {
   const logs: string[] = [];
+
+  // Optional protection: if INIT_DB_SECRET is set, require it.
+  const requiredSecret = process.env.INIT_DB_SECRET;
+  if (requiredSecret) {
+    const authHeader = request.headers.get("authorization");
+    const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const urlSecret = new URL(request.url).searchParams.get("secret");
+    const provided = bearer || urlSecret;
+
+    if (provided !== requiredSecret) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
   
   try {
     // Run main init

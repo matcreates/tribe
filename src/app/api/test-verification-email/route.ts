@@ -3,6 +3,9 @@ import { getTribeBySlug, getSubscribersByTribeId } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   try {
     const body = await request.json();
     const { slug, email } = body;

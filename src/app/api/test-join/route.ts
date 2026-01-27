@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getTribeBySlug, addSubscriber } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const slug = request.nextUrl.searchParams.get("slug") || "mathisapro";
   const testEmail = `test-${Date.now()}@example.com`;
 
