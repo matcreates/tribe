@@ -116,13 +116,19 @@ function extractEmail(value: unknown): string | null {
 // Extract plain text from Resend inbound email payload
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractPlainText(payload: any, fullPayload: any): string {
-  // Log the FULL payload structure to see all fields
-  console.log("=== FULL PAYLOAD DUMP ===");
-  console.log(JSON.stringify(fullPayload, null, 2).substring(0, 3000));
+  const debug = process.env.DEBUG_WEBHOOKS === "true";
+
+  // Log the FULL payload structure to see all fields (PII risk; keep behind DEBUG_WEBHOOKS)
+  if (debug) {
+    console.log("=== FULL PAYLOAD DUMP ===");
+    console.log(JSON.stringify(fullPayload, null, 2).substring(0, 3000));
+  }
   
   // Check data object specifically
   const data = fullPayload?.data || payload;
-  console.log("Data object keys:", Object.keys(data || {}));
+  if (debug) {
+    console.log("Data object keys:", Object.keys(data || {}));
+  }
   
   // Resend inbound emails use these field names
   const possibleTextFields = [
@@ -146,7 +152,11 @@ function extractPlainText(payload: any, fullPayload: any): string {
   for (let i = 0; i < possibleTextFields.length; i++) {
     const field = possibleTextFields[i];
     if (typeof field === 'string' && field.trim()) {
-      console.log(`Found text in field index ${i}, length: ${field.length}, preview: ${field.substring(0, 100)}`);
+      if (debug) {
+        console.log(
+          `Found text in field index ${i}, length: ${field.length}, preview: ${field.substring(0, 100)}`
+        );
+      }
       return field;
     }
   }
@@ -161,7 +171,9 @@ function extractPlainText(payload: any, fullPayload: any): string {
   
   for (const field of possibleHtmlFields) {
     if (typeof field === 'string' && field.trim()) {
-      console.log("Using HTML fallback, length:", field.length);
+      if (debug) {
+        console.log("Using HTML fallback, length:", field.length);
+      }
       return field.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     }
   }
@@ -169,10 +181,14 @@ function extractPlainText(payload: any, fullPayload: any): string {
   // Last resort: check if subject contains the reply (some email clients put short replies in subject)
   const subject = data?.subject || fullPayload?.subject || "";
   if (subject && subject.startsWith("Re:")) {
-    console.log("WARNING: No text body found, only subject available");
+    if (debug) {
+      console.log("WARNING: No text body found, only subject available");
+    }
   }
   
-  console.log("No text content found anywhere in payload");
+  if (debug) {
+    console.log("No text content found anywhere in payload");
+  }
   return "";
 }
 
