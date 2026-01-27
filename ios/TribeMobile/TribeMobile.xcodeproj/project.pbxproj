@@ -1,0 +1,346 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06A0F5BD24C4E75B70266802 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EBB55C258BF4F1732AB41A /* Keychain.swift */; };
+		482E90926D259A04839D4E4C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6117780DCB6D382D4A467AFC /* SettingsView.swift */; };
+		642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B3089B62279AC0940E7B9 /* Config.swift */; };
+		75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4743326CDB9FEA49310AE968 /* SessionStore.swift */; };
+		7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CBD123C9DD86E8B936F1E1 /* RootView.swift */; };
+		8EBE11082F18AC5A53235B73 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */; };
+		AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9257A2DF291377E800E77F46 /* SubscribersView.swift */; };
+		B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */; };
+		D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12DAA6C65703FF7090C827E /* APIClient.swift */; };
+		EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48140FCADF742D7F0388B258 /* Models.swift */; };
+		F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */; };
+		D03C18BA10DC3D9086A0A24A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D86C2793299D8CCA0B01C7B /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		154BD58BB8C197D78F6BF617 /* TribeMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TribeMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TribeMobileApp.swift; sourceTree = "<group>"; };
+		41CBD123C9DD86E8B936F1E1 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		4743326CDB9FEA49310AE968 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		48140FCADF742D7F0388B258 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		6117780DCB6D382D4A467AFC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		85EBB55C258BF4F1732AB41A /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		9257A2DF291377E800E77F46 /* SubscribersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscribersView.swift; sourceTree = "<group>"; };
+		934B3089B62279AC0940E7B9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		A12DAA6C65703FF7090C827E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		3D86C2793299D8CCA0B01C7B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		00FB134359BFD49F9F0EF977 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				154BD58BB8C197D78F6BF617 /* TribeMobile.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		02C2EDD294A0ADDD2ABC7305 /* TribeMobile */ = {
+			isa = PBXGroup;
+			children = (
+				A12DAA6C65703FF7090C827E /* APIClient.swift */,
+				934B3089B62279AC0940E7B9 /* Config.swift */,
+				15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */,
+				85EBB55C258BF4F1732AB41A /* Keychain.swift */,
+				CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */,
+				48140FCADF742D7F0388B258 /* Models.swift */,
+				41CBD123C9DD86E8B936F1E1 /* RootView.swift */,
+				4743326CDB9FEA49310AE968 /* SessionStore.swift */,
+				6117780DCB6D382D4A467AFC /* SettingsView.swift */,
+				9257A2DF291377E800E77F46 /* SubscribersView.swift */,
+				3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */,
+							3D86C2793299D8CCA0B01C7B /* Assets.xcassets */,
+			);
+			name = TribeMobile;
+			path = Sources/TribeMobile;
+			sourceTree = "<group>";
+		};
+		22CB338F5506BF8971774E73 = {
+			isa = PBXGroup;
+			children = (
+				02C2EDD294A0ADDD2ABC7305 /* TribeMobile */,
+				00FB134359BFD49F9F0EF977 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7E6FE72AB13E02DB1731312E /* TribeMobile */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC060E7E2293E20797CB2ADB /* Build configuration list for PBXNativeTarget "TribeMobile" */;
+			buildPhases = (
+				E765D1072149B5FFAE4CE4BD /* Resources */,
+				C7CEA0B26016FB91C28082DE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TribeMobile;
+			packageProductDependencies = (
+			);
+			productName = TribeMobile;
+			productReference = 154BD58BB8C197D78F6BF617 /* TribeMobile.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E765D1072149B5FFAE4CE4BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D03C18BA10DC3D9086A0A24A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+
+/* Begin PBXProject section */
+		E93A9F8752F1B790116DA00B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					7E6FE72AB13E02DB1731312E = {
+						DevelopmentTeam = HS4H37FDRG;
+					};
+				};
+			};
+			buildConfigurationList = 4788C6D98E3BC5912859E206 /* Build configuration list for PBXProject "TribeMobile" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 22CB338F5506BF8971774E73;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7E6FE72AB13E02DB1731312E /* TribeMobile */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C7CEA0B26016FB91C28082DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */,
+				642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */,
+				B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */,
+				06A0F5BD24C4E75B70266802 /* Keychain.swift in Sources */,
+				8EBE11082F18AC5A53235B73 /* LoginView.swift in Sources */,
+				EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */,
+				7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */,
+				75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */,
+				482E90926D259A04839D4E4C /* SettingsView.swift in Sources */,
+				AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */,
+				F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1A6EA63FB19A921E71293C1E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HS4H37FDRG;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3BFC62A2BC066436BF59093A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HS4H37FDRG;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		548245F6A52FAA8537612C26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.madewithtribe.mobile;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		55CFA58AEFA3A37C621BDED0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.madewithtribe.mobile;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4788C6D98E3BC5912859E206 /* Build configuration list for PBXProject "TribeMobile" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BFC62A2BC066436BF59093A /* Debug */,
+				1A6EA63FB19A921E71293C1E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EC060E7E2293E20797CB2ADB /* Build configuration list for PBXNativeTarget "TribeMobile" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				548245F6A52FAA8537612C26 /* Debug */,
+				55CFA58AEFA3A37C621BDED0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E93A9F8752F1B790116DA00B /* Project object */;
+}
