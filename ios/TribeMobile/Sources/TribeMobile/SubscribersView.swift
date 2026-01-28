@@ -7,28 +7,75 @@ struct SubscribersView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if !subscribers.isEmpty {
-                    List(subscribers) { s in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(s.email).font(.headline)
-                            HStack {
-                                if let name = s.name, !name.isEmpty {
-                                    Text(name)
+            ZStack {
+                TribeTheme.bg.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Your tribe")
+                                .font(.system(size: 26, weight: .semibold))
+                                .foregroundStyle(TribeTheme.textPrimary)
+
+                            Text("Subscribers")
+                                .font(.system(size: 13))
+                                .foregroundStyle(TribeTheme.textSecondary)
+                        }
+
+                        if !subscribers.isEmpty {
+                            VStack(spacing: 10) {
+                                ForEach(subscribers) { s in
+                                    HStack(alignment: .top, spacing: 12) {
+                                        Circle()
+                                            .fill(s.verified ? TribeTheme.accentGreen.opacity(0.9) : Color.white.opacity(0.15))
+                                            .frame(width: 8, height: 8)
+                                            .padding(.top, 6)
+
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(s.email)
+                                                .font(.system(size: 14, weight: .medium))
+                                                .foregroundStyle(TribeTheme.textPrimary)
+
+                                            HStack(spacing: 8) {
+                                                if let name = s.name, !name.isEmpty {
+                                                    Text(name)
+                                                        .foregroundStyle(TribeTheme.textSecondary)
+                                                }
+
+                                                Text(s.verified ? "Verified" : "Unverified")
+                                                    .foregroundStyle(s.verified ? TribeTheme.accentGreen.opacity(0.9) : TribeTheme.textTertiary)
+                                            }
+                                            .font(.system(size: 12))
+                                        }
+
+                                        Spacer()
+                                    }
+                                    .tribeCard()
                                 }
-                                Text(s.verified ? "Verified" : "Unverified")
-                                    .foregroundStyle(s.verified ? .green : .secondary)
                             }
-                            .font(.caption)
+                        } else if let error {
+                            Text("Couldn’t load subscribers")
+                                .font(.headline)
+                                .foregroundStyle(TribeTheme.textPrimary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(error)
+                                .font(.subheadline)
+                                .foregroundStyle(TribeTheme.textSecondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            ProgressView("Loading…")
+                                .tint(TribeTheme.textPrimary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 24)
                         }
                     }
-                } else if let error {
-                    ContentUnavailableView("Couldn’t load subscribers", systemImage: "exclamationmark.triangle", description: Text(error))
-                } else {
-                    ProgressView("Loading…")
+                    .padding(.horizontal, 18)
+                    .padding(.top, 16)
+                    .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Subscribers")
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .task { await load() }
             .refreshable { await load() }
         }
@@ -45,3 +92,4 @@ struct SubscribersView: View {
         }
     }
 }
+
