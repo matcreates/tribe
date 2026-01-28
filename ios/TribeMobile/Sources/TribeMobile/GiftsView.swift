@@ -170,6 +170,25 @@ private struct GiftRow: View {
 
             Spacer()
 
+            Button {
+                let url = "\(Config.baseURL.absoluteString)/g/\(gift.short_code)"
+                UIPasteboard.general.string = url
+            } label: {
+                Image(systemName: "doc.on.doc")
+                    .foregroundStyle(TribeTheme.textTertiary)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                if let u = URL(string: gift.file_url) {
+                    UIApplication.shared.open(u)
+                }
+            } label: {
+                Image(systemName: "arrow.down.circle")
+                    .foregroundStyle(TribeTheme.textTertiary)
+            }
+            .buttonStyle(.plain)
+
             Button(role: .destructive) {
                 onDelete()
             } label: {

@@ -3,8 +3,12 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject var session: SessionStore
 
+    @State private var isSignup = false
+
+    @State private var name = ""
     @State private var email = ""
     @State private var password = ""
+
     @State private var isLoading = false
     @State private var error: String?
 
@@ -21,12 +25,19 @@ struct LoginView: View {
                         .foregroundStyle(TribeTheme.textPrimary)
 
                     VStack(spacing: 0) {
-                        Text("Welcome back")
+                        Text(isSignup ? "Create your account" : "Welcome back")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundStyle(TribeTheme.textPrimary)
                             .padding(.bottom, 18)
 
                         VStack(spacing: 14) {
+                            if isSignup {
+                                field(label: "Name") {
+                                    TextField("", text: $name)
+                                        .textInputAutocapitalization(.words)
+                                }
+                            }
+
                             field(label: "Email") {
                                 TextField("", text: $email)
                                     .textInputAutocapitalization(.never)
@@ -46,22 +57,35 @@ struct LoginView: View {
                             }
 
                             Button {
-                                Task { await signIn() }
+                                Task { await submit() }
                             } label: {
                                 HStack {
                                     Spacer()
-                                    Text(isLoading ? "SIGNING IN..." : "SIGN IN")
+                                    Text(isLoading ? (isSignup ? "CREATING..." : "SIGNING IN...") : (isSignup ? "CREATE ACCOUNT" : "SIGN IN"))
                                         .font(.system(size: 11, weight: .semibold))
                                         .tracking(2)
-                                        .foregroundStyle(Color.black)
+                                        .foregroundStyle(TribeTheme.textPrimary)
                                         .padding(.vertical, 14)
                                     Spacer()
                                 }
-                                .background(Color.white.opacity(0.9))
+                                .background(TribeTheme.textPrimary.opacity(0.08))
                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
-                            .disabled(isLoading || email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || password.isEmpty)
+                            .disabled(isLoading || !canSubmit)
                             .opacity(isLoading ? 0.7 : 1)
+
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isSignup.toggle()
+                                    error = nil
+                                }
+                            } label: {
+                                Text(isSignup ? "Already have an account? Sign in" : "Don’t have an account? Create one")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(TribeTheme.textSecondary)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 4)
                         }
                     }
                     .padding(24)
@@ -69,7 +93,7 @@ struct LoginView: View {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .stroke(TribeTheme.stroke)
                     )
-                    .background(Color.white.opacity(0.03))
+                    .background(TribeTheme.cardBg)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .frame(maxWidth: 360)
                 }
@@ -78,6 +102,15 @@ struct LoginView: View {
                 Spacer(minLength: 0)
             }
         }
+    }
+
+    private var canSubmit: Bool {
+        if isSignup {
+            return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !password.isEmpty
+        }
+        return !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
     }
 
     @ViewBuilder
@@ -89,22 +122,27 @@ struct LoginView: View {
 
             content()
                 .font(.system(size: 13))
-                .foregroundStyle(TribeTheme.textPrimary.opacity(0.8))
+                .foregroundStyle(TribeTheme.textPrimary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(Color.white.opacity(0.05))
+                .background(TribeTheme.textPrimary.opacity(0.06))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 
-    private func signIn() async {
+    private func submit() async {
         isLoading = true
         error = nil
         do {
-            let resp = try await APIClient.shared.login(email: email, password: password)
+            let resp: LoginResponse
+            if isSignup {
+                resp = try await APIClient.shared.signup(email: email, password: password, name: name)
+            } else {
+                resp = try await APIClient.shared.login(email: email, password: password)
+            }
             session.setToken(resp.token)
         } catch {
-            self.error = "Invalid email or password"
+            self.error = error.localizedDescription
         }
         isLoading = false
     }
@@ -119,8 +157,6 @@ private struct TribeLogoView: View {
 
 private struct TribeLogo: Shape {
     func path(in rect: CGRect) -> Path {
-        // Minimal logo: use a simple text-like mark for now.
-        // Keeping this lightweight; we can swap to exact vector later.
         var p = Path()
         p.addRoundedRect(in: rect, cornerSize: CGSize(width: rect.height * 0.2, height: rect.height * 0.2))
         return p

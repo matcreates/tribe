@@ -4,6 +4,21 @@ final class APIClient {
     static let shared = APIClient()
     private init() {}
 
+
+
+    func signup(email: String, password: String, name: String) async throws -> LoginResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/signup")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(["email": email, "password": password, "name": name])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(LoginResponse.self, from: data)
+    }
+
+
     func login(email: String, password: String) async throws -> LoginResponse {
         let url = Config.baseURL.appendingPathComponent("/api/mobile/login")
         var req = URLRequest(url: url)

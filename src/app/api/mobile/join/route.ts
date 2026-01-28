@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         slug: tribe.slug,
         ownerName: tribe.owner_name || "Anonymous",
         ownerAvatar: tribe.owner_avatar,
-        description: tribe.join_description || "",
+        description: tribe.join_description || "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.",
       },
     });
   } catch (e) {

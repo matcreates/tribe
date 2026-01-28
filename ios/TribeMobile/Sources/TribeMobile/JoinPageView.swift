@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct JoinPageView: View {
+    private let defaultJoinDescription = "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."
+
     @EnvironmentObject var session: SessionStore
 
     @State private var join: JoinSettings?
@@ -155,7 +157,7 @@ struct JoinPageView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(TribeTheme.textPrimary)
 
-                Text(description.isEmpty ? "Add a description…" : description)
+                Text(description.isEmpty ? defaultJoinDescription : description)
                     .font(.system(size: 12))
                     .foregroundStyle(TribeTheme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -218,7 +220,7 @@ struct JoinPageView: View {
             error = nil
             let j = try await APIClient.shared.joinSettings(token: token)
             join = j
-            description = j.description
+            description = j.description.isEmpty ? defaultJoinDescription : j.description
 
             let url = "\(Config.baseURL.absoluteString)/j/\(j.slug)"
             fullJoinUrl = url
