@@ -64,6 +64,35 @@ final class APIClient {
         try Self.assertOK(resp, data)
     }
 
+
+
+    func joinSettings(token: String) async throws -> JoinSettings {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/join")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+
+        struct Resp: Decodable {
+            let join: JoinSettings
+        }
+        return try Self.decoder.decode(Resp.self, from: data).join
+    }
+
+    func updateJoinDescription(token: String, description: String) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/join")
+        var req = URLRequest(url: url)
+        req.httpMethod = "PATCH"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(["description": description])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
