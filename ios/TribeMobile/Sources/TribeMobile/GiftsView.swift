@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct GiftsView: View {
     @EnvironmentObject var session: SessionStore
@@ -8,7 +9,9 @@ struct GiftsView: View {
     @State private var maxGifts: Int = 5
     @State private var error: String?
 
-    @State private var showingAdd = false
+    @State private var showingPicker = false
+    @State private var pickedURL: URL?
+    @State private var isUploading = false
 
     var body: some View {
         NavigationStack {
@@ -53,20 +56,33 @@ struct GiftsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showingAdd = true
+                        showingPicker = true
                     } label: {
-                        Image(systemName: "plus")
-                            .foregroundStyle(TribeTheme.textSecondary)
+                        if isUploading {
+                            ProgressView()
+                                .tint(TribeTheme.textSecondary)
+                        } else {
+                            Image(systemName: "plus")
+                                .foregroundStyle(TribeTheme.textSecondary)
+                        }
                     }
-                    .disabled(count >= maxGifts)
-                    .accessibilityLabel("Add gift")
+                    .disabled(isUploading || count >= maxGifts)
+                    .accessibilityLabel("Upload gift")
                 }
             }
-            .sheet(isPresented: $showingAdd) {
-                AddGiftSheet(maxGifts: maxGifts, count: count) { name, url, size in
-                    Task { await createGift(name: name, url: url, size: size) }
+            .fileImporter(
+                isPresented: $showingPicker,
+                allowedContentTypes: [.data],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    pickedURL = url
+                    Task { await uploadGift(url: url) }
+                case .failure(let err):
+                    error = err.localizedDescription
                 }
-                .presentationDetents([.medium])
             }
             .task { await load() }
             .refreshable { await load() }
@@ -98,11 +114,14 @@ struct GiftsView: View {
         }
     }
 
-    private func createGift(name: String, url: String, size: Int) async {
+    private func uploadGift(url: URL) async {
         guard let token = session.token else { return }
+        isUploading = true
+        defer { isUploading = false }
+
         do {
-            try await APIClient.shared.createGift(token: token, fileName: name, fileUrl: url, fileSize: size)
-            showingAdd = false
+            error = nil
+            try await APIClient.shared.uploadGift(token: token, fileURL: url)
             await load()
         } catch {
             self.error = error.localizedDescription
@@ -160,70 +179,5 @@ private struct GiftRow: View {
             .buttonStyle(.plain)
         }
         .tribeCard()
-    }
-}
-
-private struct AddGiftSheet: View {
-    let maxGifts: Int
-    let count: Int
-    let onCreate: (String, String, Int) -> Void
-
-    @Environment(\.dismiss) var dismiss
-
-    @State private var name: String = ""
-    @State private var url: String = ""
-    @State private var size: String = "0"
-
-    var body: some View {
-        ZStack {
-            TribeTheme.bg.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 14) {
-                Text("New gift")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(TribeTheme.textPrimary)
-
-                Text("For now, paste a file URL (we’ll add native upload next).")
-                    .font(.system(size: 12))
-                    .foregroundStyle(TribeTheme.textSecondary)
-
-                field("File name", text: $name)
-                field("File URL", text: $url)
-                field("File size (bytes)", text: $size)
-
-                HStack {
-                    Button("Cancel") { dismiss() }
-                        .foregroundStyle(TribeTheme.textSecondary)
-
-                    Spacer()
-
-                    Button("Create") {
-                        onCreate(name, url, Int(size) ?? 0)
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .foregroundStyle(TribeTheme.textPrimary)
-                }
-                .padding(.top, 8)
-            }
-            .padding(18)
-        }
-    }
-
-    private func field(_ label: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundStyle(TribeTheme.textSecondary)
-
-            TextField("", text: text)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .font(.system(size: 13))
-                .foregroundStyle(TribeTheme.textPrimary.opacity(0.85))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(Color.white.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
     }
 }

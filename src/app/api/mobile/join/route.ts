@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBearerToken, verifyMobileToken } from "@/lib/mobileAuth";
-import { getTribeSettings, updateTribeSettings } from "@/lib/actions";
+import { getTribeById, updateTribe } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
     const token = getBearerToken(request.headers.get("authorization"));
     if (!token) return NextResponse.json({ error: "Missing token" }, { status: 401 });
 
-    await verifyMobileToken(token);
+    const { tribeId } = await verifyMobileToken(token);
 
-    const settings = await getTribeSettings();
+    const tribe = await getTribeById(tribeId);
+    if (!tribe) return NextResponse.json({ error: "Tribe not found" }, { status: 404 });
+
     return NextResponse.json({
       ok: true,
       join: {
-        slug: settings.slug,
-        ownerName: settings.ownerName,
-        ownerAvatar: settings.ownerAvatar,
-        description: settings.joinDescription,
+        slug: tribe.slug,
+        ownerName: tribe.owner_name || "Anonymous",
+        ownerAvatar: tribe.owner_avatar,
+        description: tribe.join_description || "",
       },
     });
   } catch (e) {
@@ -32,14 +34,14 @@ export async function PATCH(request: NextRequest) {
     const token = getBearerToken(request.headers.get("authorization"));
     if (!token) return NextResponse.json({ error: "Missing token" }, { status: 401 });
 
-    await verifyMobileToken(token);
+    const { tribeId } = await verifyMobileToken(token);
 
     const body = (await request.json()) as { description?: string };
     if (typeof body.description !== "string") {
       return NextResponse.json({ error: "Missing description" }, { status: 400 });
     }
 
-    await updateTribeSettings({ joinDescription: body.description });
+    await updateTribe(tribeId, { join_description: body.description });
 
     return NextResponse.json({ ok: true });
   } catch (e) {

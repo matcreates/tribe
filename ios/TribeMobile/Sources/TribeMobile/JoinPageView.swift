@@ -220,7 +220,7 @@ struct JoinPageView: View {
             join = j
             description = j.description
 
-            let url = "\(Config.baseURL.absoluteString)/@\(j.slug)"
+            let url = "\(Config.baseURL.absoluteString)/j/\(j.slug)"
             fullJoinUrl = url
             displayUrl = url.replacingOccurrences(of: "https://", with: "").replacingOccurrences(of: "http://", with: "")
         } catch {
