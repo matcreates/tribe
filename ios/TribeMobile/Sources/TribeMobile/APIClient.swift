@@ -93,6 +93,49 @@ final class APIClient {
         try Self.assertOK(resp, data)
     }
 
+
+
+    func gifts(token: String) async throws -> GiftsResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/gifts")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(GiftsResponse.self, from: data)
+    }
+
+    func createGift(token: String, fileName: String, fileUrl: String, fileSize: Int) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/gifts")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable {
+            let fileName: String
+            let fileUrl: String
+            let fileSize: Int
+            let thumbnailUrl: String?
+        }
+        req.httpBody = try JSONEncoder().encode(Body(fileName: fileName, fileUrl: fileUrl, fileSize: fileSize, thumbnailUrl: nil))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func deleteGift(token: String, id: String) async throws {
+        var comps = URLComponents(url: Config.baseURL.appendingPathComponent("/api/mobile/gifts"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "id", value: id)]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601

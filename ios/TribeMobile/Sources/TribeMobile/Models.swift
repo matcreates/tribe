@@ -41,3 +41,21 @@ struct Subscriber: Decodable, Identifiable {
     let verified: Bool
     let created_at: Date?
 }
+
+
+struct Gift: Identifiable, Decodable {
+    let id: String
+    let file_name: String
+    let file_url: String
+    let file_size: Int
+    let thumbnail_url: String?
+    let short_code: String
+    let created_at: String?
+    let member_count: Int
+}
+
+struct GiftsResponse: Decodable {
+    let gifts: [Gift]
+    let count: Int
+    let maxGifts: Int
+}
