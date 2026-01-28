@@ -5,7 +5,7 @@ options:
     iOS: 17.0
 settings:
   base:
-    DEVELOPMENT_TEAM: "HS4H37FDRG"
+    DEVELOPMENT_TEAM: "Z2RT4J42R5"
     SWIFT_VERSION: 5.0
     IPHONEOS_DEPLOYMENT_TARGET: 17.0
 targets:
@@ -21,5 +21,5 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.madewithtribe.mobile
         INFOPLIST_FILE: Resources/Info.plist
         MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 2
+        CURRENT_PROJECT_VERSION: 4
     preBuildScripts: []
