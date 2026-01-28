@@ -10,11 +10,17 @@ struct RootView: View {
                     DashboardView()
                         .tabItem { Label("Dashboard", systemImage: "chart.bar" ) }
 
-                    SubscribersView()
-                        .tabItem { Label("Subscribers", systemImage: "person.2" ) }
+                    WriteView()
+                        .tabItem { Label("Write", systemImage: "square.and.pencil" ) }
 
-                    SettingsView()
-                        .tabItem { Label("Settings", systemImage: "gear" ) }
+                    SubscribersView()
+                        .tabItem { Label("Your tribe", systemImage: "person.2" ) }
+
+                    GiftsView()
+                        .tabItem { Label("Gifts", systemImage: "gift" ) }
+
+                    JoinPageView()
+                        .tabItem { Label("Join", systemImage: "person.badge.plus" ) }
                 }
             } else {
                 LoginView()
@@ -22,3 +28,4 @@ struct RootView: View {
         }
     }
 }
+
