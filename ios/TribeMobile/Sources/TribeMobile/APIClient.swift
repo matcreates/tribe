@@ -38,6 +38,32 @@ final class APIClient {
         return try Self.decoder.decode(SubscribersResponse.self, from: data)
     }
 
+    func sendEmail(token: String, subject: String, body: String) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/send")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(["subject": subject, "body": body])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func scheduleEmail(token: String, subject: String, body: String, scheduledAt: Date) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/schedule")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let iso = ISO8601DateFormatter().string(from: scheduledAt)
+        req.httpBody = try JSONEncoder().encode(["subject": subject, "body": body, "scheduledAt": iso])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
