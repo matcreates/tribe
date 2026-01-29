@@ -43,6 +43,104 @@ final class APIClient {
         return try Self.decoder.decode(MobileDashboardResponse.self, from: data)
     }
 
+
+
+    func subscribersPaged(token: String, page: Int, pageSize: Int, filter: String, sort: String, search: String) async throws -> PaginatedSubscribersResponse {
+        var comps = URLComponents(url: Config.baseURL.appendingPathComponent("/api/mobile/subscribers"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "pageSize", value: String(pageSize)),
+            URLQueryItem(name: "filter", value: filter),
+            URLQueryItem(name: "sort", value: sort),
+            URLQueryItem(name: "search", value: search),
+        ]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(PaginatedSubscribersResponse.self, from: data)
+    }
+
+    func removeSubscriber(token: String, id: String) async throws {
+        var comps = URLComponents(url: Config.baseURL.appendingPathComponent("/api/mobile/subscribers"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "id", value: id)]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func addSubscriberManual(token: String, email: String, name: String?) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers/manual")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable { let email: String; let name: String? }
+        req.httpBody = try JSONEncoder().encode(Body(email: email, name: name))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func previewImport(token: String, emails: [String]) async throws -> ImportPreviewResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers/import/preview")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable { let emails: [String] }
+        req.httpBody = try JSONEncoder().encode(Body(emails: emails))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(ImportPreviewResponse.self, from: data)
+    }
+
+    func importSubscribers(token: String, emails: [String], sendVerification: Bool) async throws -> ImportRunResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers/import")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable { let emails: [String]; let sendVerification: Bool }
+        req.httpBody = try JSONEncoder().encode(Body(emails: emails, sendVerification: sendVerification))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(ImportRunResponse.self, from: data)
+    }
+
+    func exportSubscribers(token: String) async throws -> String {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers/export")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
+    func deleteAllUnverified(token: String) async throws -> DeleteUnverifiedResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers/delete-unverified")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(DeleteUnverifiedResponse.self, from: data)
+    }
+
+
     func subscribers(token: String) async throws -> SubscribersResponse {
         let url = Config.baseURL.appendingPathComponent("/api/mobile/subscribers")
         var req = URLRequest(url: url)
