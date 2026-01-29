@@ -27,6 +27,10 @@ struct JoinPageView: View {
                                 .foregroundStyle(TribeTheme.textPrimary)
 
                             Text("Preview your join page")
+
+                            Text("This is the public page people use to subscribe to your tribe.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(TribeTheme.textTertiary)
                                 .font(.system(size: 13))
                                 .foregroundStyle(TribeTheme.textSecondary)
                         }

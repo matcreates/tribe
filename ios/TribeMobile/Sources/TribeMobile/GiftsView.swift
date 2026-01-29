@@ -95,9 +95,13 @@ struct GiftsView: View {
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundStyle(TribeTheme.textPrimary)
 
-            Text("\(count)/\(maxGifts) uploaded")
+            Text("Sharing is caring: gifts help you grow by rewarding new members.")
                 .font(.system(size: 13))
                 .foregroundStyle(TribeTheme.textSecondary)
+
+            Text("\(count)/\(maxGifts) gifts uploaded")
+                .font(.system(size: 12))
+                .foregroundStyle(TribeTheme.textTertiary)
         }
     }
 
@@ -146,7 +150,7 @@ private struct GiftRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.white.opacity(0.06))
+                .fill(TribeTheme.textPrimary.opacity(0.06))
                 .frame(width: 44, height: 44)
                 .overlay(
                     Image(systemName: "gift")
@@ -159,13 +163,20 @@ private struct GiftRow: View {
                     .foregroundStyle(TribeTheme.textPrimary)
                     .lineLimit(1)
 
-                Text("\(gift.member_count) members")
+                Text("\(gift.member_count) members joined")
                     .font(.system(size: 12))
-                    .foregroundStyle(TribeTheme.textTertiary)
+                    .foregroundStyle(gift.member_count > 0 ? Color.green.opacity(0.85) : TribeTheme.textTertiary)
 
-                Text("Code: \(gift.short_code)")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(TribeTheme.textTertiary)
+                Text("Link")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.green.opacity(0.85))
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    Text("\(Config.baseURL.absoluteString)/g/\(gift.short_code)")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(Color.green.opacity(0.85))
+                        .lineLimit(1)
+                }
             }
 
             Spacer()

@@ -276,6 +276,20 @@ final class APIClient {
         try Self.assertOK(resp, data)
     }
 
+
+
+    func emailDetails(token: String, id: String) async throws -> EmailDetailResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/\(id)")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(EmailDetailResponse.self, from: data)
+    }
+
+
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601

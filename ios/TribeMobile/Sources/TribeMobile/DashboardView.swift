@@ -20,9 +20,9 @@ struct DashboardView: View {
                         if let data {
                             VStack(spacing: 12) {
                                 statsGrid(data)
-                                if !data.recentEmails.isEmpty {
-                                    recentEmailsCard(data)
-                                }
+                                growthChart(data)
+                                TipsCarouselView()
+                                recentEmailsCard(data)
                             }
                         } else if let error {
                             Text("Couldn’t load dashboard")
@@ -76,7 +76,6 @@ struct DashboardView: View {
                 .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(TribeTheme.textSecondary)
         }
-        .padding(.bottom, 2)
     }
 
     private var periodPicker: some View {
@@ -93,18 +92,47 @@ struct DashboardView: View {
     private func statsGrid(_ data: MobileDashboardResponse) -> some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                statCard(title: "Your tribe", value: String(data.verifiedSubscribers), subtitle: "Verified")
-                statCard(title: "New", value: plus(data.periodSubscribers), subtitle: period.label)
+                statCard(title: "Your tribe", value: String(data.verifiedSubscribers), subtitle: "Verified", icon: "person.2.fill", color: .blue)
+                statCard(title: "New", value: plus(data.periodSubscribers), subtitle: period.label, icon: "sparkles", color: .green)
             }
             HStack(spacing: 12) {
-                statCard(title: "Emails sent", value: String(data.totalEmailsSent), subtitle: "Total")
-                statCard(title: "Open rate", value: data.openRate > 0 ? "\(data.openRate)%" : "—", subtitle: "\(data.periodOpens) opens")
+                statCard(title: "Emails sent", value: String(data.totalEmailsSent), subtitle: "Total", icon: "paperplane.fill", color: .green)
+                statCard(title: "Open rate", value: data.openRate > 0 ? "\(data.openRate)%" : "—", subtitle: "\(data.periodOpens) opens", icon: "eye.fill", color: .purple)
             }
             HStack(spacing: 12) {
-                statCard(title: "Replies", value: String(data.totalReplies), subtitle: "Total")
-                statCard(title: "Replies", value: plus(data.periodReplies), subtitle: period.label)
+                statCard(title: "Replies", value: String(data.totalReplies), subtitle: "Total", icon: "arrowshape.turn.up.left.fill", color: .orange)
+                statCard(title: "Replies", value: plus(data.periodReplies), subtitle: period.label, icon: "bubble.left.and.bubble.right.fill", color: .orange)
             }
         }
+    }
+
+    private func growthChart(_ data: MobileDashboardResponse) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Tribe growth")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(TribeTheme.textTertiary)
+                .textCase(.uppercase)
+
+            HStack(alignment: .bottom, spacing: 4) {
+                let maxVal = max(data.chartData.max() ?? 1, 1)
+                ForEach(Array(data.chartData.enumerated()), id: \ .offset) { idx, v in
+                    let h = CGFloat(v) / CGFloat(maxVal)
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(idx == data.chartData.count - 1 ? Color.blue.opacity(0.55) : Color.blue.opacity(0.22))
+                        .frame(height: max(10, 80 * h))
+                }
+            }
+            .frame(height: 90)
+
+            HStack {
+                Text(data.chartLabels.first ?? "")
+                Spacer()
+                Text(data.chartLabels.last ?? "")
+            }
+            .font(.system(size: 11))
+            .foregroundStyle(TribeTheme.textTertiary)
+        }
+        .tribeCard()
     }
 
     private func recentEmailsCard(_ data: MobileDashboardResponse) -> some View {
@@ -114,22 +142,38 @@ struct DashboardView: View {
                 .foregroundStyle(TribeTheme.textTertiary)
                 .textCase(.uppercase)
 
-            VStack(spacing: 10) {
-                ForEach(data.recentEmails) { e in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(e.subject ?? "Untitled")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(TribeTheme.textPrimary)
-                                .lineLimit(1)
-                            Text("\(e.recipient_count) recipients")
-                                .font(.system(size: 12))
-                                .foregroundStyle(TribeTheme.textTertiary)
+            if data.recentEmails.isEmpty {
+                Text("No emails yet")
+                    .font(.system(size: 13))
+                    .foregroundStyle(TribeTheme.textSecondary)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(data.recentEmails) { e in
+                        NavigationLink {
+                            EmailDetailView(id: e.id)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(e.subject ?? "Untitled")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(TribeTheme.textPrimary)
+                                        .lineLimit(1)
+                                    Text("\(e.recipient_count) recipients")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(TribeTheme.textTertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(TribeTheme.textTertiary)
+                            }
+                            .padding(.vertical, 10)
                         }
-                        Spacer()
-                    }
-                    if e.id != data.recentEmails.last?.id {
-                        Divider().overlay(Color.white.opacity(0.06))
+                        .buttonStyle(.plain)
+
+                        if e.id != data.recentEmails.last?.id {
+                            Divider().overlay(TribeTheme.stroke)
+                        }
                     }
                 }
             }
@@ -137,11 +181,24 @@ struct DashboardView: View {
         .tribeCard()
     }
 
-    private func statCard(title: String, value: String, subtitle: String) -> some View {
+    private func statCard(title: String, value: String, subtitle: String, icon: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.system(size: 12))
-                .foregroundStyle(TribeTheme.textSecondary)
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(color.opacity(0.16))
+                    .frame(width: 34, height: 34)
+                    .overlay(
+                        Image(systemName: icon)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(color)
+                    )
+
+                Text(title)
+                    .font(.system(size: 12))
+                    .foregroundStyle(TribeTheme.textSecondary)
+
+                Spacer()
+            }
 
             Text(value)
                 .font(.system(size: 24, weight: .semibold))
@@ -153,7 +210,7 @@ struct DashboardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color.white.opacity(0.03))
+        .background(TribeTheme.cardBg)
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(TribeTheme.stroke)
@@ -161,9 +218,7 @@ struct DashboardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
-    private func plus(_ v: Int) -> String {
-        v > 0 ? "+\(v)" : "0"
-    }
+    private func plus(_ v: Int) -> String { v > 0 ? "+\(v)" : "0" }
 
     private func load() async {
         guard let token = session.token else { return }
@@ -172,6 +227,42 @@ struct DashboardView: View {
             data = try await APIClient.shared.dashboard(token: token, period: period)
         } catch {
             self.error = error.localizedDescription
+        }
+    }
+}
+
+private struct TipsCarouselView: View {
+    private let tips: [String] = [
+        "Try sending 1 email per week to stay top-of-mind.",
+        "Short subject lines often perform better.",
+        "Ask a question to increase replies.",
+        "Share one useful link or insight every email.",
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Tips for creators")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(TribeTheme.textTertiary)
+                .textCase(.uppercase)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(tips, id: \ .self) { tip in
+                        Text(tip)
+                            .font(.system(size: 13))
+                            .foregroundStyle(TribeTheme.textPrimary)
+                            .padding(14)
+                            .frame(width: 260, alignment: .leading)
+                            .background(TribeTheme.cardBg)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(TribeTheme.stroke)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                }
+            }
         }
     }
 }
@@ -202,6 +293,8 @@ struct MobileDashboardResponse: Decodable {
     let totalReplies: Int
     let periodReplies: Int
     let recentEmails: [RecentEmail]
+    let chartData: [Int]
+    let chartLabels: [String]
 
     struct RecentEmail: Decodable, Identifiable {
         let id: String

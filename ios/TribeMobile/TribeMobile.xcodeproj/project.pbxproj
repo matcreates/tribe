@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		06A0F5BD24C4E75B70266802 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EBB55C258BF4F1732AB41A /* Keychain.swift */; };
 		1972358696DB78709029203A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */; };
+		3354D6A7C1FDDC2B4A633471 /* EmailDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */; };
 		41D3391705A325EE13F6BA42 /* JoinPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9954785828361C5B3D4596DC /* JoinPageView.swift */; };
 		482E90926D259A04839D4E4C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6117780DCB6D382D4A467AFC /* SettingsView.swift */; };
 		609C495ABD07F85EDEE30939 /* GiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */; };
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		154BD58BB8C197D78F6BF617 /* TribeMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TribeMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailDetailView.swift; sourceTree = "<group>"; };
 		3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TribeMobileApp.swift; sourceTree = "<group>"; };
 		41CBD123C9DD86E8B936F1E1 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		4743326CDB9FEA49310AE968 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
@@ -61,6 +63,7 @@
 				7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */,
 				934B3089B62279AC0940E7B9 /* Config.swift */,
 				15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */,
+				1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */,
 				D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */,
 				9954785828361C5B3D4596DC /* JoinPageView.swift */,
 				85EBB55C258BF4F1732AB41A /* Keychain.swift */,
@@ -159,6 +162,7 @@
 				D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */,
 				642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */,
 				B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */,
+				3354D6A7C1FDDC2B4A633471 /* EmailDetailView.swift in Sources */,
 				609C495ABD07F85EDEE30939 /* GiftsView.swift in Sources */,
 				41D3391705A325EE13F6BA42 /* JoinPageView.swift in Sources */,
 				06A0F5BD24C4E75B70266802 /* Keychain.swift in Sources */,
@@ -303,7 +307,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -321,7 +325,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

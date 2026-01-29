@@ -9,6 +9,8 @@ import {
   getOpenRateSince,
   getTribeReplyCount,
   getSentEmailsByTribeId,
+  getDailySubscriberCounts,
+  getHourlySubscriberCounts,
 } from "@/lib/db";
 
 type Period = "24h" | "7d" | "30d";
@@ -60,6 +62,32 @@ export async function GET(request: NextRequest) {
 
     const openRate = openStats.sent > 0 ? Math.round((openStats.opens / openStats.sent) * 1000) / 10 : 0;
 
+    let chartData: number[] = [];
+    let chartLabels: string[] = [];
+
+    if (period === "24h") {
+      const hourly = await getHourlySubscriberCounts(tribeId);
+      chartData = hourly.map((d) => d.count);
+      chartLabels = hourly.map((d) => {
+        const date = new Date(d.hour);
+        const hours = date.getHours();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const hour12 = hours % 12 || 12;
+        return `${hour12}${ampm}`;
+      });
+    } else {
+      const days = period === "30d" ? 30 : 7;
+      const daily = await getDailySubscriberCounts(tribeId, days);
+      chartData = daily.map((d) => d.count);
+      chartLabels = daily.map((d) => {
+        const date = new Date(d.date);
+        if (period === "7d") {
+          return date.toLocaleDateString("en-US", { weekday: "short" });
+        }
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      });
+    }
+
     const recentEmails = sentEmails
       .filter((e) => e.sent_at)
       .slice(0, 3)
@@ -83,6 +111,8 @@ export async function GET(request: NextRequest) {
       totalReplies,
       periodReplies,
       recentEmails,
+      chartData,
+      chartLabels,
     });
   } catch (e) {
     return NextResponse.json(

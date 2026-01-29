@@ -45,7 +45,7 @@ struct WriteView: View {
                                 .textInputAutocapitalization(.sentences)
                                 .autocorrectionDisabled(false)
                                 .padding(12)
-                                .background(Color.white.opacity(0.05))
+                                .background(TribeTheme.cardBg)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                                         .stroke(TribeTheme.stroke)
@@ -65,7 +65,7 @@ struct WriteView: View {
                                 .frame(minHeight: 220)
                                 .scrollContentBackground(.hidden)
                                 .padding(8)
-                                .background(Color.white.opacity(0.05))
+                                .background(TribeTheme.cardBg)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                                         .stroke(TribeTheme.stroke)
@@ -110,11 +110,11 @@ struct WriteView: View {
                                 Text(isSubmitting ? "SENDING…" : (sendMode == .now ? "SEND" : "SCHEDULE"))
                                     .font(.system(size: 11, weight: .semibold))
                                     .tracking(2)
-                                    .foregroundStyle(Color.black)
+                                    .foregroundStyle(TribeTheme.textPrimary)
                                     .padding(.vertical, 14)
                                 Spacer()
                             }
-                            .background(Color.white.opacity(0.9))
+                            .background(TribeTheme.textPrimary.opacity(0.08))
                             .clipShape(RoundedRectangle(cornerRadius: 999, style: .continuous))
                         }
                         .disabled(isSubmitting)

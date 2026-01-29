@@ -20,9 +20,12 @@ struct LoginView: View {
                 Spacer(minLength: 0)
 
                 VStack(spacing: 22) {
-                    TribeLogoView()
-                        .frame(height: 26)
+                    Image("TribeLogo")
+                        .resizable()
+                        .renderingMode(.template)
                         .foregroundStyle(TribeTheme.textPrimary)
+                        .scaledToFit()
+                        .frame(height: 26)
 
                     VStack(spacing: 0) {
                         Text(isSignup ? "Create your account" : "Welcome back")
@@ -42,6 +45,7 @@ struct LoginView: View {
                                 TextField("", text: $email)
                                     .textInputAutocapitalization(.never)
                                     .keyboardType(.emailAddress)
+                                    .textContentType(.username)
                                     .autocorrectionDisabled()
                             }
 
@@ -148,17 +152,3 @@ struct LoginView: View {
     }
 }
 
-private struct TribeLogoView: View {
-    var body: some View {
-        TribeLogo()
-            .aspectRatio(contentMode: .fit)
-    }
-}
-
-private struct TribeLogo: Shape {
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        p.addRoundedRect(in: rect, cornerSize: CGSize(width: rect.height * 0.2, height: rect.height * 0.2))
-        return p
-    }
-}
