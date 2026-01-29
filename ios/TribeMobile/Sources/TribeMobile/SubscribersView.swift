@@ -78,61 +78,37 @@ struct SubscribersView: View {
     var body: some View {
         NavigationStack {
             content
-                .toolbar { toolbar }
-                .task { await reload(resetPage: true) }
-                .refreshable { await reload(resetPage: true) }
-                .onChange(of: filter) { _, _ in Task { await reload(resetPage: true) } }
-                .onChange(of: sort) { _, _ in Task { await reload(resetPage: true) } }
-                .onChange(of: search) { _, _ in
-                    Task {
-                        try? await Task.sleep(nanoseconds: 250_000_000)
-                        await reload(resetPage: true)
-                    }
-                }
-                .sheet(isPresented: $showingAdd) { addSheet.presentationDetents([.medium]) }
-                .confirmationDialog(
-                    "Import subscribers",
-                    isPresented: $showingImportChooser,
-                    titleVisibility: .visible
-                ) {
-                    Button("Choose file (CSV/TXT)") { showingFileImporter = true }
-                    Button("Paste emails") {
-                        if let pasted = UIPasteboard.general.string {
-                            Task { await previewImport(from: pasted) }
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {}
-                }
-                .fileImporter(
-                    isPresented: $showingFileImporter,
-                    allowedContentTypes: [UTType.commaSeparatedText, UTType.plainText],
-                    allowsMultipleSelection: false
-                ) { result in
-                    handleFileImport(result)
-                }
-                .sheet(item: $importPreview) { preview in
-                    ImportPreviewSheet(
-                        preview: preview,
-                        sendVerification: $importSendVerification,
-                        isImporting: $isImporting,
-                        onCancel: { importPreview = nil },
-                        onImport: { Task { await runImport(preview) } }
-                    )
-                    .presentationDetents([.medium])
-                }
-                .confirmationDialog(
-                    "Delete all unverified subscribers?",
-                    isPresented: $showingDeleteUnverifiedConfirm,
-                    titleVisibility: .visible
-                ) {
-                    Button("Delete", role: .destructive) { Task { await deleteUnverified() } }
-                    Button("Cancel", role: .cancel) {}
-                }
-                .sheet(isPresented: $showingExportSheet) {
-                    ExportSheet(text: exportedText)
-                        .presentationDetents([.medium, .large])
-                }
         }
+        .modifier(SubscribersLifecycleModifier(filter: filter, sort: sort, search: search, reload: { reset in
+            Task { await reload(resetPage: reset) }
+        }))
+        .modifier(SubscribersOverlaysModifier(
+            showingAdd: $showingAdd,
+            addSheet: { addSheet },
+            showingImportChooser: $showingImportChooser,
+            showingFileImporter: $showingFileImporter,
+            importPreview: $importPreview,
+            importSendVerification: $importSendVerification,
+            isImporting: $isImporting,
+            onPasteEmails: {
+                if let pasted = UIPasteboard.general.string {
+                    Task { await previewImport(from: pasted) }
+                }
+            },
+            onFileImport: { result in
+                handleFileImport(result)
+            },
+            onRunImport: { preview in
+                Task { await runImport(preview) }
+            },
+            showingDeleteUnverifiedConfirm: $showingDeleteUnverifiedConfirm,
+            onDeleteUnverified: {
+                Task { await deleteUnverified() }
+            },
+            showingExportSheet: $showingExportSheet,
+            exportedText: exportedText
+        ))
+        .toolbar { toolbar }
     }
 
     private var content: some View {
@@ -645,5 +621,95 @@ private struct ExportSheet: View {
         .onAppear {
             UIPasteboard.general.string = text
         }
+    }
+}
+
+
+private struct SubscribersLifecycleModifier: ViewModifier {
+    let filter: SubscriberFilterMode
+    let sort: SubscriberSortMode
+    let search: String
+    let reload: (_ resetPage: Bool) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .task { reload(true) }
+            .refreshable { reload(true) }
+            .onChange(of: filter) { _, _ in reload(true) }
+            .onChange(of: sort) { _, _ in reload(true) }
+            .onChange(of: search) { _, _ in
+                Task {
+                    try? await Task.sleep(nanoseconds: 250_000_000)
+                    reload(true)
+                }
+            }
+    }
+}
+
+private struct SubscribersOverlaysModifier<AddSheet: View>: ViewModifier {
+    @Binding var showingAdd: Bool
+    let addSheet: () -> AddSheet
+
+    @Binding var showingImportChooser: Bool
+    @Binding var showingFileImporter: Bool
+
+    @Binding var importPreview: ImportPreviewResponse?
+    @Binding var importSendVerification: Bool
+    @Binding var isImporting: Bool
+
+    let onPasteEmails: () -> Void
+    let onFileImport: (Result<[URL], Error>) -> Void
+    let onRunImport: (ImportPreviewResponse) -> Void
+
+    @Binding var showingDeleteUnverifiedConfirm: Bool
+    let onDeleteUnverified: () -> Void
+
+    @Binding var showingExportSheet: Bool
+    let exportedText: String
+
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $showingAdd) {
+                addSheet()
+                    .presentationDetents([.medium])
+            }
+            .confirmationDialog(
+                "Import subscribers",
+                isPresented: $showingImportChooser,
+                titleVisibility: .visible
+            ) {
+                Button("Choose file (CSV/TXT)") { showingFileImporter = true }
+                Button("Paste emails") { onPasteEmails() }
+                Button("Cancel", role: .cancel) {}
+            }
+            .fileImporter(
+                isPresented: $showingFileImporter,
+                allowedContentTypes: [UTType.commaSeparatedText, UTType.plainText],
+                allowsMultipleSelection: false
+            ) { result in
+                onFileImport(result)
+            }
+            .sheet(item: $importPreview) { preview in
+                ImportPreviewSheet(
+                    preview: preview,
+                    sendVerification: $importSendVerification,
+                    isImporting: $isImporting,
+                    onCancel: { importPreview = nil },
+                    onImport: { onRunImport(preview) }
+                )
+                .presentationDetents([.medium])
+            }
+            .confirmationDialog(
+                "Delete all unverified subscribers?",
+                isPresented: $showingDeleteUnverifiedConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) { onDeleteUnverified() }
+                Button("Cancel", role: .cancel) {}
+            }
+            .sheet(isPresented: $showingExportSheet) {
+                ExportSheet(text: exportedText)
+                    .presentationDetents([.medium, .large])
+            }
     }
 }

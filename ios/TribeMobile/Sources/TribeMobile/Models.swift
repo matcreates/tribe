@@ -91,3 +91,10 @@ struct DeleteUnverifiedResponse: Decodable {
     let ok: Bool?
     let deleted: Int
 }
+
+
+extension ImportPreviewResponse: Identifiable {
+    var id: String {
+        "\(totalInFile)-\(duplicates)-\(invalid)-\(toImport)"
+    }
+}
