@@ -16,6 +16,7 @@ targets:
       - path: Sources/TribeMobile
     resources:
       - path: Resources
+      - path: Sources/TribeMobile/Assets.xcassets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.madewithtribe.mobile
