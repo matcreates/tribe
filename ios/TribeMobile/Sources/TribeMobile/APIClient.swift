@@ -321,8 +321,56 @@ final class APIClient {
         try Self.assertOK(resp, data)
     }
 
+    func uploadAvatar(token: String, fileURL: URL) async throws -> String {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/upload-avatar")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
+        let boundary = "Boundary-\(UUID().uuidString)"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
+        let fileData = try Data(contentsOf: fileURL)
+        let filename = fileURL.lastPathComponent.isEmpty ? "avatar.png" : fileURL.lastPathComponent
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        req.httpBody = body
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+
+        struct R: Decodable { let url: String }
+        return try Self.decoder.decode(R.self, from: data).url
+    }
+
+    func verifySubscription(token: String) async throws -> MobileSubscriptionResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/stripe/verify-subscription")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(MobileSubscriptionResponse.self, from: data)
+    }
+
+    func createPortal(token: String) async throws -> String {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/stripe/create-portal")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+
+        struct R: Decodable { let url: String }
+        return try Self.decoder.decode(R.self, from: data).url
+    }
 
 
     func settings(token: String) async throws -> MobileSettingsResponse {
