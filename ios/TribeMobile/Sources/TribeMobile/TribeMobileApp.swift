@@ -10,6 +10,7 @@ struct TribeMobileApp: App {
             AppRootView()
                 .environmentObject(session)
                 .environmentObject(toast)
+                .environment(\.toastCenter, toast)
                 .withToastOverlay()
         }
     }

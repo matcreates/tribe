@@ -14,8 +14,20 @@ final class ToastCenter: ObservableObject {
     }
 }
 
+// Environment-backed toast to avoid runtime crashes if an EnvironmentObject isn't wired correctly.
+private struct ToastCenterKey: EnvironmentKey {
+    static var defaultValue: ToastCenter = ToastCenter()
+}
+
+extension EnvironmentValues {
+    var toastCenter: ToastCenter {
+        get { self[ToastCenterKey.self] }
+        set { self[ToastCenterKey.self] = newValue }
+    }
+}
+
 struct ToastOverlay: View {
-    @EnvironmentObject var toast: ToastCenter
+    @Environment(\.toastCenter) private var toast
 
     var body: some View {
         Group {
