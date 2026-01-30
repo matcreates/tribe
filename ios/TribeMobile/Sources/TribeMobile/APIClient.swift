@@ -323,6 +323,53 @@ final class APIClient {
 
 
 
+
+
+    func settings(token: String) async throws -> MobileSettingsResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/settings")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(MobileSettingsResponse.self, from: data)
+    }
+
+    func updateSettings(token: String, ownerName: String, slug: String, emailSignature: String) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/settings")
+        var req = URLRequest(url: url)
+        req.httpMethod = "PATCH"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable {
+            let ownerName: String
+            let slug: String
+            let emailSignature: String
+        }
+        req.httpBody = try JSONEncoder().encode(Body(ownerName: ownerName, slug: slug, emailSignature: emailSignature))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func emailReplies(token: String, id: String, page: Int, pageSize: Int) async throws -> EmailRepliesResponse {
+        var comps = URLComponents(url: Config.baseURL.appendingPathComponent("/api/mobile/email/\(id)/replies"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "pageSize", value: String(pageSize)),
+        ]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(EmailRepliesResponse.self, from: data)
+    }
+
+
     func emailDetails(token: String, id: String) async throws -> EmailDetailResponse {
         let url = Config.baseURL.appendingPathComponent("/api/mobile/email/\(id)")
         var req = URLRequest(url: url)

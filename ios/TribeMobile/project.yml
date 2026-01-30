@@ -21,5 +21,5 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.madewithtribe.mobile
         INFOPLIST_FILE: Resources/Info.plist
         MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 12
+        CURRENT_PROJECT_VERSION: 13
     preBuildScripts: []

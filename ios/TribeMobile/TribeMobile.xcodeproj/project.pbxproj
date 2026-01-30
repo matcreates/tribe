@@ -21,6 +21,7 @@
 		8EBE11082F18AC5A53235B73 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */; };
 		AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9257A2DF291377E800E77F46 /* SubscribersView.swift */; };
 		B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */; };
+		BF42BAFCD00628F4A39798EB /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A361BC2280F8653A5EC542C /* SplashView.swift */; };
 		D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12DAA6C65703FF7090C827E /* APIClient.swift */; };
 		E71E0AF97118863D5FD19A6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */; };
 		EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48140FCADF742D7F0388B258 /* Models.swift */; };
@@ -35,6 +36,7 @@
 		41CBD123C9DD86E8B936F1E1 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		4743326CDB9FEA49310AE968 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		48140FCADF742D7F0388B258 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		4A361BC2280F8653A5EC542C /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteView.swift; sourceTree = "<group>"; };
 		6117780DCB6D382D4A467AFC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				41CBD123C9DD86E8B936F1E1 /* RootView.swift */,
 				4743326CDB9FEA49310AE968 /* SessionStore.swift */,
 				6117780DCB6D382D4A467AFC /* SettingsView.swift */,
+				4A361BC2280F8653A5EC542C /* SplashView.swift */,
 				9257A2DF291377E800E77F46 /* SubscribersView.swift */,
 				A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */,
 				A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */,
@@ -174,6 +177,7 @@
 				7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */,
 				75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */,
 				482E90926D259A04839D4E4C /* SettingsView.swift in Sources */,
+				BF42BAFCD00628F4A39798EB /* SplashView.swift in Sources */,
 				AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */,
 				1972358696DB78709029203A /* Theme.swift in Sources */,
 				4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */,
@@ -311,7 +315,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -329,7 +333,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
