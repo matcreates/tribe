@@ -1,13 +1,22 @@
 {
-  "images" : [
+  "images": [
     {
-      "filename" : "TribeLogo.png",
-      "idiom" : "universal",
-      "scale" : "1x"
+      "idiom": "universal",
+      "filename": "TribeLogo-light.png"
+    },
+    {
+      "idiom": "universal",
+      "filename": "TribeLogo-dark.png",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
+  "info": {
+    "author": "xcode",
+    "version": 1
   }
 }
