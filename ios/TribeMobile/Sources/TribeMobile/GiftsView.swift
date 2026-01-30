@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct GiftsView: View {
     @EnvironmentObject var session: SessionStore
+    @EnvironmentObject var toast: ToastCenter
 
     @State private var gifts: [Gift] = []
     @State private var count: Int = 0
@@ -38,17 +39,15 @@ struct GiftsView: View {
                             } else {
                                 VStack(spacing: 10) {
                                     ForEach(gifts) { g in
-                                        GiftRow(gift: g) {
+                                        GiftRow(gift: g, onDelete: {
                                             Task { await deleteGift(g) }
-                                        }
+                                        }, toast: toast)
                                     }
                                 }
                             }
                         }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .pagePadding()
                 }
             }
             .navigationTitle("")
@@ -146,6 +145,7 @@ struct GiftsView: View {
 private struct GiftRow: View {
     let gift: Gift
     let onDelete: () -> Void
+    let toast: ToastCenter
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -167,28 +167,28 @@ private struct GiftRow: View {
                     .font(.system(size: 12))
                     .foregroundStyle(gift.member_count > 0 ? Color.green.opacity(0.85) : TribeTheme.textTertiary)
 
-                Text("Link")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(Color.green.opacity(0.85))
-
-                ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
                     Text("\(Config.baseURL.absoluteString)/g/\(gift.short_code)")
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(Color.green.opacity(0.85))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    Spacer(minLength: 8)
+
+                    Button {
+                        let url = "\(Config.baseURL.absoluteString)/g/\(gift.short_code)"
+                        UIPasteboard.general.string = url
+                        toast.show("Link copied")
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                            .foregroundStyle(Color.green.opacity(0.85))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
             Spacer()
-
-            Button {
-                let url = "\(Config.baseURL.absoluteString)/g/\(gift.short_code)"
-                UIPasteboard.general.string = url
-            } label: {
-                Image(systemName: "doc.on.doc")
-                    .foregroundStyle(TribeTheme.textTertiary)
-            }
-            .buttonStyle(.plain)
 
             Button {
                 if let u = URL(string: gift.file_url) {

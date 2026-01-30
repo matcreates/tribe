@@ -152,19 +152,58 @@ final class APIClient {
         return try Self.decoder.decode(SubscribersResponse.self, from: data)
     }
 
-    func sendEmail(token: String, subject: String, body: String) async throws {
-        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/send")
+
+
+    func writeMeta(token: String) async throws -> WriteMetaResponse {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/meta")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(WriteMetaResponse.self, from: data)
+    }
+
+    func sendTestEmail(token: String, to: String, subject: String, body: String, allowReplies: Bool) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/test")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try JSONEncoder().encode(["subject": subject, "body": body])
+
+        struct Body: Encodable {
+            let to: String
+            let subject: String
+            let body: String
+            let allowReplies: Bool
+        }
+        req.httpBody = try JSONEncoder().encode(Body(to: to, subject: subject, body: body, allowReplies: allowReplies))
 
         let (data, resp) = try await URLSession.shared.data(for: req)
         try Self.assertOK(resp, data)
     }
 
-    func scheduleEmail(token: String, subject: String, body: String, scheduledAt: Date) async throws {
+
+    func sendEmail(token: String, subject: String, body: String, allowReplies: Bool = true) async throws {
+        let url = Config.baseURL.appendingPathComponent("/api/mobile/email/send")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct Body: Encodable {
+            let subject: String
+            let body: String
+            let allowReplies: Bool
+        }
+        req.httpBody = try JSONEncoder().encode(Body(subject: subject, body: body, allowReplies: allowReplies))
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        try Self.assertOK(resp, data)
+    }
+
+    func scheduleEmail(token: String, subject: String, body: String, scheduledAt: Date, allowReplies: Bool = true) async throws {
         let url = Config.baseURL.appendingPathComponent("/api/mobile/email/schedule")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
@@ -172,7 +211,13 @@ final class APIClient {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let iso = ISO8601DateFormatter().string(from: scheduledAt)
-        req.httpBody = try JSONEncoder().encode(["subject": subject, "body": body, "scheduledAt": iso])
+        struct Body: Encodable {
+            let subject: String
+            let body: String
+            let scheduledAt: String
+            let allowReplies: Bool
+        }
+        req.httpBody = try JSONEncoder().encode(Body(subject: subject, body: body, scheduledAt: iso, allowReplies: allowReplies))
 
         let (data, resp) = try await URLSession.shared.data(for: req)
         try Self.assertOK(resp, data)

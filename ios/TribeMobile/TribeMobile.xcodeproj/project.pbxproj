@@ -12,6 +12,7 @@
 		3354D6A7C1FDDC2B4A633471 /* EmailDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */; };
 		41D3391705A325EE13F6BA42 /* JoinPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9954785828361C5B3D4596DC /* JoinPageView.swift */; };
 		482E90926D259A04839D4E4C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6117780DCB6D382D4A467AFC /* SettingsView.swift */; };
+		4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */; };
 		609C495ABD07F85EDEE30939 /* GiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */; };
 		642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B3089B62279AC0940E7B9 /* Config.swift */; };
 		75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4743326CDB9FEA49310AE968 /* SessionStore.swift */; };
@@ -41,6 +42,7 @@
 		9257A2DF291377E800E77F46 /* SubscribersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscribersView.swift; sourceTree = "<group>"; };
 		934B3089B62279AC0940E7B9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		9954785828361C5B3D4596DC /* JoinPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinPageView.swift; sourceTree = "<group>"; };
+		A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		A12DAA6C65703FF7090C827E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				6117780DCB6D382D4A467AFC /* SettingsView.swift */,
 				9257A2DF291377E800E77F46 /* SubscribersView.swift */,
 				A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */,
+				A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */,
 				3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */,
 				526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */,
 			);
@@ -173,6 +176,7 @@
 				482E90926D259A04839D4E4C /* SettingsView.swift in Sources */,
 				AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */,
 				1972358696DB78709029203A /* Theme.swift in Sources */,
+				4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */,
 				F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */,
 				8C01F6DBB0943D5D6F649ECC /* WriteView.swift in Sources */,
 			);
@@ -307,7 +311,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -325,7 +329,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

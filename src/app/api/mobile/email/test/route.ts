@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBearerToken, verifyMobileToken } from "@/lib/mobileAuth";
-import { sendEmail } from "@/lib/actions";
+import { sendTestEmailAction } from "@/lib/actions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,17 +10,22 @@ export async function POST(request: NextRequest) {
     await verifyMobileToken(token);
 
     const body = (await request.json()) as {
+      to?: string;
       subject?: string;
       body?: string;
       allowReplies?: boolean;
     };
 
-    if (!body.subject || !body.body) {
-      return NextResponse.json({ error: "Missing subject/body" }, { status: 400 });
+    if (!body.to || !body.subject || !body.body) {
+      return NextResponse.json({ error: "Missing to/subject/body" }, { status: 400 });
     }
 
-    const result = await sendEmail(body.subject, body.body, "verified", body.allowReplies ?? true);
-    return NextResponse.json({ ok: true, campaign: result });
+    const result = await sendTestEmailAction(body.to, body.subject, body.body, body.allowReplies ?? true);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || "Failed to send test email" }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Internal server error" },

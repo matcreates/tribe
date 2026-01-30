@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       subject?: string;
       body?: string;
+      allowReplies?: boolean;
       scheduledAt?: string;
     };
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid scheduledAt" }, { status: 400 });
     }
 
-    const result = await scheduleEmail(body.subject, body.body, scheduledAt);
+    const result = await scheduleEmail(body.subject, body.body, scheduledAt, "verified", body.allowReplies ?? true);
     return NextResponse.json({ ok: true, scheduled: result });
   } catch (e) {
     return NextResponse.json(

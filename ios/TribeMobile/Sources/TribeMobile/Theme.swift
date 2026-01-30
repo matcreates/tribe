@@ -32,3 +32,12 @@ struct TribeCard: ViewModifier {
 extension View {
     func tribeCard() -> some View { modifier(TribeCard()) }
 }
+
+
+extension View {
+    func pagePadding() -> some View {
+        self.padding(.horizontal, 18)
+            .padding(.top, 16)
+            .padding(.bottom, 32)
+    }
+}

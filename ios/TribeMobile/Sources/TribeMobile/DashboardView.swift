@@ -40,9 +40,7 @@ struct DashboardView: View {
                                 .padding(.top, 24)
                         }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .pagePadding()
                 }
             }
             .navigationTitle("")

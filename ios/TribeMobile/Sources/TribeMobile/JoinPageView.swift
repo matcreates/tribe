@@ -4,6 +4,7 @@ struct JoinPageView: View {
     private let defaultJoinDescription = "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."
 
     @EnvironmentObject var session: SessionStore
+    @EnvironmentObject var toast: ToastCenter
 
     @State private var join: JoinSettings?
     @State private var description: String = ""
@@ -59,7 +60,7 @@ struct JoinPageView: View {
                                     .frame(minHeight: 90)
                                     .scrollContentBackground(.hidden)
                                     .padding(8)
-                                    .background(Color.white.opacity(0.05))
+                                    .background(TribeTheme.cardBg)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12, style: .continuous)
                                             .stroke(TribeTheme.stroke)
@@ -89,9 +90,7 @@ struct JoinPageView: View {
                                 .padding(.top, 24)
                         }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .pagePadding()
                 }
             }
             .navigationTitle("")
@@ -129,6 +128,7 @@ struct JoinPageView: View {
 
                 Button {
                     UIPasteboard.general.string = fullJoinUrl
+                    toast.show("Link copied")
                 } label: {
                     Image(systemName: "doc.on.doc")
                         .foregroundStyle(TribeTheme.textTertiary)

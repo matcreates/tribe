@@ -42,6 +42,7 @@ enum SubscriberSortMode: String, CaseIterable {
 
 struct SubscribersView: View {
     @EnvironmentObject var session: SessionStore
+    @EnvironmentObject var toast: ToastCenter
 
     @State private var subscribers: [Subscriber] = []
     @State private var totalVerified: Int = 0
@@ -128,9 +129,9 @@ struct SubscribersView: View {
                     if !subscribers.isEmpty {
                         VStack(spacing: 10) {
                             ForEach(subscribers) { s in
-                                SubscriberRow(subscriber: s) {
+                                SubscriberRow(subscriber: s, onRemove: {
                                     Task { await remove(s) }
-                                }
+                                }, toast: toast)
                             }
                         }
                     } else if !isLoading && error == nil {
@@ -535,6 +536,7 @@ private struct ImportPreviewSheet: View {
 private struct SubscriberRow: View {
     let subscriber: Subscriber
     let onRemove: () -> Void
+    let toast: ToastCenter
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -564,6 +566,7 @@ private struct SubscriberRow: View {
 
             Button {
                 UIPasteboard.general.string = subscriber.email
+                toast.show("Email copied")
             } label: {
                 Image(systemName: "doc.on.doc")
                     .foregroundStyle(TribeTheme.textTertiary)
