@@ -41,31 +41,18 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-48 overflow-hidden">
-        {/* Background image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(/hero-bg.jpg)',
-          }}
-        />
-        
-        {/* Lighter overlay - more visible image, darker at top for nav readability */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(180deg, rgba(12, 12, 12, 0.6) 0%, rgba(12, 12, 12, 0.3) 40%, rgba(12, 12, 12, 0.2) 60%, rgba(12, 12, 12, 0.7) 100%)',
-          }}
-        />
-
+      <section className="relative min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-48 overflow-hidden" style={{ background: 'rgb(12, 12, 12)' }}>
         <div className="relative z-10 max-w-3xl mx-auto text-center px-2">
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full mb-5 sm:mb-8 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
             <span className="text-[10px] sm:text-[11px] text-white/50 tracking-wide">Simple newsletter tool for creators</span>
           </div>
           
-          <h1 className="text-[1.75rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-medium text-white leading-[1.15] sm:leading-[1.1] tracking-tight mb-4 sm:mb-6">
-            A newsletter tool that doesn’t s*ck, made for creators
+          <h1 
+            className="text-[1.75rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-normal text-white leading-[1.15] sm:leading-[1.1] tracking-tight mb-4 sm:mb-6"
+            style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+          >
+            A newsletter tool that doesn&apos;t s*ck, made for creators
           </h1>
           
           <p className="text-[14px] sm:text-[15px] md:text-[17px] text-white/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">

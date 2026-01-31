@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Custom serif font for headlines */
+@font-face {
+  font-family: 'HeritageSerif';
+  src: url('/fonts/HeritageSerif.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Dark charcoal base - not pure black */
   --bg-base: 18, 18, 18;
