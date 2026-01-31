@@ -9,11 +9,13 @@ import type {
   PaginatedRepliesResult,
   RecipientFilter,
   SubscriptionStatus,
+  SubscriptionTier,
+  SubscriptionPlan,
   WeeklyEmailStatus,
   TimePeriod,
   Gift,
 } from "./types";
-import { MAX_GIFTS } from "./types";
+import { MAX_GIFTS, TRIBE_SIZE_LIMITS } from "./types";
 import {
   pool,
   getTribeByUserId,
@@ -588,11 +590,30 @@ export async function getEmailSignature(): Promise<string> {
 
 // SubscriptionStatus imported from ./types
 
+// Helper to determine tier from plan
+function getTierFromPlan(plan: SubscriptionPlan): SubscriptionTier {
+  if (!plan) return 'free';
+  if (plan.startsWith('big_')) return 'big';
+  if (plan.startsWith('small_')) return 'small';
+  // Legacy plans (monthly/yearly) map to small
+  return 'small';
+}
+
 export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
   const tribe = await getTribe();
   
   const status = (tribe.subscription_status || 'free') as 'free' | 'active' | 'canceled' | 'past_due';
-  const plan = tribe.subscription_plan as 'monthly' | 'yearly' | null;
+  const rawPlan = tribe.subscription_plan as string | null;
+  
+  // Map legacy plans to new format
+  let plan: SubscriptionPlan = null;
+  if (rawPlan === 'monthly') {
+    plan = 'small_monthly';
+  } else if (rawPlan === 'yearly') {
+    plan = 'small_yearly';
+  } else if (rawPlan) {
+    plan = rawPlan as SubscriptionPlan;
+  }
   
   // Handle subscription_ends_at safely - it could be Date, string, or null
   let endsAt: string | null = null;
@@ -609,20 +630,44 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
     }
   }
   
-  // User can send emails if they have an active subscription
-  // or if their subscription is canceled but hasn't ended yet
-  let canSendEmails = false;
+  // Determine tier based on subscription status and plan
+  let tier: SubscriptionTier = 'free';
   if (status === 'active') {
-    canSendEmails = true;
-  } else if (status === 'canceled' && endsAt) {
-    canSendEmails = new Date(endsAt) > new Date();
+    tier = getTierFromPlan(plan);
+  } else if (status === 'canceled' && endsAt && new Date(endsAt) > new Date()) {
+    // Still active until end date
+    tier = getTierFromPlan(plan);
+  }
+  
+  // Get tribe size limit based on tier
+  const tribeSizeLimit = TRIBE_SIZE_LIMITS[tier];
+  
+  // Get current verified tribe size
+  const verifiedCount = await getVerifiedSubscriberCount(tribe.id);
+  const currentTribeSize = verifiedCount;
+  
+  // Check if tribe is full
+  const isTribeFull = tribeSizeLimit !== null && currentTribeSize >= tribeSizeLimit;
+  
+  // User can send emails if:
+  // 1. They have an active paid subscription (small or big tier)
+  // 2. Their tribe is not full
+  let canSendEmails = false;
+  if (status === 'active' && tier !== 'free') {
+    canSendEmails = !isTribeFull;
+  } else if (status === 'canceled' && endsAt && new Date(endsAt) > new Date() && tier !== 'free') {
+    canSendEmails = !isTribeFull;
   }
   
   return {
     status,
+    tier,
     plan,
     endsAt,
     canSendEmails,
+    tribeSizeLimit,
+    currentTribeSize,
+    isTribeFull,
   };
 }
 

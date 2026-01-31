@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTribeBySlug, addSubscriber, getGiftByShortCode, getGiftById, getSubscriberByEmail } from "@/lib/db";
+import { getTribeBySlug, addSubscriber, getGiftByShortCode, getGiftById, getSubscriberByEmail, getVerifiedSubscriberCount } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
+import { TRIBE_SIZE_LIMITS, SubscriptionTier } from "@/lib/types";
+
+// Helper to determine tier from plan
+function getTierFromPlan(plan: string | null, status: string): SubscriptionTier {
+  if (status !== 'active' && status !== 'canceled') return 'free';
+  if (!plan) return 'free';
+  if (plan.startsWith('big_')) return 'big';
+  if (plan.startsWith('small_') || plan === 'monthly' || plan === 'yearly') return 'small';
+  return 'free';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +30,20 @@ export async function POST(request: NextRequest) {
         { error: "Tribe not found" },
         { status: 404 }
       );
+    }
+
+    // Check if tribe is full based on subscription tier
+    const tier = getTierFromPlan(tribe.subscription_plan, tribe.subscription_status || 'free');
+    const sizeLimit = TRIBE_SIZE_LIMITS[tier];
+    
+    if (sizeLimit !== null) {
+      const currentSize = await getVerifiedSubscriberCount(tribe.id);
+      if (currentSize >= sizeLimit) {
+        return NextResponse.json(
+          { error: "Tribe is full", tribeFull: true },
+          { status: 403 }
+        );
+      }
     }
 
     // Resolve gift ID from code or direct ID

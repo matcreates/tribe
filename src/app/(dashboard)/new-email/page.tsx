@@ -428,6 +428,7 @@ export default function NewEmailPage() {
       <PaywallModal 
         isOpen={showPaywall} 
         onClose={() => setShowPaywall(false)}
+        currentTribeSize={subscription?.currentTribeSize}
       />
 
       {/* Contact Support Modal */}
@@ -533,7 +534,7 @@ export default function NewEmailPage() {
           </h1>
 
           {/* Free user info banner */}
-          {subscription && !subscription.canSendEmails && (
+          {subscription && !subscription.canSendEmails && subscription.tier === 'free' && !subscription.isTribeFull && (
             <div 
               className="flex items-center gap-3 p-4 rounded-[10px] border border-amber-500/20 mb-5"
               style={{ background: 'rgba(234, 179, 8, 0.08)' }}
@@ -544,6 +545,36 @@ export default function NewEmailPage() {
               <p className="text-[13px] text-amber-200/80">
                 Sending emails is only available for Premium users. <button onClick={() => setShowPaywall(true)} className="underline hover:text-amber-100 transition-colors">Upgrade now</button>
               </p>
+            </div>
+          )}
+
+          {/* Tribe size limit reached banner */}
+          {subscription && subscription.isTribeFull && (
+            <div 
+              className="p-5 rounded-[12px] border border-red-500/20 mb-5"
+              style={{ background: 'rgba(239, 68, 68, 0.06)' }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
+                  <LimitIcon className="w-4 h-4 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-medium text-white/90 mb-1">
+                    Your tribe has reached its size limit
+                  </h3>
+                  <p className="text-[13px] text-white/50 mb-3">
+                    You have {subscription.currentTribeSize?.toLocaleString()} members, which exceeds the {subscription.tribeSizeLimit?.toLocaleString()} member limit for your plan.
+                    {subscription.tier === 'small' ? ' Upgrade to Big Creators for unlimited members.' : ' Upgrade your plan to continue.'}
+                  </p>
+                  <button
+                    onClick={() => setShowPaywall(true)}
+                    className="px-4 py-2 rounded-[8px] text-[11px] font-medium tracking-[0.08em] uppercase"
+                    style={{ background: '#E8B84A', color: '#000' }}
+                  >
+                    {subscription.tier === 'small' ? 'Upgrade to Big Creators' : 'Upgrade'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

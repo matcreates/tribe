@@ -268,10 +268,34 @@ export default function SettingsPage() {
                       {subscription.status === 'canceled' ? 'Canceled' : 'Active'}
                     </span>
                   </div>
-                  <span className="text-[12px] text-white/40 capitalize">
-                    {subscription.plan} plan
+                  <span className="text-[12px] text-white/40">
+                    {subscription.tier === 'big' ? 'Big Creators' : 'Small Creators'} · {subscription.plan?.includes('yearly') ? 'Yearly' : 'Monthly'}
                   </span>
                 </div>
+                
+                {/* Tribe size info */}
+                <div className="mb-3 p-3 rounded-[8px] border border-white/[0.04]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-white/40">Tribe size</span>
+                    <span className="text-[11px] text-white/50">
+                      {subscription.currentTribeSize?.toLocaleString() || 0} / {subscription.tribeSizeLimit ? subscription.tribeSizeLimit.toLocaleString() : 'Unlimited'}
+                    </span>
+                  </div>
+                  {subscription.tribeSizeLimit && (
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                      <div 
+                        className={`h-full rounded-full transition-all ${subscription.isTribeFull ? 'bg-red-400' : 'bg-emerald-400'}`}
+                        style={{ width: `${Math.min(100, ((subscription.currentTribeSize || 0) / subscription.tribeSizeLimit) * 100)}%` }}
+                      />
+                    </div>
+                  )}
+                  {subscription.isTribeFull && (
+                    <p className="text-[10px] text-red-400 mt-2">
+                      Tribe is full. Upgrade to Big Creators for unlimited members.
+                    </p>
+                  )}
+                </div>
+                
                 <p className="text-[12px] text-white/40 mb-4">
                   {subscription.status === 'canceled' 
                     ? subscription.endsAt 
@@ -290,6 +314,14 @@ export default function SettingsPage() {
                   >
                     <span className="btn-glass-text">{isLoadingPortal ? "Loading..." : "Manage billing"}</span>
                   </button>
+                  {subscription.tier === 'small' && (
+                    <button
+                      onClick={() => setShowPaywall(true)}
+                      className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase text-[#E8B84A] hover:bg-[#E8B84A]/10 transition-colors"
+                    >
+                      Upgrade to Big Creators
+                    </button>
+                  )}
                   <button
                     onClick={syncSubscription}
                     disabled={isLoadingPortal}
@@ -323,6 +355,28 @@ export default function SettingsPage() {
                   <div className="w-2 h-2 rounded-full bg-white/30" />
                   <span className="text-[13px] text-white/70 font-medium">Free plan</span>
                 </div>
+                
+                {/* Tribe size info for free users */}
+                <div className="mb-3 p-3 rounded-[8px] border border-white/[0.04]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-white/40">Tribe size</span>
+                    <span className="text-[11px] text-white/50">
+                      {subscription?.currentTribeSize?.toLocaleString() || 0} / 500
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                    <div 
+                      className={`h-full rounded-full transition-all ${subscription?.isTribeFull ? 'bg-red-400' : 'bg-white/30'}`}
+                      style={{ width: `${Math.min(100, ((subscription?.currentTribeSize || 0) / 500) * 100)}%` }}
+                    />
+                  </div>
+                  {subscription?.isTribeFull && (
+                    <p className="text-[10px] text-red-400 mt-2">
+                      Tribe is full. Upgrade to add more members.
+                    </p>
+                  )}
+                </div>
+                
                 <p className="text-[12px] text-white/40 mb-4">
                   Upgrade to unlock email sending. Starts at $5/month.
                 </p>

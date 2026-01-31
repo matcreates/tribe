@@ -98,9 +98,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const stripe = getStripe();
   const customerId = session.customer as string;
   const subscriptionId = session.subscription as string;
-  const plan = session.metadata?.plan as 'monthly' | 'yearly';
+  const rawPlan = session.metadata?.plan;
 
-  console.log("Checkout completed - customerId:", customerId, "subscriptionId:", subscriptionId, "plan:", plan);
+  console.log("Checkout completed - customerId:", customerId, "subscriptionId:", subscriptionId, "plan:", rawPlan);
 
   if (!customerId) {
     console.error("No customer ID in checkout session");
@@ -121,6 +121,32 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Normalize plan to new format
+  // Valid: small_monthly, small_yearly, big_monthly, big_yearly
+  // Legacy: monthly -> small_monthly, yearly -> small_yearly
+  type SubscriptionPlan = 'small_monthly' | 'small_yearly' | 'big_monthly' | 'big_yearly';
+  let plan: SubscriptionPlan;
+  
+  switch (rawPlan) {
+    case 'monthly':
+    case 'small_monthly':
+      plan = 'small_monthly';
+      break;
+    case 'yearly':
+    case 'small_yearly':
+      plan = 'small_yearly';
+      break;
+    case 'big_monthly':
+      plan = 'big_monthly';
+      break;
+    case 'big_yearly':
+      plan = 'big_yearly';
+      break;
+    default:
+      console.log(`Unknown plan "${rawPlan}", defaulting to small_monthly`);
+      plan = 'small_monthly';
+  }
+
   // Get subscription details
   const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,11 +164,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   await updateTribeSubscription(tribe.id, {
     stripe_subscription_id: subscriptionId,
     subscription_status: 'active',
-    subscription_plan: plan || 'monthly', // Default to monthly if not set
+    subscription_plan: plan,
     subscription_ends_at: endsAt,
   });
 
-  console.log(`Subscription activated for tribe ${tribe.id}, ends at ${endsAt?.toISOString() || 'unknown'}`);
+  console.log(`Subscription activated for tribe ${tribe.id}, plan: ${plan}, ends at ${endsAt?.toISOString() || 'unknown'}`);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {

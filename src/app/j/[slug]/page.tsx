@@ -8,6 +8,8 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Note: Metadata is handled by the root layout - all pages share the same OG image
+
 interface TribeSettings {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ interface TribeSettings {
   ownerName: string;
   ownerAvatar: string | null;
   description: string;
+  isTribeFull?: boolean;
 }
 
 export default function PublicJoinPage({ params }: PageProps) {
@@ -154,7 +157,19 @@ export default function PublicJoinPage({ params }: PageProps) {
             {tribeSettings?.description || "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."}
           </p>
 
-          {isJoined ? (
+          {tribeSettings?.isTribeFull ? (
+            <div className="py-3">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
+                <LockIcon className="w-5 h-5 text-red-400/80" />
+              </div>
+              <p className="text-[14px] text-white/80 font-medium mb-1">
+                This tribe is full
+              </p>
+              <p className="text-[12px] text-white/50">
+                The creator&apos;s tribe has reached its capacity. Check back later!
+              </p>
+            </div>
+          ) : isJoined ? (
             <div className="py-3">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(45, 138, 138, 0.2)' }}>
                 <MailIcon className="w-5 h-5 text-[#2d8a8a]" />
@@ -217,6 +232,15 @@ function MailIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="4" width="20" height="16" rx="2" />
       <path d="M22 7l-10 6L2 7" />
+    </svg>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
   );
 }

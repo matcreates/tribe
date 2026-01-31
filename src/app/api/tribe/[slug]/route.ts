@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTribeBySlug } from "@/lib/db";
+import { getTribeBySlug, getVerifiedSubscriberCount } from "@/lib/db";
+import { TRIBE_SIZE_LIMITS, SubscriptionTier } from "@/lib/types";
+
+// Helper to determine tier from plan
+function getTierFromPlan(plan: string | null, status: string): SubscriptionTier {
+  if (status !== 'active' && status !== 'canceled') return 'free';
+  if (!plan) return 'free';
+  if (plan.startsWith('big_')) return 'big';
+  if (plan.startsWith('small_') || plan === 'monthly' || plan === 'yearly') return 'small';
+  return 'free';
+}
 
 export async function GET(
   request: NextRequest,
@@ -16,6 +26,16 @@ export async function GET(
       );
     }
 
+    // Check if tribe is full
+    const tier = getTierFromPlan(tribe.subscription_plan, tribe.subscription_status || 'free');
+    const sizeLimit = TRIBE_SIZE_LIMITS[tier];
+    let isTribeFull = false;
+    
+    if (sizeLimit !== null) {
+      const currentSize = await getVerifiedSubscriberCount(tribe.id);
+      isTribeFull = currentSize >= sizeLimit;
+    }
+
     const defaultDescription = "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.";
     
     return NextResponse.json({
@@ -25,6 +45,7 @@ export async function GET(
       ownerName: tribe.owner_name || "Anonymous",
       ownerAvatar: tribe.owner_avatar,
       description: tribe.join_description || defaultDescription,
+      isTribeFull,
     });
   } catch (error) {
     console.error("Get tribe by slug error:", error);

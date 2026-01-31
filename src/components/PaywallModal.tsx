@@ -6,11 +6,15 @@ import { useRouter } from "next/navigation";
 interface PaywallModalProps {
   isOpen: boolean;
   onClose?: () => void;
+  currentTribeSize?: number;
 }
 
-export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
+type PlanType = "small_monthly" | "small_yearly" | "big_monthly" | "big_yearly";
+
+export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallModalProps) {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [selectedTier, setSelectedTier] = useState<"small" | "big">("small");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +28,17 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     }
   };
 
+  const getSelectedPlan = (): PlanType => {
+    return `${selectedTier}_${billingCycle}` as PlanType;
+  };
+
+  const getPriceDisplay = () => {
+    if (selectedTier === "small") {
+      return billingCycle === "yearly" ? "$60/year" : "$8/month";
+    }
+    return billingCycle === "yearly" ? "$200/year" : "$20/month";
+  };
+
   const handleSubscribe = async () => {
     setIsLoading(true);
     setError(null);
@@ -32,7 +47,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selectedPlan }),
+        body: JSON.stringify({ plan: getSelectedPlan() }),
       });
 
       const data = await response.json();
@@ -55,6 +70,9 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     }
   };
 
+  // Check if user needs Big Creator (tribe size > 10k)
+  const needsBigCreator = currentTribeSize > 10000;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -65,7 +83,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-md mx-4 rounded-[16px] border border-white/[0.08] overflow-hidden"
+        className="relative w-full max-w-lg mx-4 rounded-[16px] border border-white/[0.08] overflow-hidden max-h-[90vh] overflow-y-auto"
         style={{ background: 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
       >
         {/* Close Button */}
@@ -88,100 +106,143 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             Unlock Email Sending
           </h2>
           <p className="text-[14px] text-white/50 leading-relaxed">
-            Upgrade to Tribe to send emails to your community
+            Choose the plan that fits your tribe
           </p>
         </div>
 
-        {/* Pricing Options */}
+        {/* Billing Toggle */}
         <div className="px-6 pb-4">
-          <div className="space-y-3">
-            {/* Yearly Plan */}
+          <div className="flex gap-1 p-1 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
             <button
-              onClick={() => setSelectedPlan("yearly")}
-              className={`w-full p-4 pl-12 rounded-[12px] border transition-all text-left relative ${
-                selectedPlan === "yearly"
-                  ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
-                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+              onClick={() => setBillingCycle("monthly")}
+              className={`flex-1 py-2 rounded-[8px] text-[12px] font-medium tracking-[0.05em] uppercase transition-all ${
+                billingCycle === "monthly"
+                  ? "bg-white/[0.1] text-white/80"
+                  : "text-white/40 hover:text-white/60"
               }`}
             >
-              {/* Best Value Badge */}
-              <div className="absolute -top-2 right-4">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-[0.05em] uppercase bg-[#E8B84A] text-black">
-                  Best Value
-                </span>
-              </div>
-              
-              {/* Radio indicator */}
-              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                selectedPlan === "yearly" ? "border-[#E8B84A]" : "border-white/20"
-              }`}>
-                {selectedPlan === "yearly" && (
-                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
-                )}
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[14px] font-medium text-white/80">Yearly</p>
-                  <p className="text-[12px] text-white/40 mt-0.5">Billed annually</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[20px] font-medium text-white/90">$60<span className="text-[13px] text-white/40">/year</span></p>
-                  <p className="text-[11px] text-[#E8B84A]">$5/month · Save 37%</p>
-                </div>
-              </div>
+              Monthly
             </button>
-
-            {/* Monthly Plan */}
             <button
-              onClick={() => setSelectedPlan("monthly")}
-              className={`w-full p-4 pl-12 rounded-[12px] border transition-all text-left relative ${
-                selectedPlan === "monthly"
-                  ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
-                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+              onClick={() => setBillingCycle("yearly")}
+              className={`flex-1 py-2 rounded-[8px] text-[12px] font-medium tracking-[0.05em] uppercase transition-all ${
+                billingCycle === "yearly"
+                  ? "bg-white/[0.1] text-white/80"
+                  : "text-white/40 hover:text-white/60"
               }`}
             >
-              {/* Radio indicator */}
-              <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                selectedPlan === "monthly" ? "border-[#E8B84A]" : "border-white/20"
-              }`}>
-                {selectedPlan === "monthly" && (
-                  <div className="w-2 h-2 rounded-full bg-[#E8B84A]" />
-                )}
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[14px] font-medium text-white/80">Monthly</p>
-                  <p className="text-[12px] text-white/40 mt-0.5">Billed monthly</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[20px] font-medium text-white/90">$8<span className="text-[13px] text-white/40">/month</span></p>
-                  <p className="text-[11px] text-white/40">Cancel anytime</p>
-                </div>
-              </div>
+              Yearly <span className="text-[#E8B84A]">Save 17%+</span>
             </button>
           </div>
         </div>
 
-        {/* Features */}
+        {/* Plan Options */}
         <div className="px-6 pb-4">
-          <div className="p-4 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-            <p className="text-[11px] text-white/40 uppercase tracking-[0.08em] mb-3">What&apos;s included</p>
-            <div className="space-y-2">
-              {[
-                "2 emails per week",
-                "Email scheduling",
-                "Open rate tracking",
-                "Reply management",
-                "Custom email signatures",
-              ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckIcon className="w-4 h-4 text-emerald-400" />
-                  <span className="text-[13px] text-white/60">{feature}</span>
+          <div className="space-y-3">
+            {/* Small Creators Plan */}
+            <button
+              onClick={() => !needsBigCreator && setSelectedTier("small")}
+              disabled={needsBigCreator}
+              className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
+                needsBigCreator
+                  ? "border-white/[0.04] bg-white/[0.01] opacity-50 cursor-not-allowed"
+                  : selectedTier === "small"
+                  ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
+                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[15px] font-medium text-white/80">Small Creators</p>
+                    {selectedTier === "small" && !needsBigCreator && (
+                      <div className="w-4 h-4 rounded-full bg-[#E8B84A] flex items-center justify-center">
+                        <CheckIcon className="w-2.5 h-2.5 text-black" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[12px] text-white/40 mb-2">Up to 10,000 tribe members</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckIcon className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[11px] text-white/50">2 emails per week</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckIcon className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[11px] text-white/50">All features included</span>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="text-right">
+                  <p className="text-[22px] font-medium text-white/90">
+                    {billingCycle === "yearly" ? "$5" : "$8"}
+                    <span className="text-[12px] text-white/40">/mo</span>
+                  </p>
+                  {billingCycle === "yearly" && (
+                    <p className="text-[11px] text-white/40">$60/year</p>
+                  )}
+                </div>
+              </div>
+              {needsBigCreator && (
+                <p className="text-[11px] text-amber-400 mt-2">
+                  Your tribe has {currentTribeSize.toLocaleString()} members - upgrade to Big Creators
+                </p>
+              )}
+            </button>
+
+            {/* Big Creators Plan */}
+            <button
+              onClick={() => setSelectedTier("big")}
+              className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
+                selectedTier === "big"
+                  ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
+                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+              }`}
+            >
+              {/* Popular Badge */}
+              <div className="absolute -top-2 right-4">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-[0.05em] uppercase bg-[#E8B84A] text-black">
+                  Unlimited
+                </span>
+              </div>
+              
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[15px] font-medium text-white/80">Big Creators</p>
+                    {selectedTier === "big" && (
+                      <div className="w-4 h-4 rounded-full bg-[#E8B84A] flex items-center justify-center">
+                        <CheckIcon className="w-2.5 h-2.5 text-black" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[12px] text-white/40 mb-2">Unlimited tribe members</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckIcon className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[11px] text-white/50">2 emails per week</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckIcon className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[11px] text-white/50">All features included</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckIcon className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[11px] text-white/50">No tribe size limits</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[22px] font-medium text-white/90">
+                    {billingCycle === "yearly" ? "$17" : "$20"}
+                    <span className="text-[12px] text-white/40">/mo</span>
+                  </p>
+                  {billingCycle === "yearly" && (
+                    <p className="text-[11px] text-white/40">$200/year</p>
+                  )}
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -195,16 +256,16 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
           <button
             onClick={handleSubscribe}
             disabled={isLoading}
-            className="w-full py-3.5 rounded-[10px] text-[12px] font-medium tracking-[0.1em] uppercase transition-all btn-glass"
+            className="w-full py-3.5 rounded-[10px] text-[12px] font-medium tracking-[0.1em] uppercase transition-all"
             style={{ 
               background: 'linear-gradient(135deg, #E8B84A 0%, #D4A43A 100%)',
               color: '#000',
             }}
           >
-            <span>{isLoading ? "Loading..." : `Upgrade ${selectedPlan === "yearly" ? "for $60/year" : "for $8/month"}`}</span>
+            <span>{isLoading ? "Loading..." : `Upgrade for ${getPriceDisplay()}`}</span>
           </button>
           <p className="text-[11px] text-white/30 text-center mt-3">
-            Secure payment powered by Stripe
+            Secure payment powered by Stripe · Cancel anytime
           </p>
         </div>
       </div>

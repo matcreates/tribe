@@ -78,12 +78,26 @@ export interface PaginatedRepliesResult {
 export type RecipientFilter = "verified" | "non-verified" | "all";
 
 // Subscription types
+export type SubscriptionTier = 'free' | 'small' | 'big';
+export type SubscriptionPlan = 'small_monthly' | 'small_yearly' | 'big_monthly' | 'big_yearly' | null;
+
 export interface SubscriptionStatus {
   status: 'free' | 'active' | 'canceled' | 'past_due';
-  plan: 'monthly' | 'yearly' | null;
+  tier: SubscriptionTier;
+  plan: SubscriptionPlan;
   endsAt: string | null;
   canSendEmails: boolean;
+  tribeSizeLimit: number | null; // null = unlimited
+  currentTribeSize: number;
+  isTribeFull: boolean;
 }
+
+// Tribe size limits per tier
+export const TRIBE_SIZE_LIMITS: Record<SubscriptionTier, number | null> = {
+  free: 500,
+  small: 10000,
+  big: null, // unlimited
+};
 
 // Weekly email status
 export interface WeeklyEmailStatus {

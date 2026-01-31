@@ -534,7 +534,7 @@ export async function updateTribeSubscription(
     stripe_customer_id?: string;
     stripe_subscription_id?: string;
     subscription_status?: 'free' | 'active' | 'canceled' | 'past_due';
-    subscription_plan?: 'monthly' | 'yearly' | null;
+    subscription_plan?: 'small_monthly' | 'small_yearly' | 'big_monthly' | 'big_yearly' | null;
     subscription_ends_at?: Date | null;
   }
 ): Promise<void> {

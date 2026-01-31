@@ -27,19 +27,48 @@ export async function POST(req: NextRequest) {
 
     const { plan } = await req.json();
     
-    if (!plan || !["monthly", "yearly"].includes(plan)) {
+    // Valid plans: small_monthly, small_yearly, big_monthly, big_yearly
+    // Also support legacy: monthly, yearly (map to small_*)
+    const validPlans = ["monthly", "yearly", "small_monthly", "small_yearly", "big_monthly", "big_yearly"];
+    if (!plan || !validPlans.includes(plan)) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
-    // Check price IDs
-    const priceId = plan === "yearly" 
-      ? process.env.STRIPE_YEARLY_PRICE_ID 
-      : process.env.STRIPE_MONTHLY_PRICE_ID;
+    // Map legacy plans and get price IDs
+    // Small Creator: $8/month, $60/year (from env vars - existing)
+    // Big Creator: $20/month, $200/year (hardcoded)
+    const BIG_MONTHLY_PRICE_ID = "price_1SvejtP8Y5norXJQIC91Bmlu";
+    const BIG_YEARLY_PRICE_ID = "price_1SveklP8Y5norXJQtfPhay6V";
+    
+    let priceId: string | undefined;
+    let normalizedPlan: string;
+    
+    switch (plan) {
+      case "monthly":
+      case "small_monthly":
+        priceId = process.env.STRIPE_MONTHLY_PRICE_ID;
+        normalizedPlan = "small_monthly";
+        break;
+      case "yearly":
+      case "small_yearly":
+        priceId = process.env.STRIPE_YEARLY_PRICE_ID;
+        normalizedPlan = "small_yearly";
+        break;
+      case "big_monthly":
+        priceId = BIG_MONTHLY_PRICE_ID;
+        normalizedPlan = "big_monthly";
+        break;
+      case "big_yearly":
+        priceId = BIG_YEARLY_PRICE_ID;
+        normalizedPlan = "big_yearly";
+        break;
+      default:
+        return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
 
     if (!priceId) {
-      const missingVar = plan === "yearly" ? "STRIPE_YEARLY_PRICE_ID" : "STRIPE_MONTHLY_PRICE_ID";
-      console.error(`${missingVar} is not set`);
-      return NextResponse.json({ error: `${missingVar} is not configured in environment variables.` }, { status: 500 });
+      console.error(`Price ID not found for plan: ${plan}`);
+      return NextResponse.json({ error: "Price not configured for this plan." }, { status: 500 });
     }
 
     const tribe = await getTribeByUserId(session.user.id);
@@ -89,7 +118,7 @@ export async function POST(req: NextRequest) {
         cancel_url: `${baseUrl}/new-email?subscription=canceled`,
         metadata: {
           tribeId: tribe.id,
-          plan,
+          plan: normalizedPlan,
         },
       });
 
