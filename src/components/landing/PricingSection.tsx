@@ -70,7 +70,7 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto items-stretch">
+        <div className="grid md:grid-cols-3 gap-5 items-stretch">
           {/* Free */}
           <div
             className="p-7 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12] flex flex-col"

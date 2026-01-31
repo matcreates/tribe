@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PricingSection } from "@/components/landing/PricingSection";
@@ -56,27 +57,19 @@ export default async function LandingPage() {
           </h1>
           
           <p className="text-[14px] sm:text-[15px] md:text-[17px] text-white/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">
-            Build, grow, and engage your audience without the complexity.
+            Stop depending on an algorithm to deliver your message and build a real community.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
-            >
-              <span className="btn-glass-text">Start for free</span>
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass"
-            >
-              <span className="btn-glass-text">Sign in</span>
-            </Link>
-          </div>
+          <Link
+            href="/signup"
+            className="inline-block px-10 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
+          >
+            <span className="btn-glass-text">Start for free</span>
+          </Link>
 
           {/* Social proof hint */}
           <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-white/30">
-            Free up to 500 members • Paid plans from $5/mo
+            Free up to 500 members · Paid plans from $5/mo
           </p>
         </div>
 
@@ -93,7 +86,7 @@ export default async function LandingPage() {
               Everything you need, nothing you don&apos;t
             </h2>
             <p className="text-[15px] text-white/40 max-w-lg mx-auto">
-              Built for simplicity. Focus on what matters—connecting with your audience.
+              Built for simplicity. Focus on what matters: connecting with your audience.
             </p>
           </div>
 
@@ -102,7 +95,7 @@ export default async function LandingPage() {
               {
                 icon: "✉️",
                 title: "Simple emails",
-                description: "Write and send beautiful emails to your tribe. No templates, no fuss—just your words."
+                description: "Write and send beautiful emails to your tribe. No templates, no fuss. Just your words."
               },
               {
                 icon: "👥",
@@ -112,12 +105,12 @@ export default async function LandingPage() {
               {
                 icon: "📊",
                 title: "Real insights",
-                description: "See who's reading, track opens, and understand your audience with clear analytics."
+                description: "See who is reading, track opens, and understand your audience with clear analytics."
               },
               {
                 icon: "✓",
                 title: "Verified members",
-                description: "Double opt-in keeps your list clean and your engagement rates high."
+                description: "Double opt in keeps your list clean and your engagement rates high."
               },
               {
                 icon: "🔗",
@@ -146,6 +139,50 @@ export default async function LandingPage() {
 
       <PricingSection />
 
+      {/* iPhone App Section */}
+      <section className="relative py-32 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* iPhone mockup */}
+            <div className="flex justify-center md:justify-end">
+              <div className="relative w-[280px] sm:w-[320px]">
+                <Image 
+                  src="/iphone-mockup.png" 
+                  alt="Tribe iPhone app" 
+                  width={320} 
+                  height={650}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            
+            {/* Text content */}
+            <div className="text-center md:text-left">
+              <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
+                Take your tribe with you
+              </h2>
+              <p className="text-[15px] text-white/40 leading-relaxed mb-8 max-w-md">
+                Write and send emails, manage your subscribers, and track your growth from anywhere. The Tribe app puts your entire newsletter in your pocket.
+              </p>
+              <a
+                href="https://apps.apple.com/app/tribe"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block"
+              >
+                <Image 
+                  src="/app-store-badge.png" 
+                  alt="Download on the App Store" 
+                  width={160} 
+                  height={54}
+                  className="h-[54px] w-auto"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/[0.04]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -160,6 +197,14 @@ export default async function LandingPage() {
             <Link href="/signup" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">
               Get started
             </Link>
+            <a
+              href="https://instagram.com/madewithtribe"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[12px] text-white/30 hover:text-white/50 transition-colors"
+            >
+              Instagram
+            </a>
             <a
               href="https://www.instagram.com/matcreates/"
               target="_blank"
