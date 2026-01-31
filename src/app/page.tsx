@@ -15,25 +15,25 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen" style={{ background: 'rgb(12, 12, 12)' }}>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <TribeLogo className="h-[22px] w-auto text-white/90" />
-          <div className="flex items-center gap-3">
+          <TribeLogo className="h-[18px] sm:h-[22px] w-auto text-white/90" />
+          <div className="flex items-center gap-1 sm:gap-3">
             <a
               href="#pricing"
-              className="px-5 py-2 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
+              className="px-3 sm:px-5 py-2 text-[10px] sm:text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
             >
               Pricing
             </a>
             <Link
               href="/login"
-              className="px-5 py-2 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
+              className="px-3 sm:px-5 py-2 text-[10px] sm:text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
             >
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="px-5 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
+              className="hidden sm:inline-block px-5 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
             >
               <span className="btn-glass-text">Get started</span>
             </Link>
@@ -79,18 +79,21 @@ export default async function LandingPage() {
       <InteractiveDemo />
 
       {/* Features Section */}
-      <section className="relative py-32 px-6">
+      <section className="relative py-16 sm:py-32 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
+          <div className="text-center mb-10 sm:mb-20">
+            <h2 
+              className="text-[clamp(1.5rem,4vw,2.5rem)] font-normal text-white/90 mb-4"
+              style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+            >
               Everything you need, nothing you don&apos;t
             </h2>
-            <p className="text-[15px] text-white/40 max-w-lg mx-auto">
+            <p className="text-[14px] sm:text-[15px] text-white/40 max-w-lg mx-auto">
               Built for simplicity. Focus on what matters: connecting with your audience.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
                 icon: "✉️",
@@ -125,12 +128,12 @@ export default async function LandingPage() {
             ].map((feature, i) => (
               <div 
                 key={i}
-                className="p-6 rounded-2xl border border-white/[0.06] transition-colors hover:border-white/[0.1]"
+                className="p-5 sm:p-6 rounded-2xl border border-white/[0.06] transition-colors hover:border-white/[0.1]"
                 style={{ background: 'rgba(255, 255, 255, 0.02)' }}
               >
-                <span className="text-2xl mb-4 block">{feature.icon}</span>
-                <h3 className="text-[15px] font-medium text-white/80 mb-2">{feature.title}</h3>
-                <p className="text-[13px] text-white/40 leading-relaxed">{feature.description}</p>
+                <span className="text-xl sm:text-2xl mb-3 sm:mb-4 block">{feature.icon}</span>
+                <h3 className="text-[14px] sm:text-[15px] font-medium text-white/80 mb-2">{feature.title}</h3>
+                <p className="text-[12px] sm:text-[13px] text-white/40 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -140,12 +143,12 @@ export default async function LandingPage() {
       <PricingSection />
 
       {/* iPhone App Section */}
-      <section className="relative py-32 px-6">
+      <section className="relative py-16 sm:py-32 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* iPhone mockup */}
-            <div className="flex justify-center md:justify-end">
-              <div className="relative w-[320px] sm:w-[400px]">
+            <div className="flex justify-center md:justify-end order-2 md:order-1">
+              <div className="relative w-[280px] sm:w-[320px] md:w-[400px]">
                 <Image 
                   src="/iphone-mockup.png" 
                   alt="Tribe iPhone app" 
@@ -157,22 +160,25 @@ export default async function LandingPage() {
             </div>
             
             {/* Text content */}
-            <div className="text-center md:text-left">
+            <div className="text-center md:text-left order-1 md:order-2">
               {/* App icon */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <Image 
                   src="/apple-touch-icon.png" 
                   alt="Tribe app icon" 
                   width={96} 
                   height={96}
-                  className="w-[96px] h-[96px] rounded-[20px] mx-auto md:mx-0 border border-white/[0.1]"
+                  className="w-[72px] h-[72px] sm:w-[96px] sm:h-[96px] rounded-[16px] sm:rounded-[20px] mx-auto md:mx-0 border border-white/[0.1]"
                 />
               </div>
               
-              <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
+              <h2 
+                className="text-[clamp(1.5rem,4vw,2.5rem)] font-normal text-white/90 mb-4"
+                style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+              >
                 Your Tribe is in your pocket
               </h2>
-              <p className="text-[15px] text-white/40 leading-relaxed mb-8 max-w-md">
+              <p className="text-[14px] sm:text-[15px] text-white/40 leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto md:mx-0">
                 Write and send emails, manage your subscribers, and track your growth from anywhere. The Tribe app puts your entire newsletter in your pocket.
               </p>
               <a
@@ -186,7 +192,7 @@ export default async function LandingPage() {
                   alt="Download on the App Store" 
                   width={160} 
                   height={54}
-                  className="h-[54px] w-auto"
+                  className="h-[48px] sm:h-[54px] w-auto mx-auto md:mx-0"
                 />
               </a>
             </div>
@@ -195,24 +201,24 @@ export default async function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-white/[0.04]">
+      <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-white/[0.04]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <TribeLogo className="h-4 w-auto text-white/40" />
             <span className="text-[12px] text-white/25">© 2026</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
+            <Link href="/login" className="text-[11px] sm:text-[12px] text-white/30 hover:text-white/50 transition-colors">
               Sign in
             </Link>
-            <Link href="/signup" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">
+            <Link href="/signup" className="text-[11px] sm:text-[12px] text-white/30 hover:text-white/50 transition-colors">
               Get started
             </Link>
             <a
               href="https://instagram.com/madewithtribe"
               target="_blank"
               rel="noreferrer"
-              className="text-[12px] text-white/30 hover:text-white/50 transition-colors"
+              className="text-[11px] sm:text-[12px] text-white/30 hover:text-white/50 transition-colors"
             >
               Instagram
             </a>
@@ -220,7 +226,7 @@ export default async function LandingPage() {
               href="https://www.instagram.com/matcreates/"
               target="_blank"
               rel="noreferrer"
-              className="text-[12px] text-white/20 hover:text-white/40 transition-colors"
+              className="text-[11px] sm:text-[12px] text-white/20 hover:text-white/40 transition-colors"
             >
               made by @matcreates
             </a>

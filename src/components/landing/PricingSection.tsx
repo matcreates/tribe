@@ -24,10 +24,13 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="relative py-32 px-6" id="pricing">
+    <section className="relative py-16 sm:py-32 px-4 sm:px-6" id="pricing">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
+        <div className="text-center mb-8 sm:mb-10">
+          <h2 
+            className="text-[clamp(1.5rem,4vw,2.5rem)] font-normal text-white/90 mb-4"
+            style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+          >
             Simple, transparent pricing
           </h2>
           <p className="text-[15px] text-white/40 max-w-lg mx-auto">
@@ -70,7 +73,7 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 items-stretch">
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-5 items-stretch">
           {/* Free */}
           <div
             className="p-7 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12] flex flex-col"
