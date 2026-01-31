@@ -163,9 +163,9 @@ export default async function LandingPage() {
                 <Image 
                   src="/apple-touch-icon.png" 
                   alt="Tribe app icon" 
-                  width={72} 
-                  height={72}
-                  className="w-[72px] h-[72px] rounded-[16px] mx-auto md:mx-0"
+                  width={96} 
+                  height={96}
+                  className="w-[96px] h-[96px] rounded-[20px] mx-auto md:mx-0 border border-white/[0.1]"
                 />
               </div>
               
