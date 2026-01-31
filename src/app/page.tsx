@@ -82,7 +82,7 @@ export default async function LandingPage() {
 
           {/* Social proof hint */}
           <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-white/30">
-            Free to explore • Starts at $5/month
+            Free up to 500 members • Paid plans from $5/mo
           </p>
         </div>
 
