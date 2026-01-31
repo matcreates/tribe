@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "join";
 
@@ -20,11 +21,27 @@ export function InteractiveDemo() {
   const [activeTab, setActiveTab] = useState<DemoTab>("dashboard");
 
   return (
-    <section className="relative px-6 -mt-32 z-20">
+    <section className="relative px-4 sm:px-6 -mt-16 sm:-mt-32 z-20">
       <div className="max-w-6xl mx-auto">
-        {/* Browser-like container */}
+        {/* Mobile: Static image */}
+        <div className="lg:hidden">
+          <div className="rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl">
+            <Image 
+              src="/demo-mobile.png" 
+              alt="Tribe app demo" 
+              width={1200} 
+              height={750}
+              className="w-full h-auto"
+            />
+          </div>
+          <p className="text-center text-[12px] text-white/30 mt-4">
+            Try the full demo on desktop
+          </p>
+        </div>
+
+        {/* Desktop: Interactive demo */}
         <div 
-          className="rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl"
+          className="hidden lg:block rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl"
           style={{ 
             background: "rgb(24, 24, 24)",
             aspectRatio: "16/10",
@@ -132,7 +149,7 @@ export function InteractiveDemo() {
           </div>
         </div>
 
-        <p className="text-center text-[13px] text-white/30 mt-6">
+        <p className="hidden lg:block text-center text-[13px] text-white/30 mt-6">
           Interactive demo · Click around to explore Tribe
         </p>
       </div>

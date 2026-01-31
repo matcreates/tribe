@@ -42,7 +42,7 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-48 overflow-hidden" style={{ background: 'rgb(12, 12, 12)' }}>
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden" style={{ background: 'rgb(12, 12, 12)' }}>
         <div className="relative z-10 max-w-3xl mx-auto text-center px-2">
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full mb-5 sm:mb-8 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
