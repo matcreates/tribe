@@ -70,10 +70,10 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto items-stretch">
           {/* Free */}
           <div
-            className="p-7 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12]"
+            className="p-7 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12] flex flex-col"
             style={{ background: "rgba(255, 255, 255, 0.02)" }}
           >
             <p className="text-[12px] text-white/50 uppercase tracking-wider mb-2">Free</p>
@@ -83,7 +83,7 @@ export function PricingSection() {
             </div>
             <p className="text-[13px] text-white/40 mb-5">Up to 500 members</p>
 
-            <div className="space-y-2.5 mb-6">
+            <div className="space-y-2.5 mb-6 flex-grow">
               {[
                 "Create your newsletter",
                 "Collect subscribers",
@@ -103,7 +103,7 @@ export function PricingSection() {
 
             <Link
               href="/signup"
-              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass"
+              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass mt-auto"
             >
               <span className="btn-glass-text">Get started</span>
             </Link>
@@ -111,7 +111,7 @@ export function PricingSection() {
 
           {/* Small Creators */}
           <div
-            className="relative p-7 rounded-2xl border transition-colors"
+            className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{
               borderColor: `${GOLD}4D`,
               background: `linear-gradient(180deg, ${GOLD}0D 0%, rgba(255, 255, 255, 0.02) 100%)`,
@@ -139,7 +139,7 @@ export function PricingSection() {
               {smallPrice.yearly ? `${smallPrice.yearly} · ` : ""}Up to 10,000 members
             </p>
 
-            <div className="space-y-2.5 mb-6">
+            <div className="space-y-2.5 mb-6 flex-grow">
               {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
@@ -150,7 +150,7 @@ export function PricingSection() {
 
             <Link
               href="/signup"
-              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-gold"
+              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-gold mt-auto"
             >
               <span className="btn-glass-text">Upgrade</span>
             </Link>
@@ -158,7 +158,7 @@ export function PricingSection() {
 
           {/* Big Creators */}
           <div
-            className="relative p-7 rounded-2xl border transition-colors"
+            className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{ 
               borderColor: `${PURPLE}4D`,
               background: `linear-gradient(180deg, ${PURPLE}0D 0%, rgba(255, 255, 255, 0.02) 100%)`,
@@ -184,7 +184,7 @@ export function PricingSection() {
               {bigPrice.yearly ? `${bigPrice.yearly} · ` : ""}Unlimited members
             </p>
 
-            <div className="space-y-2.5 mb-6">
+            <div className="space-y-2.5 mb-6 flex-grow">
               {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
@@ -199,7 +199,7 @@ export function PricingSection() {
 
             <Link
               href="/signup"
-              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase text-white transition-all hover:opacity-90"
+              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase text-white transition-all hover:opacity-90 mt-auto"
               style={{ background: PURPLE }}
             >
               Upgrade

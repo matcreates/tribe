@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 
 export default async function LandingPage() {
   // If user is already logged in, redirect to dashboard
@@ -92,6 +93,9 @@ export default async function LandingPage() {
           <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
         </div>
       </section>
+
+      {/* Interactive Demo */}
+      <InteractiveDemo />
 
       {/* Features Section */}
       <section className="relative py-32 px-6">
