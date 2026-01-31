@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "emails";
+type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "join";
 
 const SENT_EMAILS = [
   { id: "1", subject: "Welcome to my tribe!", recipients: 1247, time: "2 days ago", opens: 847, openRate: 68 },
@@ -20,11 +20,11 @@ export function InteractiveDemo() {
   const [activeTab, setActiveTab] = useState<DemoTab>("dashboard");
 
   return (
-    <section className="relative py-16 px-6">
+    <section className="relative px-6 -mt-32 z-20">
       <div className="max-w-6xl mx-auto">
         {/* Browser-like container */}
         <div 
-          className="rounded-2xl border border-white/[0.08] overflow-hidden"
+          className="rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl"
           style={{ 
             background: "rgb(24, 24, 24)",
             aspectRatio: "16/10",
@@ -44,7 +44,7 @@ export function InteractiveDemo() {
                 style={{ background: "rgba(255, 255, 255, 0.04)" }}
               >
                 <LockIcon className="w-3 h-3" />
-                <span>madewithtribe.com/{activeTab === "emails" ? "sent-emails" : activeTab}</span>
+                <span>madewithtribe.com/{activeTab === "join" ? "join-page" : activeTab}</span>
               </div>
             </div>
             
@@ -59,44 +59,60 @@ export function InteractiveDemo() {
               style={{ background: "rgb(18, 18, 18)" }}
             >
               {/* Logo */}
-              <div className="p-4 border-b border-white/[0.06]">
-                <TribeLogo className="h-4 w-auto text-white/80" />
+              <div className="px-8 pt-8 pb-6">
+                <TribeLogo className="h-[18px] w-auto opacity-90" />
               </div>
               
               {/* Nav items - centered vertically */}
-              <nav className="flex-1 flex flex-col justify-center px-3 space-y-1">
-                {([
-                  { id: "dashboard", label: "Dashboard", icon: DashboardIcon },
-                  { id: "write", label: "Write", icon: WriteIcon },
-                  { id: "tribe", label: "Your Tribe", icon: TribeIcon },
-                  { id: "gifts", label: "Gifts", icon: GiftIcon },
-                  { id: "emails", label: "Sent Emails", icon: EmailIcon },
-                ] as const).map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[11px] transition-colors ${
-                      activeTab === id
-                        ? "bg-white/[0.08] text-white/90"
-                        : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                ))}
+              <nav className="flex-1 px-4 flex flex-col justify-center">
+                <ul className="space-y-1">
+                  {([
+                    { id: "dashboard", label: "Dashboard", icon: DashboardIcon },
+                    { id: "write", label: "Write", icon: PencilIcon },
+                    { id: "tribe", label: "Your tribe", icon: UsersIcon },
+                    { id: "gifts", label: "Gifts", icon: GiftIcon },
+                    { id: "join", label: "Join page", icon: SquarePlusIcon },
+                  ] as const).map(({ id, label, icon: Icon }) => (
+                    <li key={id}>
+                      <button
+                        onClick={() => setActiveTab(id)}
+                        className={`w-full flex items-center gap-2.5 px-4 py-2 rounded-md text-[11px] transition-colors ${
+                          activeTab === id
+                            ? "bg-white/[0.08] text-white/90"
+                            : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
+                        }`}
+                      >
+                        <Icon className="w-[13px] h-[13px]" />
+                        {label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </nav>
               
+              {/* Sent emails section */}
+              <div className="px-4 pb-6">
+                <p className="px-4 mb-2 text-[10px] text-white/25 tracking-wide">
+                  Emails sent
+                </p>
+                <ul className="space-y-0">
+                  {SENT_EMAILS.slice(0, 3).map((email) => (
+                    <li key={email.id}>
+                      <button className="w-full text-left px-4 py-1.5 text-[10px] text-white/50 truncate rounded-md hover:bg-white/[0.05] hover:text-white/70 transition-colors">
+                        {email.subject}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
               {/* User section */}
-              <div className="p-4 border-t border-white/[0.06]">
-                <div className="flex items-center gap-2">
+              <div className="px-4 pb-8 border-t border-white/[0.06] pt-4">
+                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.05] transition-colors cursor-pointer">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-medium text-white">
                     D
                   </div>
-                  <div>
-                    <p className="text-[11px] text-white/70">Demo User</p>
-                    <p className="text-[9px] text-white/30">Settings</p>
-                  </div>
+                  <span className="text-[11px] text-white/60">Demo User</span>
                 </div>
               </div>
             </div>
@@ -105,11 +121,11 @@ export function InteractiveDemo() {
             <div className="flex-1 overflow-auto">
               <div className="pt-10 px-6 pb-8 flex justify-center">
                 <div className="w-full max-w-[480px]">
-                  {activeTab === "dashboard" && <DemoDashboard onViewEmails={() => setActiveTab("emails")} />}
+                  {activeTab === "dashboard" && <DemoDashboard />}
                   {activeTab === "write" && <DemoWrite />}
                   {activeTab === "tribe" && <DemoTribe />}
                   {activeTab === "gifts" && <DemoGifts />}
-                  {activeTab === "emails" && <DemoSentEmails />}
+                  {activeTab === "join" && <DemoJoinPage />}
                 </div>
               </div>
             </div>
@@ -125,8 +141,9 @@ export function InteractiveDemo() {
 }
 
 // Demo Dashboard
-function DemoDashboard({ onViewEmails }: { onViewEmails: () => void }) {
+function DemoDashboard() {
   const [period, setPeriod] = useState<"24h" | "7d" | "30d">("7d");
+  const [showReplies, setShowReplies] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -150,7 +167,7 @@ function DemoDashboard({ onViewEmails }: { onViewEmails: () => void }) {
       
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<TribeIcon className="w-4 h-4" />} iconBg="rgba(59, 130, 246, 0.15)" iconColor="#3b82f6" label="Your tribe" value="1,247" change="+12" />
+        <StatCard icon={<UsersIcon className="w-4 h-4" />} iconBg="rgba(59, 130, 246, 0.15)" iconColor="#3b82f6" label="Your tribe" value="1,247" change="+12" />
         <StatCard icon={<EmailIcon className="w-4 h-4" />} iconBg="rgba(34, 197, 94, 0.15)" iconColor="#22c55e" label="Emails sent" value="8" change="2 left" />
         <StatCard icon={<EyeIcon className="w-4 h-4" />} iconBg="rgba(168, 85, 247, 0.15)" iconColor="#a855f7" label="Open rate" value="68%" change="+5%" />
         <StatCard icon={<ReplyIcon className="w-4 h-4" />} iconBg="rgba(234, 179, 8, 0.15)" iconColor="#eab308" label="Replies" value="14" change="+3" />
@@ -168,30 +185,61 @@ function DemoDashboard({ onViewEmails }: { onViewEmails: () => void }) {
         <DemoChart />
       </div>
 
-      {/* Recent emails */}
+      {/* Recent emails / Replies toggle */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] text-white/40 uppercase tracking-wider">Recent emails</span>
-          <button onClick={onViewEmails} className="text-[10px] text-white/30 hover:text-white/50">View all</button>
-        </div>
-        <div className="space-y-2">
-          {SENT_EMAILS.slice(0, 2).map((email) => (
-            <div 
-              key={email.id}
-              className="flex items-center justify-between p-3 rounded-[10px] border border-white/[0.06]"
-              style={{ background: "rgba(255, 255, 255, 0.02)" }}
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setShowReplies(false)}
+              className={`text-[11px] uppercase tracking-wider ${!showReplies ? "text-white/60" : "text-white/30 hover:text-white/50"}`}
             >
-              <div>
-                <p className="text-[12px] text-white/70">{email.subject}</p>
-                <p className="text-[10px] text-white/30">{email.recipients} recipients</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[11px] text-white/50">{email.openRate}% opened</p>
-                <p className="text-[9px] text-white/25">{email.time}</p>
-              </div>
-            </div>
-          ))}
+              Recent emails
+            </button>
+            <button 
+              onClick={() => setShowReplies(true)}
+              className={`text-[11px] uppercase tracking-wider ${showReplies ? "text-white/60" : "text-white/30 hover:text-white/50"}`}
+            >
+              Replies ({REPLIES.length})
+            </button>
+          </div>
         </div>
+        
+        {!showReplies ? (
+          <div className="space-y-2">
+            {SENT_EMAILS.slice(0, 2).map((email) => (
+              <div 
+                key={email.id}
+                className="flex items-center justify-between p-3 rounded-[10px] border border-white/[0.06] hover:border-white/[0.1] cursor-pointer transition-colors"
+                style={{ background: "rgba(255, 255, 255, 0.02)" }}
+              >
+                <div>
+                  <p className="text-[12px] text-white/70">{email.subject}</p>
+                  <p className="text-[10px] text-white/30">{email.recipients} recipients</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] text-white/50">{email.openRate}% opened</p>
+                  <p className="text-[9px] text-white/25">{email.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {REPLIES.slice(0, 2).map((reply, i) => (
+              <div 
+                key={i}
+                className="p-3 rounded-[10px] border border-white/[0.06]"
+                style={{ background: "rgba(255, 255, 255, 0.02)" }}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <p className="text-[11px] text-white/60">{reply.email}</p>
+                  <span className="text-[9px] text-white/25">{reply.time}</span>
+                </div>
+                <p className="text-[10px] text-white/40 line-clamp-1">{reply.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -354,78 +402,6 @@ function DemoWrite() {
   );
 }
 
-// Demo Sent Emails
-function DemoSentEmails() {
-  const [view, setView] = useState<"emails" | "replies">("emails");
-
-  return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-medium text-white/90">Sent Emails</h1>
-        <div className="flex gap-1 p-1 rounded-[8px] border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
-          <button 
-            onClick={() => setView("emails")}
-            className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium transition-colors ${
-              view === "emails" ? "bg-white/[0.1] text-white/80" : "text-white/40"
-            }`}
-          >
-            Emails
-          </button>
-          <button 
-            onClick={() => setView("replies")}
-            className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium transition-colors ${
-              view === "replies" ? "bg-white/[0.1] text-white/80" : "text-white/40"
-            }`}
-          >
-            Replies ({REPLIES.length})
-          </button>
-        </div>
-      </div>
-
-      {view === "emails" ? (
-        <div className="space-y-3">
-          {SENT_EMAILS.map((email) => (
-            <div 
-              key={email.id}
-              className="p-4 rounded-[12px] border border-white/[0.06] hover:border-white/[0.1] transition-colors cursor-pointer"
-              style={{ background: "rgba(255, 255, 255, 0.02)" }}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-[13px] text-white/80 font-medium">{email.subject}</p>
-                <span className="text-[10px] text-white/30">{email.time}</span>
-              </div>
-              <div className="flex items-center gap-4 text-[11px]">
-                <span className="text-white/40">{email.recipients} sent</span>
-                <span className="text-white/40">{email.opens} opened</span>
-                <span className="text-emerald-400">{email.openRate}% rate</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {REPLIES.map((reply, i) => (
-            <div 
-              key={i}
-              className="p-4 rounded-[12px] border border-white/[0.06]"
-              style={{ background: "rgba(255, 255, 255, 0.02)" }}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="text-[12px] text-white/70">{reply.email}</p>
-                  <p className="text-[10px] text-white/30">{reply.subject}</p>
-                </div>
-                <span className="text-[9px] text-white/25">{reply.time}</span>
-              </div>
-              <p className="text-[11px] text-white/50 leading-relaxed">{reply.text}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // Demo Tribe
 function DemoTribe() {
   const [filter, setFilter] = useState<"verified" | "all" | "non-verified">("verified");
@@ -441,6 +417,8 @@ function DemoTribe() {
     { email: "jamie@example.com", verified: false, date: "Jan 8" },
     { email: "drew@example.com", verified: true, date: "Jan 7" },
     { email: "avery@example.com", verified: true, date: "Jan 6" },
+    { email: "blake@example.com", verified: true, date: "Jan 5" },
+    { email: "chris@example.com", verified: true, date: "Jan 4" },
   ];
 
   const filteredMembers = members.filter(m => {
@@ -500,7 +478,7 @@ function DemoTribe() {
         className="rounded-[12px] border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
-        {filteredMembers.map((member) => (
+        {filteredMembers.slice(0, 6).map((member) => (
           <div 
             key={member.email}
             className="flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.03] transition-colors"
@@ -591,7 +569,70 @@ function DemoGifts() {
   );
 }
 
-// Icons
+// Demo Join Page
+function DemoJoinPage() {
+  const [email, setEmail] = useState("");
+
+  return (
+    <div className="space-y-5">
+      <h1 className="text-[18px] font-medium text-white/90">Join page</h1>
+      
+      <p className="text-[11px] text-white/40">
+        This is how your public join page looks. Share the link to grow your tribe.
+      </p>
+
+      {/* Preview of join page */}
+      <div 
+        className="rounded-[14px] border border-white/[0.06] overflow-hidden"
+        style={{ background: "rgba(255, 255, 255, 0.02)" }}
+      >
+        {/* Header */}
+        <div className="p-6 text-center border-b border-white/[0.04]">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[24px] font-medium text-white mx-auto mb-4">
+            D
+          </div>
+          <h2 className="text-[16px] font-medium text-white/90 mb-1">Demo User</h2>
+          <p className="text-[12px] text-white/50">Join my tribe and get exclusive updates</p>
+        </div>
+        
+        {/* Form */}
+        <div className="p-6">
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Your email"
+              className="flex-1 px-3 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/30 bg-transparent border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
+            />
+            <button 
+              className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
+              style={{ background: "#E8B84A" }}
+            >
+              Join
+            </button>
+          </div>
+          <p className="text-[10px] text-white/30 text-center mt-3">1,247 people have joined</p>
+        </div>
+      </div>
+
+      {/* Page URL */}
+      <div className="flex items-center gap-2">
+        <div 
+          className="flex-1 px-3 py-2 rounded-[8px] text-[11px] text-white/50 truncate"
+          style={{ background: "rgba(255, 255, 255, 0.03)" }}
+        >
+          madewithtribe.com/@demouser
+        </div>
+        <button className="px-3 py-2 rounded-[8px] text-[10px] text-white/40 hover:text-white/60 hover:bg-white/[0.05]">
+          Copy
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Icons - matching actual Sidebar icons
 function LockIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -614,40 +655,45 @@ function TribeLogo({ className }: { className?: string }) {
   );
 }
 
+// Icons matching the actual Sidebar
 function DashboardIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="2" width="5" height="5" rx="1" />
-      <rect x="9" y="2" width="5" height="5" rx="1" />
-      <rect x="2" y="9" width="5" height="5" rx="1" />
-      <rect x="9" y="9" width="5" height="5" rx="1" />
+    <svg className={className} viewBox="0 0 10 11" fill="currentColor">
+      <path fillRule="evenodd" clipRule="evenodd" d="M5.30695 0.105325C5.1264 -0.0351083 4.8736 -0.0351083 4.69305 0.105325L0.19303 3.60532C0.071235 3.70005 0 3.8457 0 4V9.5C0 10.0523 0.447715 10.5 1 10.5H9C9.5523 10.5 10 10.0523 10 9.5V4C10 3.8457 9.92875 3.70005 9.80695 3.60532L5.30695 0.105325ZM7 9.5H9V4.24454L5 1.13343L1 4.24454V9.5H3V5.5C3 5.22385 3.22386 5 3.5 5H6.5C6.77615 5 7 5.22385 7 5.5V9.5ZM4 9.5V6H6V9.5H4Z" />
     </svg>
   );
 }
 
-function WriteIcon({ className }: { className?: string }) {
+function PencilIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M11.5 2.5l2 2M3 13l-0.5 0.5L2 15l1.5-0.5L13 5l-2-2L3 13z" />
+    <svg className={className} viewBox="0 0 12 12" fill="currentColor">
+      <path fillRule="evenodd" clipRule="evenodd" d="M9.85944 1.2C9.73596 1.2 9.61362 1.22433 9.4995 1.27159C9.38538 1.31886 9.2817 1.38814 9.19434 1.47548L1.95395 8.71588L1.45514 10.5449L3.28412 10.046L10.5245 2.80564C10.6118 2.7183 10.6811 2.61461 10.7284 2.5005C10.7757 2.38639 10.8 2.26408 10.8 2.14056C10.8 2.01705 10.7757 1.89474 10.7284 1.78062C10.6811 1.66651 10.6118 1.56282 10.5245 1.47548C10.4372 1.38814 10.3335 1.31886 10.2194 1.27159C10.1053 1.22433 9.98298 1.2 9.85944 1.2ZM9.04026 0.162942C9.3 0.0553678 9.57834 0 9.85944 0C10.1405 0 10.4189 0.0553678 10.6786 0.162942C10.9383 0.270515 11.1743 0.428189 11.3731 0.626956C11.5718 0.825724 11.7295 1.0617 11.8371 1.32141C11.9446 1.58111 12 1.85946 12 2.14056C12 2.42166 11.9446 2.70001 11.8371 2.95972C11.7295 3.21942 11.5718 3.4554 11.3731 3.65417L4.01998 11.0072C3.94615 11.0811 3.85432 11.1344 3.75358 11.1618L0.757883 11.9789C0.550157 12.0355 0.328001 11.9765 0.175751 11.8242C0.023501 11.672 -0.0354971 11.4498 0.0211549 11.2421L0.838163 8.24644C0.865637 8.1457 0.918923 8.05384 0.992759 7.98004L8.34582 0.626956C8.5446 0.428189 8.78058 0.270515 9.04026 0.162942Z" />
     </svg>
   );
 }
 
-function TribeIcon({ className }: { className?: string }) {
+function UsersIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="8" cy="5" r="3" />
-      <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" />
+    <svg className={className} viewBox="0 0 11 12" fill="currentColor">
+      <path fillRule="evenodd" clipRule="evenodd" d="M5.5 0C3.82934 0 2.475 1.34314 2.475 3C2.475 4.65686 3.82934 6 5.5 6C7.17068 6 8.525 4.65686 8.525 3C8.525 1.34314 7.17068 0 5.5 0ZM3.575 3C3.575 1.94564 4.43685 1.09091 5.5 1.09091C6.56315 1.09091 7.425 1.94564 7.425 3C7.425 4.05436 6.56315 4.90909 5.5 4.90909C4.43685 4.90909 3.575 4.05436 3.575 3Z" />
+      <path d="M3.3 7.09091C1.47746 7.09091 0 8.55616 0 10.3636V11.4545C0 11.7558 0.246246 12 0.55 12C0.853754 12 1.1 11.7558 1.1 11.4545V10.3636C1.1 9.15867 2.08497 8.18182 3.3 8.18182H7.7C8.915 8.18182 9.9 9.15867 9.9 10.3636V11.4545C9.9 11.7558 10.1462 12 10.45 12C10.7538 12 11 11.7558 11 11.4545V10.3636C11 8.55616 9.52254 7.09091 7.7 7.09091H3.3Z" />
     </svg>
   );
 }
 
 function GiftIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="6" width="12" height="8" rx="1" />
-      <path d="M8 6v8M2 9h12" />
-      <path d="M8 6c-1.5 0-3-1-3-2.5S5.5 1 8 3c2.5-2 4.5-.5 4.5 1S9.5 6 8 6z" />
+    <svg className={className} viewBox="0 0 22 21" fill="currentColor">
+      <path fillRule="evenodd" clipRule="evenodd" d="M3 3.5C3 4.02384 3.11743 4.53557 3.33772 5H1C0.44772 5 0 5.44772 0 6V11C0 11.5523 0.44772 12 1 12H2V20C2 20.5523 2.44772 21 3 21H19C19.5523 21 20 20.5523 20 20V12H21C21.5523 12 22 11.5523 22 11V6C22 5.44772 21.5523 5 21 5H18.6623C18.8826 4.53557 19 4.02384 19 3.5C19 2.57174 18.6313 1.6815 17.9749 1.02513C17.3185 0.36875 16.4283 0 15.5 0C14.1769 0 13.1209 0.37202 12.3032 0.97769C11.7384 1.39606 11.316 1.90438 11 2.42396C10.684 1.90438 10.2616 1.39606 9.6968 0.97769C8.87913 0.37202 7.82309 0 6.5 0C5.57174 0 4.6815 0.36875 4.02513 1.02513C3.36875 1.6815 3 2.57174 3 3.5ZM6.5 2C6.10218 2 5.72064 2.15804 5.43934 2.43934C5.15804 2.72064 5 3.10218 5 3.5C5 3.89782 5.15804 4.27936 5.43934 4.56066C5.72064 4.84196 6.10218 5 6.5 5H9.8745C9.8032 4.66322 9.6934 4.2833 9.5256 3.91036C9.2937 3.39508 8.96597 2.92528 8.50633 2.58481C8.05837 2.25298 7.42691 2 6.5 2ZM12.1255 5H15.5C15.8978 5 16.2794 4.84196 16.5607 4.56066C16.842 4.27936 17 3.89782 17 3.5C17 3.10218 16.842 2.72064 16.5607 2.43934C16.2794 2.15804 15.8978 2 15.5 2C14.5731 2 13.9416 2.25298 13.4937 2.58481C13.034 2.92528 12.7063 3.39508 12.4744 3.91036C12.3066 4.2833 12.1968 4.66322 12.1255 5ZM12 7V10H20V7H12ZM10 7V10H2V7H10ZM12 19H18V12H12V19ZM10 12V19H4V12H10Z" />
+    </svg>
+  );
+}
+
+function SquarePlusIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" fill="currentColor">
+      <path d="M6 2.4C6.33138 2.4 6.6 2.66863 6.6 3V5.4H9C9.33138 5.4 9.6 5.66862 9.6 6C9.6 6.33138 9.33138 6.6 9 6.6H6.6V9C6.6 9.33138 6.33138 9.6 6 9.6C5.66862 9.6 5.4 9.33138 5.4 9V6.6H3C2.66863 6.6 2.4 6.33138 2.4 6C2.4 5.66862 2.66863 5.4 3 5.4H5.4V3C5.4 2.66863 5.66862 2.4 6 2.4Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M0 1.5C0 0.671574 0.671574 0 1.5 0H10.5C11.3284 0 12 0.671574 12 1.5V10.5C12 11.3284 11.3284 12 10.5 12H1.5C0.671574 12 0 11.3284 0 10.5V1.5ZM1.5 1.2C1.33432 1.2 1.2 1.33432 1.2 1.5V10.5C1.2 10.6657 1.33432 10.8 1.5 10.8H10.5C10.6657 10.8 10.8 10.6657 10.8 10.5V1.5C10.8 1.33432 10.6657 1.2 10.5 1.2H1.5Z" />
     </svg>
   );
 }

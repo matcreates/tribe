@@ -18,6 +18,12 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <TribeLogo className="h-[22px] w-auto text-white/90" />
           <div className="flex items-center gap-3">
+            <a
+              href="#pricing"
+              className="px-5 py-2 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
+            >
+              Pricing
+            </a>
             <Link
               href="/login"
               className="px-5 py-2 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white/90 transition-colors"
@@ -35,7 +41,7 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-48 overflow-hidden">
         {/* Background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -87,11 +93,6 @@ export default async function LandingPage() {
           </p>
         </div>
 
-        {/* Scroll indicator - positioned at bottom */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-[10px] text-white/30 tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
-        </div>
       </section>
 
       {/* Interactive Demo */}
