@@ -145,12 +145,12 @@ export default async function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* iPhone mockup */}
             <div className="flex justify-center md:justify-end">
-              <div className="relative w-[280px] sm:w-[320px]">
+              <div className="relative w-[320px] sm:w-[400px]">
                 <Image 
                   src="/iphone-mockup.png" 
                   alt="Tribe iPhone app" 
-                  width={320} 
-                  height={650}
+                  width={400} 
+                  height={500}
                   className="w-full h-auto"
                 />
               </div>
@@ -158,8 +158,19 @@ export default async function LandingPage() {
             
             {/* Text content */}
             <div className="text-center md:text-left">
+              {/* App icon */}
+              <div className="mb-6">
+                <Image 
+                  src="/apple-touch-icon.png" 
+                  alt="Tribe app icon" 
+                  width={72} 
+                  height={72}
+                  className="w-[72px] h-[72px] rounded-[16px] mx-auto md:mx-0"
+                />
+              </div>
+              
               <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
-                Take your tribe with you
+                Your Tribe is in your pocket
               </h2>
               <p className="text-[15px] text-white/40 leading-relaxed mb-8 max-w-md">
                 Write and send emails, manage your subscribers, and track your growth from anywhere. The Tribe app puts your entire newsletter in your pocket.
