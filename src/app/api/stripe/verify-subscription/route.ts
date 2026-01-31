@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getTribeByUserId, updateTribeSubscription } from "@/lib/db";
 import Stripe from "stripe";
+import type { SubscriptionPlan } from "@/lib/types";
+
+// Big Creator price IDs
+const BIG_MONTHLY_PRICE_ID = "price_1SvejtP8Y5norXJQIC91Bmlu";
+const BIG_YEARLY_PRICE_ID = "price_1SveklP8Y5norXJQtfPhay6V";
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -97,12 +102,16 @@ export async function POST() {
     console.log("Final status:", status);
 
     // Determine plan from price
-    let plan: 'monthly' | 'yearly' | null = null;
+    let plan: SubscriptionPlan = null;
     const priceId = subscription.items.data[0]?.price?.id;
     if (priceId === process.env.STRIPE_MONTHLY_PRICE_ID) {
-      plan = 'monthly';
+      plan = 'small_monthly';
     } else if (priceId === process.env.STRIPE_YEARLY_PRICE_ID) {
-      plan = 'yearly';
+      plan = 'small_yearly';
+    } else if (priceId === BIG_MONTHLY_PRICE_ID) {
+      plan = 'big_monthly';
+    } else if (priceId === BIG_YEARLY_PRICE_ID) {
+      plan = 'big_yearly';
     }
 
     // Get period end - safely handle the timestamp
