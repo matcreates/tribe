@@ -2,7 +2,19 @@
 
 import { useState } from "react";
 
-type DemoTab = "dashboard" | "write" | "tribe" | "gifts";
+type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "emails";
+
+const SENT_EMAILS = [
+  { id: "1", subject: "Welcome to my tribe!", recipients: 1247, time: "2 days ago", opens: 847, openRate: 68 },
+  { id: "2", subject: "Big announcement coming...", recipients: 1189, time: "5 days ago", opens: 892, openRate: 75 },
+  { id: "3", subject: "Thank you for being here", recipients: 1102, time: "1 week ago", opens: 771, openRate: 70 },
+];
+
+const REPLIES = [
+  { email: "alex@example.com", subject: "Re: Welcome to my tribe!", text: "This is amazing! So happy to be part of this community.", time: "2 hours ago" },
+  { email: "jordan@example.com", subject: "Re: Big announcement coming...", text: "Can't wait to hear what you've been working on!", time: "1 day ago" },
+  { email: "sam@example.com", subject: "Re: Thank you for being here", text: "Thank YOU for creating such valuable content.", time: "3 days ago" },
+];
 
 export function InteractiveDemo() {
   const [activeTab, setActiveTab] = useState<DemoTab>("dashboard");
@@ -14,87 +26,96 @@ export function InteractiveDemo() {
         <div 
           className="rounded-2xl border border-white/[0.08] overflow-hidden"
           style={{ 
-            background: "rgba(12, 12, 14, 0.95)",
+            background: "rgb(24, 24, 24)",
             aspectRatio: "16/10",
           }}
         >
           {/* Browser toolbar */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
-            {/* Traffic lights */}
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
               <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
               <div className="w-3 h-3 rounded-full bg-[#28CA41]" />
             </div>
             
-            {/* URL bar */}
             <div className="flex-1 max-w-md mx-auto">
               <div 
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-white/40"
                 style={{ background: "rgba(255, 255, 255, 0.04)" }}
               >
                 <LockIcon className="w-3 h-3" />
-                <span>madewithtribe.com/dashboard</span>
+                <span>madewithtribe.com/{activeTab === "emails" ? "sent-emails" : activeTab}</span>
               </div>
             </div>
             
-            <div className="w-[54px]" /> {/* Spacer for symmetry */}
+            <div className="w-[54px]" />
           </div>
 
           {/* App content */}
           <div className="flex h-[calc(100%-48px)]">
             {/* Sidebar */}
-            <div className="w-48 border-r border-white/[0.06] p-4 flex flex-col" style={{ background: "rgba(255, 255, 255, 0.01)" }}>
+            <div 
+              className="w-[180px] border-r border-white/[0.06] flex flex-col"
+              style={{ background: "rgb(18, 18, 18)" }}
+            >
               {/* Logo */}
-              <div className="mb-6">
-                <TribeLogo className="h-5 w-auto text-white/80" />
+              <div className="p-4 border-b border-white/[0.06]">
+                <TribeLogo className="h-4 w-auto text-white/80" />
               </div>
               
-              {/* Nav items */}
-              <nav className="space-y-1 flex-1">
+              {/* Nav items - centered vertically */}
+              <nav className="flex-1 flex flex-col justify-center px-3 space-y-1">
                 {([
                   { id: "dashboard", label: "Dashboard", icon: DashboardIcon },
                   { id: "write", label: "Write", icon: WriteIcon },
                   { id: "tribe", label: "Your Tribe", icon: TribeIcon },
                   { id: "gifts", label: "Gifts", icon: GiftIcon },
+                  { id: "emails", label: "Sent Emails", icon: EmailIcon },
                 ] as const).map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
                     onClick={() => setActiveTab(id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] transition-colors ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[11px] transition-colors ${
                       activeTab === id
                         ? "bg-white/[0.08] text-white/90"
-                        : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"
+                        : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                     {label}
                   </button>
                 ))}
               </nav>
               
-              {/* User */}
-              <div className="pt-4 border-t border-white/[0.06]">
+              {/* User section */}
+              <div className="p-4 border-t border-white/[0.06]">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-medium text-white">
                     D
                   </div>
-                  <span className="text-[11px] text-white/50">Demo User</span>
+                  <div>
+                    <p className="text-[11px] text-white/70">Demo User</p>
+                    <p className="text-[9px] text-white/30">Settings</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Main content */}
-            <div className="flex-1 p-6 overflow-auto">
-              {activeTab === "dashboard" && <DemoDashboard />}
-              {activeTab === "write" && <DemoWrite />}
-              {activeTab === "tribe" && <DemoTribe />}
-              {activeTab === "gifts" && <DemoGifts />}
+            <div className="flex-1 overflow-auto">
+              <div className="pt-10 px-6 pb-8 flex justify-center">
+                <div className="w-full max-w-[480px]">
+                  {activeTab === "dashboard" && <DemoDashboard onViewEmails={() => setActiveTab("emails")} />}
+                  {activeTab === "write" && <DemoWrite />}
+                  {activeTab === "tribe" && <DemoTribe />}
+                  {activeTab === "gifts" && <DemoGifts />}
+                  {activeTab === "emails" && <DemoSentEmails />}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Caption */}
         <p className="text-center text-[13px] text-white/30 mt-6">
           Interactive demo · Click around to explore Tribe
         </p>
@@ -104,51 +125,102 @@ export function InteractiveDemo() {
 }
 
 // Demo Dashboard
-function DemoDashboard() {
+function DemoDashboard({ onViewEmails }: { onViewEmails: () => void }) {
+  const [period, setPeriod] = useState<"24h" | "7d" | "30d">("7d");
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-[18px] font-medium text-white/90">Dashboard</h1>
+    <div className="space-y-5">
+      {/* Header with period toggle */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[18px] font-medium text-white/90">Dashboard</h1>
+        <div className="flex gap-1 p-1 rounded-[8px] border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
+          {(["24h", "7d", "30d"] as const).map((p) => (
+            <button 
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium uppercase transition-colors ${
+                period === p ? "bg-white/[0.1] text-white/80" : "text-white/40 hover:text-white/60"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
       
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Tribe members" value="1,247" change="+12 this week" />
-        <StatCard label="Emails sent" value="8" change="2 remaining" />
-        <StatCard label="Open rate" value="68%" change="+5% vs last" />
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard icon={<TribeIcon className="w-4 h-4" />} iconBg="rgba(59, 130, 246, 0.15)" iconColor="#3b82f6" label="Your tribe" value="1,247" change="+12" />
+        <StatCard icon={<EmailIcon className="w-4 h-4" />} iconBg="rgba(34, 197, 94, 0.15)" iconColor="#22c55e" label="Emails sent" value="8" change="2 left" />
+        <StatCard icon={<EyeIcon className="w-4 h-4" />} iconBg="rgba(168, 85, 247, 0.15)" iconColor="#a855f7" label="Open rate" value="68%" change="+5%" />
+        <StatCard icon={<ReplyIcon className="w-4 h-4" />} iconBg="rgba(234, 179, 8, 0.15)" iconColor="#eab308" label="Replies" value="14" change="+3" />
       </div>
       
       {/* Chart */}
       <div 
-        className="p-5 rounded-xl border border-white/[0.06]"
+        className="p-4 rounded-[12px] border border-white/[0.06]"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[13px] text-white/60">Tribe growth</span>
-          <div className="flex gap-1">
-            {["24h", "7d", "30d"].map((period, i) => (
-              <button 
-                key={period}
-                className={`px-2 py-1 rounded text-[10px] ${i === 1 ? "bg-white/10 text-white/80" : "text-white/40"}`}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] text-white/40">Tribe growth</span>
+          <span className="text-[10px] text-emerald-400">+47 this week</span>
         </div>
         <DemoChart />
+      </div>
+
+      {/* Recent emails */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] text-white/40 uppercase tracking-wider">Recent emails</span>
+          <button onClick={onViewEmails} className="text-[10px] text-white/30 hover:text-white/50">View all</button>
+        </div>
+        <div className="space-y-2">
+          {SENT_EMAILS.slice(0, 2).map((email) => (
+            <div 
+              key={email.id}
+              className="flex items-center justify-between p-3 rounded-[10px] border border-white/[0.06]"
+              style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            >
+              <div>
+                <p className="text-[12px] text-white/70">{email.subject}</p>
+                <p className="text-[10px] text-white/30">{email.recipients} recipients</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] text-white/50">{email.openRate}% opened</p>
+                <p className="text-[9px] text-white/25">{email.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, change }: { label: string; value: string; change: string }) {
+function StatCard({ icon, iconBg, iconColor, label, value, change }: { 
+  icon: React.ReactNode; 
+  iconBg: string; 
+  iconColor: string; 
+  label: string; 
+  value: string; 
+  change: string;
+}) {
   return (
     <div 
-      className="p-4 rounded-xl border border-white/[0.06]"
+      className="p-4 rounded-[12px] border border-white/[0.06]"
       style={{ background: "rgba(255, 255, 255, 0.02)" }}
     >
-      <p className="text-[11px] text-white/40 mb-1">{label}</p>
-      <p className="text-[24px] font-medium text-white/90">{value}</p>
-      <p className="text-[10px] text-emerald-400/80 mt-1">{change}</p>
+      <div className="flex items-start justify-between mb-2">
+        <div 
+          className="w-8 h-8 rounded-[8px] flex items-center justify-center"
+          style={{ background: iconBg, color: iconColor }}
+        >
+          {icon}
+        </div>
+        <span className="text-[10px] text-emerald-400">{change}</span>
+      </div>
+      <p className="text-[22px] font-medium text-white/90 mb-0.5">{value}</p>
+      <p className="text-[10px] text-white/40">{label}</p>
     </div>
   );
 }
@@ -158,11 +230,11 @@ function DemoChart() {
   const max = Math.max(...data);
   
   return (
-    <div className="h-32 flex items-end gap-1">
+    <div className="h-24 flex items-end gap-1">
       {data.map((value, i) => (
         <div 
           key={i}
-          className="flex-1 rounded-t transition-all hover:opacity-80"
+          className="flex-1 rounded-t-[3px] transition-all hover:opacity-80 cursor-pointer"
           style={{ 
             height: `${(value / max) * 100}%`,
             background: "linear-gradient(180deg, rgba(232, 184, 74, 0.6) 0%, rgba(232, 184, 74, 0.2) 100%)",
@@ -176,102 +248,283 @@ function DemoChart() {
 // Demo Write
 function DemoWrite() {
   const [subject, setSubject] = useState("Welcome to my tribe!");
-  const [body, setBody] = useState("Hey there,\n\nI'm so excited to have you here...");
+  const [body, setBody] = useState("Hey there,\n\nI'm so excited to have you here. This community means everything to me, and I can't wait to share what's coming next.\n\nStay tuned!");
+  const [allowReplies, setAllowReplies] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className="space-y-5 max-w-lg">
+    <div className="space-y-5">
       <h1 className="text-[18px] font-medium text-white/90">Write</h1>
       
       <div 
-        className="p-5 rounded-xl border border-white/[0.06]"
+        className="rounded-[14px] border border-white/[0.06] overflow-hidden"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
-        <div className="mb-4">
-          <label className="block text-[11px] text-white/40 mb-1.5">To</label>
-          <div className="px-3 py-2 rounded-lg text-[12px] text-white/50 border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
+        {/* Recipients */}
+        <div className="px-4 py-3 border-b border-white/[0.04]">
+          <label className="block text-[10px] text-white/40 mb-1.5">To</label>
+          <div className="text-[12px] text-white/50">
             All verified members (1,247)
           </div>
         </div>
         
-        <div className="mb-4">
-          <label className="block text-[11px] text-white/40 mb-1.5">Subject</label>
+        {/* Subject */}
+        <div className="px-4 py-3 border-b border-white/[0.04]">
+          <label className="block text-[10px] text-white/40 mb-1.5">Subject</label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-[12px] text-white/80 border border-white/[0.06] bg-transparent focus:outline-none focus:border-white/20"
-            style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            className="w-full text-[13px] text-white/80 bg-transparent focus:outline-none"
+            placeholder="Subject..."
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-[11px] text-white/40 mb-1.5">Message</label>
+        {/* Message */}
+        <div className="px-4 py-3 border-b border-white/[0.04]">
+          <label className="block text-[10px] text-white/40 mb-1.5">Message</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 rounded-lg text-[12px] text-white/80 border border-white/[0.06] bg-transparent focus:outline-none focus:border-white/20 resize-none"
-            style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            rows={5}
+            className="w-full text-[12px] text-white/70 bg-transparent focus:outline-none resize-none leading-relaxed"
+            placeholder="Write your message..."
           />
         </div>
+
+        {/* Signature preview */}
+        <div className="px-4 py-3 border-b border-white/[0.04]">
+          <label className="block text-[10px] text-white/40 mb-1.5">Signature</label>
+          <div className="text-[11px] text-white/40 leading-relaxed">
+            Best,<br/>Demo User
+          </div>
+        </div>
         
-        <button 
-          className="px-5 py-2 rounded-lg text-[10px] font-medium tracking-wider uppercase text-black"
-          style={{ background: "#E8B84A" }}
-        >
-          Send
-        </button>
+        {/* Allow replies toggle */}
+        <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ReplyIcon className="w-3.5 h-3.5 text-white/40" />
+            <span className="text-[11px] text-white/60">Allow replies</span>
+          </div>
+          <button
+            onClick={() => setAllowReplies(!allowReplies)}
+            className={`w-9 h-5 rounded-full transition-colors relative ${allowReplies ? "bg-emerald-500" : "bg-white/10"}`}
+          >
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${allowReplies ? "left-[18px]" : "left-0.5"}`} />
+          </button>
+        </div>
+        
+        {/* Actions */}
+        <div className="px-4 py-3 flex items-center gap-2">
+          <button 
+            className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
+            style={{ background: "#E8B84A" }}
+          >
+            Send
+          </button>
+          
+          {/* Options dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="px-3 py-2 rounded-[8px] text-[10px] text-white/50 hover:text-white/70 hover:bg-white/[0.05] transition-colors flex items-center gap-1"
+            >
+              <ChevronDownIcon className="w-3 h-3" />
+            </button>
+            
+            {showMenu && (
+              <div 
+                className="absolute bottom-full left-0 mb-1 w-36 rounded-[8px] border border-white/[0.08] py-1 shadow-xl"
+                style={{ background: "rgb(28, 28, 28)" }}
+              >
+                <button className="w-full px-3 py-2 text-left text-[11px] text-white/60 hover:bg-white/[0.05] flex items-center gap-2">
+                  <ClockIcon className="w-3 h-3" />
+                  Schedule
+                </button>
+                <button className="w-full px-3 py-2 text-left text-[11px] text-white/60 hover:bg-white/[0.05] flex items-center gap-2">
+                  <TestIcon className="w-3 h-3" />
+                  Send test email
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+// Demo Sent Emails
+function DemoSentEmails() {
+  const [view, setView] = useState<"emails" | "replies">("emails");
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h1 className="text-[18px] font-medium text-white/90">Sent Emails</h1>
+        <div className="flex gap-1 p-1 rounded-[8px] border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
+          <button 
+            onClick={() => setView("emails")}
+            className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium transition-colors ${
+              view === "emails" ? "bg-white/[0.1] text-white/80" : "text-white/40"
+            }`}
+          >
+            Emails
+          </button>
+          <button 
+            onClick={() => setView("replies")}
+            className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium transition-colors ${
+              view === "replies" ? "bg-white/[0.1] text-white/80" : "text-white/40"
+            }`}
+          >
+            Replies ({REPLIES.length})
+          </button>
+        </div>
+      </div>
+
+      {view === "emails" ? (
+        <div className="space-y-3">
+          {SENT_EMAILS.map((email) => (
+            <div 
+              key={email.id}
+              className="p-4 rounded-[12px] border border-white/[0.06] hover:border-white/[0.1] transition-colors cursor-pointer"
+              style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-[13px] text-white/80 font-medium">{email.subject}</p>
+                <span className="text-[10px] text-white/30">{email.time}</span>
+              </div>
+              <div className="flex items-center gap-4 text-[11px]">
+                <span className="text-white/40">{email.recipients} sent</span>
+                <span className="text-white/40">{email.opens} opened</span>
+                <span className="text-emerald-400">{email.openRate}% rate</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {REPLIES.map((reply, i) => (
+            <div 
+              key={i}
+              className="p-4 rounded-[12px] border border-white/[0.06]"
+              style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="text-[12px] text-white/70">{reply.email}</p>
+                  <p className="text-[10px] text-white/30">{reply.subject}</p>
+                </div>
+                <span className="text-[9px] text-white/25">{reply.time}</span>
+              </div>
+              <p className="text-[11px] text-white/50 leading-relaxed">{reply.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // Demo Tribe
 function DemoTribe() {
+  const [filter, setFilter] = useState<"verified" | "all" | "non-verified">("verified");
+  
   const members = [
     { email: "alex@example.com", verified: true, date: "Jan 15" },
     { email: "sam@example.com", verified: true, date: "Jan 14" },
     { email: "jordan@example.com", verified: true, date: "Jan 13" },
-    { email: "taylor@example.com", verified: false, date: "Jan 12" },
+    { email: "taylor@example.com", verified: true, date: "Jan 12" },
     { email: "casey@example.com", verified: true, date: "Jan 11" },
+    { email: "morgan@example.com", verified: true, date: "Jan 10" },
+    { email: "riley@example.com", verified: true, date: "Jan 9" },
+    { email: "jamie@example.com", verified: false, date: "Jan 8" },
+    { email: "drew@example.com", verified: true, date: "Jan 7" },
+    { email: "avery@example.com", verified: true, date: "Jan 6" },
   ];
+
+  const filteredMembers = members.filter(m => {
+    if (filter === "verified") return m.verified;
+    if (filter === "non-verified") return !m.verified;
+    return true;
+  });
+
+  const counts = {
+    verified: members.filter(m => m.verified).length,
+    all: members.length,
+    nonVerified: members.filter(m => !m.verified).length,
+  };
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-medium text-white/90">Your Tribe</h1>
-        <span className="text-[12px] text-white/40">1,247 members</span>
+      <div>
+        <h1 className="text-[18px] font-medium text-white/90 mb-1">
+          Your tribe is made of <span className="text-white">{counts.verified}</span> people
+        </h1>
+        <p className="text-[11px] text-white/40">
+          A tribe is a group of people who choose to follow your work.
+        </p>
       </div>
       
       {/* Filters */}
       <div className="flex gap-2">
-        {["Verified", "All", "Non-verified"].map((filter, i) => (
+        {([
+          { id: "verified", label: "Verified", count: counts.verified },
+          { id: "all", label: "All", count: counts.all },
+          { id: "non-verified", label: "Non-verified", count: counts.nonVerified },
+        ] as const).map(({ id, label, count }) => (
           <button 
-            key={filter}
-            className={`px-3 py-1.5 rounded-lg text-[11px] ${i === 0 ? "bg-white/10 text-white/80" : "text-white/40"}`}
+            key={id}
+            onClick={() => setFilter(id)}
+            className={`px-3 py-1.5 rounded-[8px] text-[10px] transition-colors ${
+              filter === id ? "bg-white/[0.08] text-white/80" : "text-white/40 hover:bg-white/[0.04]"
+            }`}
           >
-            {filter}
+            {label} ({count})
           </button>
         ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-full pl-9 pr-3 py-2 rounded-[8px] text-[11px] text-white/70 placeholder:text-white/30 bg-transparent border border-white/[0.06] focus:outline-none focus:border-white/[0.12]"
+        />
       </div>
       
       {/* Members list */}
       <div 
-        className="rounded-xl border border-white/[0.06] overflow-hidden"
+        className="rounded-[12px] border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
-        {members.map((member, i) => (
+        {filteredMembers.map((member) => (
           <div 
             key={member.email}
-            className={`flex items-center justify-between px-4 py-3 ${i !== members.length - 1 ? "border-b border-white/[0.04]" : ""}`}
+            className="flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.03] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${member.verified ? "bg-emerald-400" : "bg-white/20"}`} />
-              <span className="text-[12px] text-white/70">{member.email}</span>
+              {member.verified ? (
+                <div className="px-1.5 py-0.5 rounded text-[8px] font-medium uppercase tracking-wider" style={{ background: "rgba(45, 138, 138, 0.2)", color: "#2d8a8a" }}>
+                  Verified
+                </div>
+              ) : (
+                <div className="w-2 h-2 rounded-full bg-white/20" />
+              )}
+              <span className="text-[11px] text-white/70">{member.email}</span>
             </div>
-            <span className="text-[11px] text-white/30">{member.date}</span>
+            <span className="text-[10px] text-white/25">{member.date}</span>
           </div>
         ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-center gap-2 text-[10px] text-white/40">
+        <button className="px-2 py-1 rounded hover:bg-white/[0.05]">← Prev</button>
+        <span>Page 1 of 125</span>
+        <button className="px-2 py-1 rounded hover:bg-white/[0.05]">Next →</button>
       </div>
     </div>
   );
@@ -280,8 +533,8 @@ function DemoTribe() {
 // Demo Gifts
 function DemoGifts() {
   const gifts = [
-    { name: "Free eBook.pdf", size: "2.4 MB", downloads: 156 },
-    { name: "Exclusive Wallpaper.zip", size: "8.1 MB", downloads: 89 },
+    { name: "Free eBook.pdf", size: "2.4 MB", downloads: 156, code: "abc123" },
+    { name: "Exclusive Wallpaper.zip", size: "8.1 MB", downloads: 89, code: "xyz789" },
   ];
 
   return (
@@ -289,42 +542,51 @@ function DemoGifts() {
       <div className="flex items-center justify-between">
         <h1 className="text-[18px] font-medium text-white/90">Gifts</h1>
         <button 
-          className="px-3 py-1.5 rounded-lg text-[10px] font-medium tracking-wider uppercase text-black"
+          className="px-3 py-1.5 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
           style={{ background: "#E8B84A" }}
         >
           Upload
         </button>
       </div>
       
-      <p className="text-[12px] text-white/40">
+      <p className="text-[11px] text-white/40">
         Offer free downloads to people joining your tribe.
       </p>
       
-      <div className="grid gap-3">
+      <div className="space-y-3">
         {gifts.map((gift) => (
           <div 
             key={gift.name}
-            className="flex items-center justify-between p-4 rounded-xl border border-white/[0.06]"
+            className="p-4 rounded-[12px] border border-white/[0.06]"
             style={{ background: "rgba(255, 255, 255, 0.02)" }}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
-                <GiftIcon className="w-5 h-5 text-white/40" />
-              </div>
-              <div>
-                <p className="text-[12px] text-white/70">{gift.name}</p>
-                <p className="text-[10px] text-white/30">{gift.size}</p>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-[8px] bg-white/[0.04] flex items-center justify-center">
+                  <GiftIcon className="w-5 h-5 text-white/30" />
+                </div>
+                <div>
+                  <p className="text-[12px] text-white/70">{gift.name}</p>
+                  <p className="text-[10px] text-white/30">{gift.size} · {gift.downloads} downloads</p>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-[12px] text-white/60">{gift.downloads}</p>
-              <p className="text-[10px] text-white/30">downloads</p>
+            <div className="flex items-center gap-2">
+              <div 
+                className="flex-1 px-2.5 py-1.5 rounded-[6px] text-[10px] text-white/40 truncate"
+                style={{ background: "rgba(255, 255, 255, 0.03)" }}
+              >
+                madewithtribe.com/g/{gift.code}
+              </div>
+              <button className="px-2 py-1.5 rounded-[6px] text-[9px] text-white/40 hover:text-white/60 hover:bg-white/[0.05]">
+                Copy
+              </button>
             </div>
           </div>
         ))}
       </div>
       
-      <p className="text-[11px] text-white/30">2/5 gifts uploaded</p>
+      <p className="text-[10px] text-white/30 text-center">2/5 gifts uploaded</p>
     </div>
   );
 }
@@ -366,7 +628,7 @@ function DashboardIcon({ className }: { className?: string }) {
 function WriteIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M2 14h12M2 2l6 10 6-10" />
+      <path d="M11.5 2.5l2 2M3 13l-0.5 0.5L2 15l1.5-0.5L13 5l-2-2L3 13z" />
     </svg>
   );
 }
@@ -386,6 +648,67 @@ function GiftIcon({ className }: { className?: string }) {
       <rect x="2" y="6" width="12" height="8" rx="1" />
       <path d="M8 6v8M2 9h12" />
       <path d="M8 6c-1.5 0-3-1-3-2.5S5.5 1 8 3c2.5-2 4.5-.5 4.5 1S9.5 6 8 6z" />
+    </svg>
+  );
+}
+
+function EmailIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="3" width="12" height="10" rx="1.5" />
+      <path d="M2 5l6 4 6-4" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" />
+      <circle cx="8" cy="8" r="2" />
+    </svg>
+  );
+}
+
+function ReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M6 4L2 8l4 4" />
+      <path d="M2 8h9a3 3 0 0 1 3 3v1" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 6l4 4 4-4" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M8 5v3l2 2" />
+    </svg>
+  );
+}
+
+function TestIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M14 2L6 10l-3-3" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="7" cy="7" r="4" />
+      <path d="M10 10l4 4" />
     </svg>
   );
 }
