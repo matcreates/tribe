@@ -3,11 +3,25 @@
 import Link from "next/link";
 import { useState } from "react";
 
+// Accent colors
+const GOLD = "#E8B84A";
+const PURPLE = "#A855F7";
+
 export function PricingSection() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
 
   const smallPrice = billing === "yearly" ? { amount: "$5", suffix: "/mo", yearly: "$60/year" } : { amount: "$8", suffix: "/mo", yearly: null };
   const bigPrice = billing === "yearly" ? { amount: "$17", suffix: "/mo", yearly: "$200/year" } : { amount: "$20", suffix: "/mo", yearly: null };
+
+  const paidFeatures = [
+    "Create your newsletter",
+    "Collect subscribers",
+    "Gift downloads",
+    "Send 2 emails/week",
+    "Email scheduling",
+    "Open rate analytics",
+    "Reply management",
+  ];
 
   return (
     <section className="relative py-32 px-6" id="pricing">
@@ -51,7 +65,7 @@ export function PricingSection() {
               }
               aria-pressed={billing === "yearly"}
             >
-              Yearly <span className="text-[#E8B84A]">Save 17%+</span>
+              Yearly <span style={{ color: GOLD }}>Save 17%+</span>
             </button>
           </div>
         </div>
@@ -97,19 +111,22 @@ export function PricingSection() {
 
           {/* Small Creators */}
           <div
-            className="relative p-7 rounded-2xl border border-[#E8B84A]/30 transition-colors"
+            className="relative p-7 rounded-2xl border transition-colors"
             style={{
-              background:
-                "linear-gradient(180deg, rgba(232, 184, 74, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)",
+              borderColor: `${GOLD}4D`,
+              background: `linear-gradient(180deg, ${GOLD}0D 0%, rgba(255, 255, 255, 0.02) 100%)`,
             }}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-medium tracking-[0.05em] uppercase bg-[#E8B84A] text-black">
+              <span 
+                className="px-3 py-1 rounded-full text-[10px] font-medium tracking-[0.05em] uppercase text-black"
+                style={{ background: GOLD }}
+              >
                 Most Popular
               </span>
             </div>
             
-            <p className="text-[12px] text-[#E8B84A]/80 uppercase tracking-wider mb-2">
+            <p className="text-[12px] uppercase tracking-wider mb-2" style={{ color: `${GOLD}CC` }}>
               Small Creators
             </p>
 
@@ -123,13 +140,7 @@ export function PricingSection() {
             </p>
 
             <div className="space-y-2.5 mb-6">
-              {[
-                "Everything in Free",
-                "Send 2 emails/week",
-                "Email scheduling",
-                "Open rate analytics",
-                "Reply management",
-              ].map((feature) => (
+              {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
                   <span className="text-[12px] text-white/60">{feature}</span>
@@ -147,10 +158,24 @@ export function PricingSection() {
 
           {/* Big Creators */}
           <div
-            className="p-7 rounded-2xl border border-white/[0.08] transition-colors hover:border-white/[0.12]"
-            style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            className="relative p-7 rounded-2xl border transition-colors"
+            style={{ 
+              borderColor: `${PURPLE}4D`,
+              background: `linear-gradient(180deg, ${PURPLE}0D 0%, rgba(255, 255, 255, 0.02) 100%)`,
+            }}
           >
-            <p className="text-[12px] text-white/50 uppercase tracking-wider mb-2">Big Creators</p>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span 
+                className="px-3 py-1 rounded-full text-[10px] font-medium tracking-[0.05em] uppercase text-white"
+                style={{ background: PURPLE }}
+              >
+                Unlimited
+              </span>
+            </div>
+
+            <p className="text-[12px] uppercase tracking-wider mb-2" style={{ color: `${PURPLE}CC` }}>
+              Big Creators
+            </p>
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-[36px] font-medium text-white/90">{bigPrice.amount}</span>
               <span className="text-[14px] text-white/40">{bigPrice.suffix}</span>
@@ -160,39 +185,39 @@ export function PricingSection() {
             </p>
 
             <div className="space-y-2.5 mb-6">
-              {[
-                "Everything in Small",
-                "Unlimited tribe size",
-                "Receive replies",
-                "Priority support",
-              ].map((feature) => (
+              {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
                   <span className="text-[12px] text-white/60">{feature}</span>
                 </div>
               ))}
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-3.5 h-3.5" style={{ color: PURPLE }} />
+                <span className="text-[12px] text-white/80 font-medium">Unlimited tribe size</span>
+              </div>
             </div>
 
             <Link
               href="/signup"
-              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass"
+              className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase text-white transition-all hover:opacity-90"
+              style={{ background: PURPLE }}
             >
-              <span className="btn-glass-text">Get started</span>
+              Upgrade
             </Link>
           </div>
         </div>
 
         <p className="text-center text-[13px] text-white/30 mt-8">
-          All plans include 2 emails per week limit · Cancel anytime
+          All paid plans include 2 emails per week · Cancel anytime
         </p>
       </div>
     </section>
   );
 }
 
-function CheckCircle({ className }: { className?: string }) {
+function CheckCircle({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none">
+    <svg className={className} style={style} viewBox="0 0 16 16" fill="none">
       <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M5 8l2 2 4-4"
