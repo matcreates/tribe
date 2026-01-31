@@ -154,27 +154,6 @@ export default async function LandingPage() {
 
       <PricingSection />
 
-      {/* CTA Section */}
-      <section className="relative py-32 px-6">
-        <div 
-          className="max-w-3xl mx-auto text-center p-12 rounded-3xl border border-white/[0.06]"
-          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
-        >
-          <h2 className="text-[clamp(1.5rem,4vw,2rem)] font-medium text-white/90 mb-4">
-            Ready to build your tribe?
-          </h2>
-          <p className="text-[15px] text-white/40 mb-8 max-w-md mx-auto">
-            Join thousands of creators who use Tribe to connect with their audience.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-block px-10 py-4 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase btn-glass-primary"
-          >
-            <span className="btn-glass-text">Get started for free</span>
-          </Link>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">

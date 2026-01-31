@@ -141,7 +141,7 @@ export function PricingSection() {
               href="/signup"
               className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase btn-glass-gold"
             >
-              <span className="btn-glass-text">Start free trial</span>
+              <span className="btn-glass-text">Upgrade</span>
             </Link>
           </div>
 
@@ -163,7 +163,7 @@ export function PricingSection() {
               {[
                 "Everything in Small",
                 "Unlimited tribe size",
-                "No restrictions",
+                "Receive replies",
                 "Priority support",
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
