@@ -25,7 +25,7 @@ export function PricingSection() {
 
   return (
     <section className="relative py-32 px-6" id="pricing">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
             Simple, transparent pricing

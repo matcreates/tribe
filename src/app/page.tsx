@@ -100,7 +100,7 @@ export default async function LandingPage() {
 
       {/* Features Section */}
       <section className="relative py-32 px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-medium text-white/90 mb-4">
               Everything you need, nothing you don&apos;t
@@ -161,7 +161,7 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/[0.04]">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <TribeLogo className="h-4 w-auto text-white/40" />
             <span className="text-[12px] text-white/25">© 2026</span>

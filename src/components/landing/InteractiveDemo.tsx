@@ -581,38 +581,49 @@ function DemoJoinPage() {
         This is how your public join page looks. Share the link to grow your tribe.
       </p>
 
-      {/* Preview of join page */}
+      {/* Preview of join page - matching actual design */}
       <div 
         className="rounded-[14px] border border-white/[0.06] overflow-hidden"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
-        {/* Header */}
-        <div className="p-6 text-center border-b border-white/[0.04]">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[24px] font-medium text-white mx-auto mb-4">
+        <div className="py-10 px-6 flex flex-col items-center text-center">
+          {/* Avatar */}
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[28px] font-medium text-white mb-3 ring-2 ring-white/10">
             D
           </div>
-          <h2 className="text-[16px] font-medium text-white/90 mb-1">Demo User</h2>
-          <p className="text-[12px] text-white/50">Join my tribe and get exclusive updates</p>
-        </div>
-        
-        {/* Form */}
-        <div className="p-6">
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
-              className="flex-1 px-3 py-2 rounded-[8px] text-[12px] text-white/70 placeholder:text-white/30 bg-transparent border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
-            />
-            <button 
-              className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
-              style={{ background: "#E8B84A" }}
-            >
-              Join
-            </button>
-          </div>
-          <p className="text-[10px] text-white/30 text-center mt-3">1,247 people have joined</p>
+          
+          {/* Name */}
+          <p className="text-[14px] text-white/60 mb-4">Demo User</p>
+          
+          {/* Title */}
+          <h2 className="text-[20px] font-semibold text-white mb-3">Join my tribe</h2>
+          
+          {/* Description */}
+          <p className="text-[13px] text-white/40 leading-relaxed max-w-[280px] mb-6">
+            A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.
+          </p>
+          
+          {/* Email input - full width */}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your email address"
+            className="w-full max-w-[320px] px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/30 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15] text-center mb-4"
+          />
+          
+          {/* Join button - centered below */}
+          <button 
+            className="px-8 py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.15em] uppercase text-black/80"
+            style={{ background: "rgba(255, 255, 255, 0.12)" }}
+          >
+            Join
+          </button>
+          
+          {/* Made with Tribe footer */}
+          <p className="mt-8 text-[11px] text-white/25">
+            made with <span className="text-white/40">Tribe</span>
+          </p>
         </div>
       </div>
 
