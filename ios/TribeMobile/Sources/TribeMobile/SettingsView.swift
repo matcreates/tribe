@@ -17,8 +17,13 @@ struct MobileSettings: Decodable {
 
 struct MobileSubscriptionResponse: Decodable {
     let status: String
+    let tier: String?
     let plan: String?
     let endsAt: String?
+    let tribeSizeLimit: Int?
+    let currentTribeSize: Int?
+    let isTribeFull: Bool?
+    let canSendEmails: Bool?
     let synced: Bool?
     let message: String?
 }
@@ -136,10 +141,65 @@ struct SettingsView: View {
 
                         // Subscription
                         fieldCard(title: "Subscription") {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(subscriptionLine())
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(TribeTheme.textSecondary)
+                            VStack(alignment: .leading, spacing: 12) {
+                                // Tier and status
+                                HStack {
+                                    Circle()
+                                        .fill(subscriptionStatusColor())
+                                        .frame(width: 8, height: 8)
+                                    Text(subscriptionTierName())
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(TribeTheme.textPrimary)
+                                    Spacer()
+                                    Text(subscriptionPlanLabel())
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(TribeTheme.textTertiary)
+                                }
+                                
+                                // Tribe size progress
+                                if let current = subscription?.currentTribeSize {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack {
+                                            Text("Tribe size")
+                                                .font(.system(size: 11))
+                                                .foregroundStyle(TribeTheme.textTertiary)
+                                            Spacer()
+                                            Text(tribeSizeLabel())
+                                                .font(.system(size: 11))
+                                                .foregroundStyle(TribeTheme.textSecondary)
+                                        }
+                                        
+                                        if let limit = subscription?.tribeSizeLimit, limit > 0 {
+                                            GeometryReader { geo in
+                                                ZStack(alignment: .leading) {
+                                                    RoundedRectangle(cornerRadius: 3)
+                                                        .fill(TribeTheme.textPrimary.opacity(0.1))
+                                                        .frame(height: 6)
+                                                    RoundedRectangle(cornerRadius: 3)
+                                                        .fill(subscription?.isTribeFull == true ? Color.red.opacity(0.8) : Color.green.opacity(0.6))
+                                                        .frame(width: min(geo.size.width, geo.size.width * CGFloat(current) / CGFloat(limit)), height: 6)
+                                                }
+                                            }
+                                            .frame(height: 6)
+                                        }
+                                        
+                                        if subscription?.isTribeFull == true {
+                                            Text("Tribe is full. Upgrade to add more members.")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(Color.red.opacity(0.8))
+                                        }
+                                    }
+                                    .padding(10)
+                                    .background(TribeTheme.textPrimary.opacity(0.03))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                }
+                                
+                                // End date info
+                                if let sub = subscription {
+                                    Text(subscriptionEndInfo(sub))
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(TribeTheme.textTertiary)
+                                }
 
                                 HStack {
                                     Button {
@@ -304,12 +364,52 @@ struct SettingsView: View {
         }
     }
 
-    private func subscriptionLine() -> String {
-        guard let subscription else { return "Loading…" }
-        var parts: [String] = [subscription.status]
-        if let plan = subscription.plan { parts.append(plan) }
-        if let ends = subscription.endsAt { parts.append("ends \(ends.prefix(10))") }
-        return parts.joined(separator: " • ")
+    private func subscriptionTierName() -> String {
+        guard let tier = subscription?.tier else { return "Loading…" }
+        switch tier {
+        case "big": return "Big Creators"
+        case "small": return "Small Creators"
+        default: return "Free"
+        }
+    }
+    
+    private func subscriptionStatusColor() -> Color {
+        guard let status = subscription?.status else { return Color.gray.opacity(0.5) }
+        switch status {
+        case "active": return Color.green
+        case "canceled": return Color.orange
+        case "past_due": return Color.orange
+        default: return Color.gray.opacity(0.5)
+        }
+    }
+    
+    private func subscriptionPlanLabel() -> String {
+        guard let plan = subscription?.plan else { return "" }
+        if plan.contains("yearly") { return "Yearly" }
+        if plan.contains("monthly") { return "Monthly" }
+        return plan.capitalized
+    }
+    
+    private func tribeSizeLabel() -> String {
+        let current = subscription?.currentTribeSize ?? 0
+        if let limit = subscription?.tribeSizeLimit, limit > 0 {
+            return "\(current.formatted()) / \(limit.formatted())"
+        }
+        return "\(current.formatted()) / Unlimited"
+    }
+    
+    private func subscriptionEndInfo(_ sub: MobileSubscriptionResponse) -> String {
+        guard let ends = sub.endsAt, !ends.isEmpty else { 
+            if sub.status == "free" {
+                return "Upgrade to unlock email sending"
+            }
+            return "Subscription active"
+        }
+        let dateStr = String(ends.prefix(10))
+        if sub.status == "canceled" {
+            return "Access until \(dateStr)"
+        }
+        return "Renews on \(dateStr)"
     }
 
     private func syncSubscription() async {
