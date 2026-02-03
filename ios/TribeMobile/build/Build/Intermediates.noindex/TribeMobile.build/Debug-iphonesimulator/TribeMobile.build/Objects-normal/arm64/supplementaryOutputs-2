@@ -1,0 +1,23 @@
+{
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/EmailDetailView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/EmailDetailView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/EmailDetailView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/EmailDetailView.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/EmailDetailView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/EmailDetailView.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/GiftsView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/GiftsView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/GiftsView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/GiftsView.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/GiftsView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/GiftsView.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/JoinPageView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/JoinPageView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/JoinPageView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/JoinPageView.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/JoinPageView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/JoinPageView.swiftdeps"
+  }
+}

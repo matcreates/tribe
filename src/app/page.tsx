@@ -14,8 +14,8 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'rgb(12, 12, 12)' }}>
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5">
+      {/* Navigation with gradient background */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5" style={{ background: 'linear-gradient(180deg, rgba(12, 12, 12, 0.95) 0%, rgba(12, 12, 12, 0.8) 60%, rgba(12, 12, 12, 0) 100%)' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <TribeLogo className="h-[18px] sm:h-[22px] w-auto text-white/90" />
           <div className="flex items-center gap-1 sm:gap-3">
@@ -43,15 +43,10 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden" style={{ background: 'rgb(12, 12, 12)' }}>
-        <div className="relative z-10 max-w-3xl mx-auto text-center px-2">
-          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full mb-5 sm:mb-8 border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
-            <span className="text-[10px] sm:text-[11px] text-white/50 tracking-wide">Simple newsletter tool for creators</span>
-          </div>
-          
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-2">
           <h1 
-            className="text-[1.75rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-normal text-white leading-[1.15] sm:leading-[1.1] tracking-tight mb-4 sm:mb-6"
-            style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+            className="text-[2rem] sm:text-[3rem] md:text-[4rem] lg:text-[5rem] font-light text-white leading-[1.1] tracking-tight mb-4 sm:mb-6"
+            style={{ fontFamily: 'HeritageSerifLight, Georgia, serif' }}
           >
             A newsletter tool that doesn&apos;t s*ck, made for creators
           </h1>
@@ -96,9 +91,9 @@ export default async function LandingPage() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
-                icon: "✉️",
-                title: "Simple emails",
-                description: "Write and send beautiful emails to your tribe. No templates, no fuss. Just your words."
+                icon: "🎁",
+                title: "Gift downloads",
+                description: "Reward new subscribers with exclusive downloads. PDFs, wallpapers, anything you want to share."
               },
               {
                 icon: "👥",

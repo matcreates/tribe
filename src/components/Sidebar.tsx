@@ -74,7 +74,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
       <aside 
         className={`
           fixed top-0 right-0 lg:left-0 z-50 h-screen flex flex-col
-          w-[280px] lg:w-[220px]
+          w-[280px] lg:w-[260px]
           transform transition-transform duration-300 ease-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
         `}

@@ -167,7 +167,7 @@ export default function SettingsPage() {
 
       <div className="flex flex-col items-center pt-14 px-6 pb-12">
         <div className="w-full max-w-[540px]">
-          <h1 className="text-[20px] font-medium text-white/90 mb-6">Account settings</h1>
+          <h1 className="text-[24px] font-normal text-white/90 mb-6" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Account settings</h1>
 
         {/* Email (read-only) */}
         <div className="mb-5">

@@ -18,7 +18,7 @@ const REPLIES = [
 ];
 
 export function InteractiveDemo() {
-  const [activeTab, setActiveTab] = useState<DemoTab>("dashboard");
+  const [activeTab, setActiveTab] = useState<DemoTab>("write");
 
   return (
     <section className="relative px-4 sm:px-6 -mt-16 sm:-mt-32 z-20">

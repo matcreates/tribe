@@ -529,7 +529,7 @@ export default function NewEmailPage() {
       <div className="flex flex-col items-center pt-14 px-6 pb-12">
         <div className="w-full max-w-[540px]">
           {/* Header */}
-          <h1 className="text-[20px] font-medium text-white/90 mb-5">
+          <h1 className="text-[24px] font-normal text-white/90 mb-5" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
             Write
           </h1>
 
@@ -647,8 +647,8 @@ export default function NewEmailPage() {
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Subject"
                 disabled={isWeeklyLimitReached}
-                className="w-full text-[16px] font-medium text-white/90 placeholder:text-white/25 placeholder:font-normal bg-transparent disabled:cursor-not-allowed"
-                style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                className="w-full text-[18px] font-normal text-white/90 placeholder:text-white/25 bg-transparent disabled:cursor-not-allowed"
+                style={{ outline: 'none', border: 'none', boxShadow: 'none', fontFamily: 'HeritageSerif, Georgia, serif' }}
               />
             </div>
 

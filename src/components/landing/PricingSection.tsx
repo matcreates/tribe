@@ -94,7 +94,7 @@ export function PricingSection() {
                 "Preview emails",
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
+                  <CheckCircle className="w-3.5 h-3.5 text-white/50" />
                   <span className="text-[12px] text-white/60">{feature}</span>
                 </div>
               ))}
@@ -145,7 +145,7 @@ export function PricingSection() {
             <div className="space-y-2.5 mb-6 flex-grow">
               {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
+                  <CheckCircle className="w-3.5 h-3.5 text-white/50" />
                   <span className="text-[12px] text-white/60">{feature}</span>
                 </div>
               ))}
@@ -190,7 +190,7 @@ export function PricingSection() {
             <div className="space-y-2.5 mb-6 flex-grow">
               {paidFeatures.map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400/80" />
+                  <CheckCircle className="w-3.5 h-3.5 text-white/50" />
                   <span className="text-[12px] text-white/60">{feature}</span>
                 </div>
               ))}

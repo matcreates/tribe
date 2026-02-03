@@ -238,7 +238,7 @@ export default function GiftsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
           <div className="flex-1">
-            <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90 mb-2">
+            <h1 className="text-[22px] sm:text-[24px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
               Gifts
             </h1>
             <p className="text-[13px] text-white/50 leading-relaxed">

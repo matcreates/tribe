@@ -1,0 +1,23 @@
+{
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/APIClient.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/APIClient.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/APIClient.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/APIClient.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/APIClient.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/APIClient.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/Config.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Config.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Config.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Config.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Config.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Config.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/DashboardView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/DashboardView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/DashboardView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/DashboardView.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/DashboardView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/DashboardView.swiftdeps"
+  }
+}

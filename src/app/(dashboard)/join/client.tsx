@@ -83,7 +83,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* Header */}
-        <h1 className="text-[20px] font-medium text-white/90 mb-5">
+        <h1 className="text-[24px] font-normal text-white/90 mb-5" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           Join Page
         </h1>
 
@@ -150,10 +150,15 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
                 Join my tribe
               </h2>
               
-              {/* Description */}
-              <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
-                {description || "Add a description..."}
-              </p>
+              {/* Description - editable inline */}
+              <textarea
+                value={description}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                placeholder="Add a description..."
+                className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2"
+                style={{ minHeight: '40px' }}
+                rows={2}
+              />
               
               {/* Email Input (disabled preview) */}
               <div 
@@ -177,28 +182,13 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
           </div>
         </div>
 
-        {/* Description Editor */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-[11px] text-white/30 uppercase tracking-[0.08em]">
-              Page description
-            </label>
-            {isSaving && (
-              <span className="text-[10px] text-white/30">Saving...</span>
-            )}
-          </div>
-          <textarea
-            ref={descriptionRef}
-            value={description}
-            onChange={(e) => handleDescriptionChange(e.target.value)}
-            className="w-full min-h-[60px] px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/25 resize-none focus:outline-none transition-colors overflow-hidden"
-            style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
-            placeholder="Describe what people will get by joining your tribe..."
-          />
-          <p className="mt-2 text-[11px] text-white/25">
-            Changes are saved automatically
-          </p>
-        </div>
+        {/* Saving indicator */}
+        {isSaving && (
+          <p className="mt-4 text-[11px] text-white/30 text-center">Saving...</p>
+        )}
+        <p className="mt-2 text-[11px] text-white/25 text-center">
+          Changes are saved automatically
+        </p>
 
         <Toast message={toast.message} isVisible={toast.visible} onClose={hideToast} />
       </div>

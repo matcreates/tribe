@@ -351,7 +351,7 @@ export default function TribePage() {
         {/* Header */}
         <div className="mb-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <h1 className="text-[18px] sm:text-[20px] font-medium text-white/90">
+            <h1 className="text-[22px] sm:text-[24px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
               Your tribe is made of <span className="text-white">{totalVerified}</span> {totalVerified === 1 ? 'person' : 'people'}
             </h1>
             <div className="flex-1" />

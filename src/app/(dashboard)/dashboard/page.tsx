@@ -73,7 +73,7 @@ export default function DashboardPage() {
       <div className="w-full max-w-[540px]">
         {/* Header with Filters */}
         <div className="flex items-center justify-between gap-4 mb-6">
-          <h1 className="text-[20px] font-medium text-white/90">
+          <h1 className="text-[24px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
             Dashboard
           </h1>
           

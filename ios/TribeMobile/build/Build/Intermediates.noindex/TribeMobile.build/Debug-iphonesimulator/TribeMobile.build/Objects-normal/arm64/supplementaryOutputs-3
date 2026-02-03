@@ -1,0 +1,23 @@
+{
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/Keychain.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Keychain.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Keychain.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Keychain.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Keychain.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Keychain.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/LoginView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/LoginView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/LoginView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/LoginView.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/LoginView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/LoginView.swiftdeps"
+  },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/Models.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Models.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Models.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Models.dia",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Models.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/Models.swiftdeps"
+  }
+}

@@ -164,7 +164,7 @@ export async function sendBulkEmailWithUnsubscribe(
             <tr>
               <td style="padding: 0;">
                 <!-- Main Content -->
-                <div style="font-family: Georgia, 'Times New Roman', serif;">
+                <div style="font-family: Garamond, 'Apple Garamond', Georgia, 'Times New Roman', serif;">
                   ${formattedBody}
                 </div>
                 
@@ -180,7 +180,7 @@ export async function sendBulkEmailWithUnsubscribe(
                     Sent by ${ownerName}
                   </p>
                   <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
-                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
+                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Garamond, 'Apple Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
                   </a>
                   <br>
                   <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.3); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: underline;">
@@ -527,7 +527,7 @@ export async function sendTestEmail(
                 </div>
                 
                 <!-- Main Content -->
-                <div style="font-family: Georgia, 'Times New Roman', serif;">
+                <div style="font-family: Garamond, 'Apple Garamond', Georgia, 'Times New Roman', serif;">
                   ${formattedBody}
                 </div>
                 
@@ -543,7 +543,7 @@ export async function sendTestEmail(
                     Sent by ${ownerName}
                   </p>
                   <a href="https://www.madewithtribe.com" target="_blank" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
-                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
+                    <span style="color: rgba(255,255,255,0.25); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">made with </span><span style="font-family: Garamond, 'Apple Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-style: italic; letter-spacing: 0.03em; color: rgba(255,255,255,0.4);">tribe</span>
                   </a>
                   <br>
                   <p style="color: rgba(255,255,255,0.15); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0;">
