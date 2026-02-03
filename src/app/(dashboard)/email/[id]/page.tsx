@@ -330,10 +330,23 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
           </div>
           <div className="p-5">
             <div 
-              className="rounded-[8px] p-5 text-[13px] text-white/60 leading-relaxed whitespace-pre-wrap"
+              className="rounded-[8px] p-5"
               style={{ background: 'rgba(0, 0, 0, 0.2)' }}
             >
-              {email.body || "No content"}
+              {/* Subject */}
+              <h4 
+                className="text-[18px] font-normal text-white/80 mb-4 pb-4 border-b border-white/[0.06]"
+                style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+              >
+                {email.subject || "Untitled"}
+              </h4>
+              {/* Body */}
+              <div 
+                className="text-[14px] text-white/60 leading-[1.8] whitespace-pre-wrap mb-6"
+                style={{ fontFamily: 'Garamond, Georgia, serif' }}
+              >
+                {email.body || "No content"}
+              </div>
             </div>
           </div>
         </div>

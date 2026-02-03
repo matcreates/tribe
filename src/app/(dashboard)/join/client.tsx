@@ -83,9 +83,12 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[540px]">
         {/* Header */}
-        <h1 className="text-[24px] font-normal text-white/90 mb-5" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+        <h1 className="text-[24px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           Join Page
         </h1>
+        <p className="text-[13px] text-white/40 mb-5 leading-relaxed">
+          This is your public page where people can join your tribe. Share the link to grow your community.
+        </p>
 
         {/* Browser Preview Card */}
         <div 
@@ -152,12 +155,11 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
               
               {/* Description - editable inline */}
               <textarea
+                ref={descriptionRef}
                 value={description}
                 onChange={(e) => handleDescriptionChange(e.target.value)}
                 placeholder="Add a description..."
-                className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2"
-                style={{ minHeight: '40px' }}
-                rows={2}
+                className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2 overflow-hidden"
               />
               
               {/* Email Input (disabled preview) */}

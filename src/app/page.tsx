@@ -43,10 +43,13 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden" style={{ background: 'rgb(12, 12, 12)' }}>
-        <div className="relative z-10 max-w-4xl mx-auto text-center px-2">
+        <div className="relative z-10 max-w-5xl mx-auto text-center px-2">
           <h1 
-            className="text-[2rem] sm:text-[3rem] md:text-[4rem] lg:text-[5rem] font-light text-white leading-[1.1] tracking-tight mb-4 sm:mb-6"
-            style={{ fontFamily: 'HeritageSerifLight, Georgia, serif' }}
+            className="text-[2rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-light text-white leading-[1.05] mb-4 sm:mb-6 hero-title"
+            style={{ 
+              fontFamily: 'HeritageSerifLight, Georgia, serif',
+              letterSpacing: '-0.02em',
+            }}
           >
             A newsletter tool that doesn&apos;t s*ck, made for creators
           </h1>

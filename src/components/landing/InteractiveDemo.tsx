@@ -6,15 +6,15 @@ import Image from "next/image";
 type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "join";
 
 const SENT_EMAILS = [
-  { id: "1", subject: "Welcome to my tribe!", recipients: 1247, time: "2 days ago", opens: 847, openRate: 68 },
-  { id: "2", subject: "Big announcement coming...", recipients: 1189, time: "5 days ago", opens: 892, openRate: 75 },
-  { id: "3", subject: "Thank you for being here", recipients: 1102, time: "1 week ago", opens: 771, openRate: 70 },
+  { id: "1", subject: "Something I've been working on", recipients: 1247, time: "2 days ago", opens: 847, openRate: 68 },
+  { id: "2", subject: "A quick personal update", recipients: 1189, time: "5 days ago", opens: 892, openRate: 75 },
+  { id: "3", subject: "Behind the scenes", recipients: 1102, time: "1 week ago", opens: 771, openRate: 70 },
 ];
 
 const REPLIES = [
-  { email: "alex@example.com", subject: "Re: Welcome to my tribe!", text: "This is amazing! So happy to be part of this community.", time: "2 hours ago" },
-  { email: "jordan@example.com", subject: "Re: Big announcement coming...", text: "Can't wait to hear what you've been working on!", time: "1 day ago" },
-  { email: "sam@example.com", subject: "Re: Thank you for being here", text: "Thank YOU for creating such valuable content.", time: "3 days ago" },
+  { email: "alex@example.com", subject: "Re: Something I've been working on", text: "This looks incredible! Can't wait to try it out.", time: "2 hours ago" },
+  { email: "jordan@example.com", subject: "Re: A quick personal update", text: "Really appreciate you sharing this. Keep going!", time: "1 day ago" },
+  { email: "sam@example.com", subject: "Re: Behind the scenes", text: "Love seeing the process. More of this please!", time: "3 days ago" },
 ];
 
 export function InteractiveDemo() {
@@ -98,6 +98,7 @@ export function InteractiveDemo() {
                             ? "bg-white/[0.08] text-white/90"
                             : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
                         }`}
+                        style={{ fontFamily: 'HeritageSerifLight, Georgia, serif' }}
                       >
                         <Icon className="w-[13px] h-[13px]" />
                         {label}
@@ -127,9 +128,9 @@ export function InteractiveDemo() {
               <div className="px-4 pb-8 border-t border-white/[0.06] pt-4">
                 <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.05] transition-colors cursor-pointer">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-medium text-white">
-                    D
+                    M
                   </div>
-                  <span className="text-[11px] text-white/60">Demo User</span>
+                  <span className="text-[11px] text-white/60">Mat</span>
                 </div>
               </div>
             </div>
@@ -166,7 +167,7 @@ function DemoDashboard() {
     <div className="space-y-5">
       {/* Header with period toggle */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-medium text-white/90">Dashboard</h1>
+        <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Dashboard</h1>
         <div className="flex gap-1 p-1 rounded-[8px] border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
           {(["24h", "7d", "30d"] as const).map((p) => (
             <button 
@@ -312,14 +313,14 @@ function DemoChart() {
 
 // Demo Write
 function DemoWrite() {
-  const [subject, setSubject] = useState("Welcome to my tribe!");
-  const [body, setBody] = useState("Hey there,\n\nI'm so excited to have you here. This community means everything to me, and I can't wait to share what's coming next.\n\nStay tuned!");
+  const [subject, setSubject] = useState("Something I've been working on");
+  const [body, setBody] = useState("Hey,\n\nI wanted to share something with you that I've been quietly building for the past few months.\n\nIt's still early, but your feedback means everything to me. I'd love to hear what you think.\n\nMore details coming soon.");
   const [allowReplies, setAllowReplies] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[18px] font-medium text-white/90">Write</h1>
+      <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Write</h1>
       
       <div 
         className="rounded-[14px] border border-white/[0.06] overflow-hidden"
@@ -327,41 +328,39 @@ function DemoWrite() {
       >
         {/* Recipients */}
         <div className="px-4 py-3 border-b border-white/[0.04]">
-          <label className="block text-[10px] text-white/40 mb-1.5">To</label>
           <div className="text-[12px] text-white/50">
-            All verified members (1,247)
+            To all verified members (1,247)
           </div>
         </div>
         
         {/* Subject */}
         <div className="px-4 py-3 border-b border-white/[0.04]">
-          <label className="block text-[10px] text-white/40 mb-1.5">Subject</label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-[13px] text-white/80 bg-transparent focus:outline-none"
+            className="w-full text-[14px] text-white/80 bg-transparent focus:outline-none"
+            style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
             placeholder="Subject..."
           />
         </div>
         
         {/* Message */}
         <div className="px-4 py-3 border-b border-white/[0.04]">
-          <label className="block text-[10px] text-white/40 mb-1.5">Message</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={5}
             className="w-full text-[12px] text-white/70 bg-transparent focus:outline-none resize-none leading-relaxed"
+            style={{ fontFamily: 'Garamond, Georgia, serif' }}
             placeholder="Write your message..."
           />
         </div>
 
         {/* Signature preview */}
         <div className="px-4 py-3 border-b border-white/[0.04]">
-          <label className="block text-[10px] text-white/40 mb-1.5">Signature</label>
-          <div className="text-[11px] text-white/40 leading-relaxed">
-            Best,<br/>Demo User
+          <div className="text-[11px] text-white/40 leading-relaxed" style={{ fontFamily: 'Garamond, Georgia, serif' }}>
+            Mat
           </div>
         </div>
         
@@ -382,8 +381,8 @@ function DemoWrite() {
         {/* Actions */}
         <div className="px-4 py-3 flex items-center gap-2">
           <button 
-            className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
-            style={{ background: "#E8B84A" }}
+            className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-white/90"
+            style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
           >
             Send
           </button>
@@ -453,7 +452,7 @@ function DemoTribe() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[18px] font-medium text-white/90 mb-1">
+        <h1 className="text-[18px] font-normal text-white/90 mb-1" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           Your tribe is made of <span className="text-white">{counts.verified}</span> people
         </h1>
         <p className="text-[11px] text-white/40">
@@ -535,7 +534,7 @@ function DemoGifts() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-medium text-white/90">Gifts</h1>
+        <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Gifts</h1>
         <button 
           className="px-3 py-1.5 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
           style={{ background: "#E8B84A" }}
@@ -592,7 +591,7 @@ function DemoJoinPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[18px] font-medium text-white/90">Join page</h1>
+      <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Join page</h1>
       
       <p className="text-[11px] text-white/40">
         This is how your public join page looks. Share the link to grow your tribe.
@@ -606,11 +605,11 @@ function DemoJoinPage() {
         <div className="py-10 px-6 flex flex-col items-center text-center">
           {/* Avatar */}
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[28px] font-medium text-white mb-3 ring-2 ring-white/10">
-            D
+            M
           </div>
           
           {/* Name */}
-          <p className="text-[14px] text-white/60 mb-4">Demo User</p>
+          <p className="text-[14px] text-white/60 mb-4">Mat</p>
           
           {/* Title */}
           <h2 className="text-[20px] font-semibold text-white mb-3">Join my tribe</h2>
@@ -650,7 +649,7 @@ function DemoJoinPage() {
           className="flex-1 px-3 py-2 rounded-[8px] text-[11px] text-white/50 truncate"
           style={{ background: "rgba(255, 255, 255, 0.03)" }}
         >
-          madewithtribe.com/@demouser
+          madewithtribe.com/@mat
         </div>
         <button className="px-3 py-2 rounded-[8px] text-[10px] text-white/40 hover:text-white/60 hover:bg-white/[0.05]">
           Copy
