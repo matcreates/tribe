@@ -59,12 +59,9 @@
 
 /* Landing page paper-like background */
 .landing-paper-bg {
-  background-color: rgb(250, 248, 245);
+  background-color: rgb(252, 250, 247);
   background-image: 
-    radial-gradient(ellipse at 20% 30%, rgba(255, 253, 250, 0.8) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(245, 240, 235, 0.6) 0%, transparent 50%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-blend-mode: normal, normal, soft-light;
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 :root {
@@ -75,6 +72,11 @@
   --text-primary: 255, 255, 255;
   --text-secondary: 255, 255, 255;
   --border-color: 255, 255, 255;
+  --card-bg: rgba(255, 255, 255, 0.02);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --btn-glass-bg: rgba(255, 255, 255, 0.08);
+  --btn-glass-border: rgba(255, 255, 255, 0.1);
+  --btn-glass-text: rgba(255, 255, 255, 0.9);
 }
 
 /* Light mode overrides */
@@ -85,6 +87,70 @@
   --text-primary: 28, 28, 28;
   --text-secondary: 28, 28, 28;
   --border-color: 28, 28, 28;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --btn-glass-bg: rgba(0, 0, 0, 0.06);
+  --btn-glass-border: rgba(0, 0, 0, 0.1);
+  --btn-glass-text: rgba(0, 0, 0, 0.85);
+}
+
+/* Theme-aware text opacity classes */
+[data-theme="light"] .text-white\/90,
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/70 { color: rgba(var(--text-primary), 0.85); }
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-white\/50 { color: rgba(var(--text-primary), 0.6); }
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-white\/30 { color: rgba(var(--text-primary), 0.45); }
+[data-theme="light"] .text-white\/25,
+[data-theme="light"] .text-white\/20 { color: rgba(var(--text-primary), 0.35); }
+
+/* Theme-aware border colors */
+[data-theme="light"] .border-white\/\[0\.06\],
+[data-theme="light"] .border-white\/\[0\.08\],
+[data-theme="light"] .border-white\/\[0\.1\] { border-color: rgba(0, 0, 0, 0.08); }
+[data-theme="light"] .border-white\/\[0\.04\] { border-color: rgba(0, 0, 0, 0.06); }
+
+/* Theme-aware divide colors */
+[data-theme="light"] .divide-white\/\[0\.04\] > :not([hidden]) ~ :not([hidden]),
+[data-theme="light"] .divide-white\/\[0\.06\] > :not([hidden]) ~ :not([hidden]) { 
+  border-color: rgba(0, 0, 0, 0.06); 
+}
+
+/* Theme-aware hover states */
+[data-theme="light"] .hover\:bg-white\/\[0\.02\]:hover,
+[data-theme="light"] .hover\:bg-white\/\[0\.03\]:hover,
+[data-theme="light"] .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(0, 0, 0, 0.03); }
+[data-theme="light"] .hover\:border-white\/\[0\.1\]:hover,
+[data-theme="light"] .hover\:border-white\/\[0\.12\]:hover { border-color: rgba(0, 0, 0, 0.12); }
+[data-theme="light"] .hover\:text-white\/60:hover,
+[data-theme="light"] .hover\:text-white\/70:hover,
+[data-theme="light"] .hover\:text-white\/80:hover { color: rgba(var(--text-primary), 0.7); }
+
+/* Theme-aware placeholder colors */
+[data-theme="light"] .placeholder\:text-white\/30::placeholder { color: rgba(0, 0, 0, 0.35); }
+
+/* Theme-aware focus states */
+[data-theme="light"] .focus\:border-white\/\[0\.12\]:focus,
+[data-theme="light"] .focus\:border-white\/\[0\.15\]:focus { border-color: rgba(0, 0, 0, 0.15); }
+
+/* Theme-aware card/surface backgrounds via utility class */
+.theme-card {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+/* Theme-aware active/selected states */
+[data-theme="light"] .bg-white\/\[0\.08\],
+[data-theme="light"] .bg-white\/\[0\.1\] { background-color: rgba(0, 0, 0, 0.06); }
+[data-theme="light"] .bg-white\/\[0\.04\],
+[data-theme="light"] .bg-white\/\[0\.05\] { background-color: rgba(0, 0, 0, 0.04); }
+[data-theme="light"] .bg-white\/\[0\.02\],
+[data-theme="light"] .bg-white\/\[0\.03\] { background-color: rgba(0, 0, 0, 0.02); }
+
+/* Theme-aware gradient backgrounds */
+[data-theme="light"] .bg-gradient-to-br.from-amber-400.to-orange-500 {
+  /* Keep gradient but ensure good contrast */
 }
 
 @theme inline {
@@ -159,33 +225,17 @@ select option {
 .btn-glass {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
   backdrop-filter: blur(12px);
   box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.25),
-    0 1px 2px rgba(255, 255, 255, 0.1) inset,
-    0 -1px 2px rgba(0, 0, 0, 0.15) inset;
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(255, 255, 255, 0.1) inset;
   transition: all 0.3s ease;
 }
 
 .btn-glass:hover:not(:disabled) {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.12) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 
-    0 6px 32px rgba(0, 0, 0, 0.3),
-    0 1px 3px rgba(255, 255, 255, 0.15) inset,
-    0 -1px 2px rgba(0, 0, 0, 0.15) inset;
+  opacity: 0.85;
   transform: translateY(-1px);
 }
 
@@ -202,19 +252,17 @@ select option {
 .btn-glass-text {
   position: relative;
   display: inline-block;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.7) 40%,
-    rgba(255, 255, 255, 1) 50%,
-    rgba(255, 255, 255, 0.7) 60%,
-    rgba(255, 255, 255, 0.7) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: text-shine 3s ease-in-out infinite;
+  color: var(--btn-glass-text);
+}
+
+/* Light mode: simpler button text without animation */
+[data-theme="light"] .btn-glass-text {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: unset;
+  animation: none;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 @keyframes text-shine {
@@ -230,33 +278,24 @@ select option {
 .btn-glass-secondary {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(255, 255, 255, 0.04) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
   backdrop-filter: blur(8px);
-  box-shadow: 
-    0 2px 12px rgba(0, 0, 0, 0.15),
-    0 1px 1px rgba(255, 255, 255, 0.05) inset;
   transition: all 0.3s ease;
 }
 
 .btn-glass-secondary:hover:not(:disabled) {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.04) 50%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.15);
+  opacity: 0.8;
 }
 
 .btn-glass-secondary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Light mode secondary button */
+[data-theme="light"] .btn-glass-secondary .btn-glass-text {
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /* Primary CTA button - dark glass with white text */

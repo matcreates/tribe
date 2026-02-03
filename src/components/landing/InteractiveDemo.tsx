@@ -165,14 +165,14 @@ function DemoDashboard() {
     <div className="space-y-5">
       {/* Header with period toggle */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Dashboard</h1>
-        <div className="flex gap-1 p-1 rounded-[8px] border border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
+        <h1 className="text-[18px] font-normal text-black/85" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Dashboard</h1>
+        <div className="flex gap-1 p-1 rounded-[8px] border border-black/[0.08] bg-white/60">
           {(["24h", "7d", "30d"] as const).map((p) => (
             <button 
               key={p}
               onClick={() => setPeriod(p)}
               className={`px-2.5 py-1 rounded-[6px] text-[10px] font-medium uppercase transition-colors ${
-                period === p ? "bg-white/[0.1] text-white/80" : "text-white/40 hover:text-white/60"
+                period === p ? "bg-black/[0.08] text-black/80" : "text-black/40 hover:text-black/60"
               }`}
             >
               {p}
@@ -191,12 +191,11 @@ function DemoDashboard() {
       
       {/* Chart */}
       <div 
-        className="p-4 rounded-[12px] border border-white/[0.06]"
-        style={{ background: "rgba(255, 255, 255, 0.02)" }}
+        className="p-4 rounded-[12px] border border-black/[0.06] bg-white/60"
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] text-white/40">Tribe growth</span>
-          <span className="text-[10px] text-emerald-400">+47 this week</span>
+          <span className="text-[11px] text-black/50">Tribe growth</span>
+          <span className="text-[10px] text-emerald-600">+47 this week</span>
         </div>
         <DemoChart />
       </div>
@@ -207,13 +206,13 @@ function DemoDashboard() {
           <div className="flex gap-2">
             <button 
               onClick={() => setShowReplies(false)}
-              className={`text-[11px] uppercase tracking-wider ${!showReplies ? "text-white/60" : "text-white/30 hover:text-white/50"}`}
+              className={`text-[11px] uppercase tracking-wider ${!showReplies ? "text-black/70" : "text-black/35 hover:text-black/55"}`}
             >
               Recent emails
             </button>
             <button 
               onClick={() => setShowReplies(true)}
-              className={`text-[11px] uppercase tracking-wider ${showReplies ? "text-white/60" : "text-white/30 hover:text-white/50"}`}
+              className={`text-[11px] uppercase tracking-wider ${showReplies ? "text-black/70" : "text-black/35 hover:text-black/55"}`}
             >
               Replies ({REPLIES.length})
             </button>
@@ -225,16 +224,15 @@ function DemoDashboard() {
             {SENT_EMAILS.slice(0, 2).map((email) => (
               <div 
                 key={email.id}
-                className="flex items-center justify-between p-3 rounded-[10px] border border-white/[0.06] hover:border-white/[0.1] cursor-pointer transition-colors"
-                style={{ background: "rgba(255, 255, 255, 0.02)" }}
+                className="flex items-center justify-between p-3 rounded-[10px] border border-black/[0.06] hover:border-black/[0.12] cursor-pointer transition-colors bg-white/60"
               >
                 <div>
-                  <p className="text-[12px] text-white/70">{email.subject}</p>
-                  <p className="text-[10px] text-white/30">{email.recipients} recipients</p>
+                  <p className="text-[12px] text-black/70">{email.subject}</p>
+                  <p className="text-[10px] text-black/40">{email.recipients} recipients</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] text-white/50">{email.openRate}% opened</p>
-                  <p className="text-[9px] text-white/25">{email.time}</p>
+                  <p className="text-[11px] text-black/55">{email.openRate}% opened</p>
+                  <p className="text-[9px] text-black/35">{email.time}</p>
                 </div>
               </div>
             ))}
@@ -244,14 +242,13 @@ function DemoDashboard() {
             {REPLIES.slice(0, 2).map((reply, i) => (
               <div 
                 key={i}
-                className="p-3 rounded-[10px] border border-white/[0.06]"
-                style={{ background: "rgba(255, 255, 255, 0.02)" }}
+                className="p-3 rounded-[10px] border border-black/[0.06] bg-white/60"
               >
                 <div className="flex items-start justify-between mb-1">
-                  <p className="text-[11px] text-white/60">{reply.email}</p>
-                  <span className="text-[9px] text-white/25">{reply.time}</span>
+                  <p className="text-[11px] text-black/65">{reply.email}</p>
+                  <span className="text-[9px] text-black/35">{reply.time}</span>
                 </div>
-                <p className="text-[10px] text-white/40 line-clamp-1">{reply.text}</p>
+                <p className="text-[10px] text-black/50 line-clamp-1">{reply.text}</p>
               </div>
             ))}
           </div>
@@ -271,8 +268,7 @@ function StatCard({ icon, iconBg, iconColor, label, value, change }: {
 }) {
   return (
     <div 
-      className="p-4 rounded-[12px] border border-white/[0.06]"
-      style={{ background: "rgba(255, 255, 255, 0.02)" }}
+      className="p-4 rounded-[12px] border border-black/[0.06] bg-white/60"
     >
       <div className="flex items-start justify-between mb-2">
         <div 
@@ -281,10 +277,10 @@ function StatCard({ icon, iconBg, iconColor, label, value, change }: {
         >
           {icon}
         </div>
-        <span className="text-[10px] text-emerald-400">{change}</span>
+        <span className="text-[10px] text-emerald-600">{change}</span>
       </div>
-      <p className="text-[22px] font-medium text-white/90 mb-0.5">{value}</p>
-      <p className="text-[10px] text-white/40">{label}</p>
+      <p className="text-[22px] font-medium text-black/85 mb-0.5">{value}</p>
+      <p className="text-[10px] text-black/50">{label}</p>
     </div>
   );
 }
@@ -318,59 +314,58 @@ function DemoWrite() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Write</h1>
+      <h1 className="text-[18px] font-normal text-black/85" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Write</h1>
       
       <div 
-        className="rounded-[14px] border border-white/[0.06] overflow-hidden"
-        style={{ background: "rgba(255, 255, 255, 0.02)" }}
+        className="rounded-[14px] border border-black/[0.08] overflow-hidden bg-white/70"
       >
         {/* Recipients */}
-        <div className="px-4 py-3 border-b border-white/[0.04]">
-          <div className="text-[12px] text-white/50">
+        <div className="px-4 py-3 border-b border-black/[0.06]">
+          <div className="text-[12px] text-black/55">
             To all verified members (1,247)
           </div>
         </div>
         
         {/* Subject */}
-        <div className="px-4 py-3 border-b border-white/[0.04]">
+        <div className="px-4 py-3 border-b border-black/[0.06]">
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-[14px] text-white/80 bg-transparent focus:outline-none"
+            className="w-full text-[14px] text-black/80 bg-transparent focus:outline-none"
             style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
             placeholder="Subject..."
           />
         </div>
         
         {/* Message */}
-        <div className="px-4 py-3 border-b border-white/[0.04]">
+        <div className="px-4 py-3 border-b border-black/[0.06]">
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={8}
-            className="w-full text-[12px] text-white/70 bg-transparent focus:outline-none resize-none leading-relaxed"
+            className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed"
             style={{ fontFamily: 'Garamond, Georgia, serif' }}
             placeholder="Write your message..."
           />
         </div>
 
         {/* Signature preview */}
-        <div className="px-4 py-3 border-b border-white/[0.04]">
-          <div className="text-[11px] text-white/40 leading-relaxed" style={{ fontFamily: 'Garamond, Georgia, serif' }}>
+        <div className="px-4 py-3 border-b border-black/[0.06]">
+          <div className="text-[11px] text-black/45 leading-relaxed" style={{ fontFamily: 'Garamond, Georgia, serif' }}>
             Mat
           </div>
         </div>
         
         {/* Allow replies toggle */}
-        <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-black/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ReplyIcon className="w-3.5 h-3.5 text-white/40" />
-            <span className="text-[11px] text-white/60">Allow replies</span>
+            <ReplyIcon className="w-3.5 h-3.5 text-black/45" />
+            <span className="text-[11px] text-black/60">Allow replies</span>
           </div>
           <button
             onClick={() => setAllowReplies(!allowReplies)}
-            className={`w-9 h-5 rounded-full transition-colors relative ${allowReplies ? "bg-emerald-500" : "bg-white/10"}`}
+            className={`w-9 h-5 rounded-full transition-colors relative ${allowReplies ? "bg-emerald-500" : "bg-black/10"}`}
           >
             <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${allowReplies ? "left-[18px]" : "left-0.5"}`} />
           </button>
@@ -379,8 +374,7 @@ function DemoWrite() {
         {/* Actions */}
         <div className="px-4 py-3 flex items-center gap-2">
           <button 
-            className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-white/90"
-            style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
+            className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black/80 bg-black/[0.06] border border-black/[0.1] hover:bg-black/[0.1] transition-colors"
           >
             Send
           </button>
@@ -389,21 +383,20 @@ function DemoWrite() {
           <div className="relative">
             <button 
               onClick={() => setShowMenu(!showMenu)}
-              className="px-3 py-2 rounded-[8px] text-[10px] text-white/50 hover:text-white/70 hover:bg-white/[0.05] transition-colors flex items-center gap-1"
+              className="px-3 py-2 rounded-[8px] text-[10px] text-black/50 hover:text-black/70 hover:bg-black/[0.04] transition-colors flex items-center gap-1"
             >
               <ChevronDownIcon className="w-3 h-3" />
             </button>
             
             {showMenu && (
               <div 
-                className="absolute bottom-full left-0 mb-1 w-36 rounded-[8px] border border-white/[0.08] py-1 shadow-xl"
-                style={{ background: "rgb(28, 28, 28)" }}
+                className="absolute bottom-full left-0 mb-1 w-36 rounded-[8px] border border-black/[0.1] py-1 shadow-lg bg-white"
               >
-                <button className="w-full px-3 py-2 text-left text-[11px] text-white/60 hover:bg-white/[0.05] flex items-center gap-2">
+                <button className="w-full px-3 py-2 text-left text-[11px] text-black/60 hover:bg-black/[0.04] flex items-center gap-2">
                   <ClockIcon className="w-3 h-3" />
                   Schedule
                 </button>
-                <button className="w-full px-3 py-2 text-left text-[11px] text-white/60 hover:bg-white/[0.05] flex items-center gap-2">
+                <button className="w-full px-3 py-2 text-left text-[11px] text-black/60 hover:bg-black/[0.04] flex items-center gap-2">
                   <TestIcon className="w-3 h-3" />
                   Send test email
                 </button>
@@ -450,10 +443,10 @@ function DemoTribe() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[18px] font-normal text-white/90 mb-1" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
-          Your tribe is made of <span className="text-white">{counts.verified}</span> people
+        <h1 className="text-[18px] font-normal text-black/85 mb-1" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+          Your tribe is made of <span className="text-black">{counts.verified}</span> people
         </h1>
-        <p className="text-[11px] text-white/40">
+        <p className="text-[11px] text-black/45">
           A tribe is a group of people who choose to follow your work.
         </p>
       </div>
@@ -469,7 +462,7 @@ function DemoTribe() {
             key={id}
             onClick={() => setFilter(id)}
             className={`px-3 py-1.5 rounded-[8px] text-[10px] transition-colors ${
-              filter === id ? "bg-white/[0.08] text-white/80" : "text-white/40 hover:bg-white/[0.04]"
+              filter === id ? "bg-black/[0.08] text-black/80" : "text-black/45 hover:bg-black/[0.04]"
             }`}
           >
             {label} ({count})
@@ -479,44 +472,43 @@ function DemoTribe() {
 
       {/* Search */}
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/35" />
         <input
           type="text"
           placeholder="Search..."
-          className="w-full pl-9 pr-3 py-2 rounded-[8px] text-[11px] text-white/70 placeholder:text-white/30 bg-transparent border border-white/[0.06] focus:outline-none focus:border-white/[0.12]"
+          className="w-full pl-9 pr-3 py-2 rounded-[8px] text-[11px] text-black/70 placeholder:text-black/35 bg-white/70 border border-black/[0.08] focus:outline-none focus:border-black/[0.15]"
         />
       </div>
       
       {/* Members list */}
       <div 
-        className="rounded-[12px] border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]"
-        style={{ background: "rgba(255, 255, 255, 0.02)" }}
+        className="rounded-[12px] border border-black/[0.06] overflow-hidden divide-y divide-black/[0.06] bg-white/70"
       >
         {filteredMembers.slice(0, 6).map((member) => (
           <div 
             key={member.email}
-            className="flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.03] transition-colors"
+            className="flex items-center justify-between px-4 py-2.5 hover:bg-black/[0.02] transition-colors"
           >
             <div className="flex items-center gap-3">
               {member.verified ? (
-                <div className="px-1.5 py-0.5 rounded text-[8px] font-medium uppercase tracking-wider" style={{ background: "rgba(45, 138, 138, 0.2)", color: "#2d8a8a" }}>
+                <div className="px-1.5 py-0.5 rounded text-[8px] font-medium uppercase tracking-wider" style={{ background: "rgba(45, 138, 138, 0.15)", color: "#2d8a8a" }}>
                   Verified
                 </div>
               ) : (
-                <div className="w-2 h-2 rounded-full bg-white/20" />
+                <div className="w-2 h-2 rounded-full bg-black/20" />
               )}
-              <span className="text-[11px] text-white/70">{member.email}</span>
+              <span className="text-[11px] text-black/70">{member.email}</span>
             </div>
-            <span className="text-[10px] text-white/25">{member.date}</span>
+            <span className="text-[10px] text-black/35">{member.date}</span>
           </div>
         ))}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center gap-2 text-[10px] text-white/40">
-        <button className="px-2 py-1 rounded hover:bg-white/[0.05]">← Prev</button>
+      <div className="flex items-center justify-center gap-2 text-[10px] text-black/45">
+        <button className="px-2 py-1 rounded hover:bg-black/[0.04]">← Prev</button>
         <span>Page 1 of 125</span>
-        <button className="px-2 py-1 rounded hover:bg-white/[0.05]">Next →</button>
+        <button className="px-2 py-1 rounded hover:bg-black/[0.04]">Next →</button>
       </div>
     </div>
   );
@@ -532,7 +524,7 @@ function DemoGifts() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Gifts</h1>
+        <h1 className="text-[18px] font-normal text-black/85" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Gifts</h1>
         <button 
           className="px-3 py-1.5 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black"
           style={{ background: "#E8B84A" }}
@@ -541,7 +533,7 @@ function DemoGifts() {
         </button>
       </div>
       
-      <p className="text-[11px] text-white/40">
+      <p className="text-[11px] text-black/45">
         Offer free downloads to people joining your tribe.
       </p>
       
@@ -549,28 +541,26 @@ function DemoGifts() {
         {gifts.map((gift) => (
           <div 
             key={gift.name}
-            className="p-4 rounded-[12px] border border-white/[0.06]"
-            style={{ background: "rgba(255, 255, 255, 0.02)" }}
+            className="p-4 rounded-[12px] border border-black/[0.06] bg-white/70"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[8px] bg-white/[0.04] flex items-center justify-center">
-                  <GiftIcon className="w-5 h-5 text-white/30" />
+                <div className="w-10 h-10 rounded-[8px] bg-black/[0.04] flex items-center justify-center">
+                  <GiftIcon className="w-5 h-5 text-black/35" />
                 </div>
                 <div>
-                  <p className="text-[12px] text-white/70">{gift.name}</p>
-                  <p className="text-[10px] text-white/30">{gift.size} · {gift.downloads} downloads</p>
+                  <p className="text-[12px] text-black/70">{gift.name}</p>
+                  <p className="text-[10px] text-black/40">{gift.size} · {gift.downloads} downloads</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div 
-                className="flex-1 px-2.5 py-1.5 rounded-[6px] text-[10px] text-white/40 truncate"
-                style={{ background: "rgba(255, 255, 255, 0.03)" }}
+                className="flex-1 px-2.5 py-1.5 rounded-[6px] text-[10px] text-black/50 truncate bg-black/[0.03]"
               >
                 madewithtribe.com/g/{gift.code}
               </div>
-              <button className="px-2 py-1.5 rounded-[6px] text-[9px] text-white/40 hover:text-white/60 hover:bg-white/[0.05]">
+              <button className="px-2 py-1.5 rounded-[6px] text-[9px] text-black/45 hover:text-black/70 hover:bg-black/[0.05]">
                 Copy
               </button>
             </div>
@@ -578,7 +568,7 @@ function DemoGifts() {
         ))}
       </div>
       
-      <p className="text-[10px] text-white/30 text-center">2/5 gifts uploaded</p>
+      <p className="text-[10px] text-black/40 text-center">2/5 gifts uploaded</p>
     </div>
   );
 }
@@ -589,31 +579,30 @@ function DemoJoinPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[18px] font-normal text-white/90" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Join page</h1>
+      <h1 className="text-[18px] font-normal text-black/85" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Join page</h1>
       
-      <p className="text-[11px] text-white/40">
+      <p className="text-[11px] text-black/45">
         This is how your public join page looks. Share the link to grow your tribe.
       </p>
 
       {/* Preview of join page - matching actual design */}
       <div 
-        className="rounded-[14px] border border-white/[0.06] overflow-hidden"
-        style={{ background: "rgba(255, 255, 255, 0.02)" }}
+        className="rounded-[14px] border border-black/[0.08] overflow-hidden bg-white/80"
       >
         <div className="py-10 px-6 flex flex-col items-center text-center">
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[28px] font-medium text-white mb-3 ring-2 ring-white/10">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[28px] font-medium text-white mb-3 ring-2 ring-black/10">
             M
           </div>
           
           {/* Name */}
-          <p className="text-[14px] text-white/60 mb-4">Mat</p>
+          <p className="text-[14px] text-black/60 mb-4">Mat</p>
           
           {/* Title */}
-          <h2 className="text-[20px] font-semibold text-white mb-3">Join my tribe</h2>
+          <h2 className="text-[20px] font-semibold text-black/85 mb-3">Join my tribe</h2>
           
           {/* Description */}
-          <p className="text-[13px] text-white/40 leading-relaxed max-w-[280px] mb-6">
+          <p className="text-[13px] text-black/50 leading-relaxed max-w-[280px] mb-6">
             A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.
           </p>
           
@@ -623,20 +612,19 @@ function DemoJoinPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your email address"
-            className="w-full max-w-[320px] px-4 py-3 rounded-[10px] text-[13px] text-white/70 placeholder:text-white/30 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15] text-center mb-4"
+            className="w-full max-w-[320px] px-4 py-3 rounded-[10px] text-[13px] text-black/70 placeholder:text-black/35 bg-black/[0.03] border border-black/[0.1] focus:outline-none focus:border-black/[0.2] text-center mb-4"
           />
           
           {/* Join button - centered below */}
           <button 
-            className="px-8 py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.15em] uppercase text-black/80"
-            style={{ background: "rgba(255, 255, 255, 0.12)" }}
+            className="px-8 py-2.5 rounded-[10px] text-[11px] font-medium tracking-[0.15em] uppercase text-black/80 bg-black/[0.08] hover:bg-black/[0.12] transition-colors"
           >
             Join
           </button>
           
           {/* Made with Tribe footer */}
-          <p className="mt-8 text-[11px] text-white/25">
-            made with <span className="text-white/40">Tribe</span>
+          <p className="mt-8 text-[11px] text-black/30">
+            made with <span className="text-black/50">Tribe</span>
           </p>
         </div>
       </div>
@@ -644,12 +632,11 @@ function DemoJoinPage() {
       {/* Page URL */}
       <div className="flex items-center gap-2">
         <div 
-          className="flex-1 px-3 py-2 rounded-[8px] text-[11px] text-white/50 truncate"
-          style={{ background: "rgba(255, 255, 255, 0.03)" }}
+          className="flex-1 px-3 py-2 rounded-[8px] text-[11px] text-black/55 truncate bg-black/[0.03]"
         >
           madewithtribe.com/@mat
         </div>
-        <button className="px-3 py-2 rounded-[8px] text-[10px] text-white/40 hover:text-white/60 hover:bg-white/[0.05]">
+        <button className="px-3 py-2 rounded-[8px] text-[10px] text-black/45 hover:text-black/70 hover:bg-black/[0.05]">
           Copy
         </button>
       </div>
