@@ -753,7 +753,7 @@ export default function NewEmailPage() {
                     disabled={isSending || isScheduling || !canSend}
                     className="px-2.5 py-2.5 rounded-r-[10px] text-[10px] btn-glass disabled:opacity-40 disabled:cursor-not-allowed border-l border-white/[0.08]"
                   >
-                    <ChevronDownIcon className="w-3.5 h-3.5 text-white/60" />
+                    <ChevronDownIcon className="w-3.5 h-3.5 btn-glass-icon" />
                   </button>
                   
                   {showMoreMenu && (

@@ -332,7 +332,7 @@ function DemoWrite() {
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-[14px] text-black/80 bg-transparent focus:outline-none"
+            className="w-full text-[16px] text-black/80 bg-transparent focus:outline-none"
             style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
             placeholder="Subject..."
           />

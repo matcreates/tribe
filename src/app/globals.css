@@ -57,11 +57,11 @@
   }
 }
 
-/* Landing page paper-like background */
+/* Landing page dotted notebook background */
 .landing-paper-bg {
   background-color: rgb(252, 250, 247);
-  background-image: 
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 :root {
@@ -169,8 +169,11 @@
 
 /* Emerald color adjustments for light mode - darker green */
 [data-theme="light"] .text-emerald-400,
-[data-theme="light"] .text-emerald-500 { color: #059669; }
+[data-theme="light"] .text-emerald-500,
+[data-theme="light"] [class*="text-emerald-400\\/"],
+[data-theme="light"] [class*="text-emerald-300\\/"] { color: #047857; }
 [data-theme="light"] .bg-emerald-500 { background-color: #059669; }
+[data-theme="light"] .hover\:bg-emerald-400\/10:hover { background-color: rgba(4, 120, 87, 0.1); }
 
 @theme inline {
   --color-background: rgb(var(--bg-base));
@@ -226,6 +229,11 @@ body {
 input::placeholder,
 textarea::placeholder {
   color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: rgba(0, 0, 0, 0.35);
 }
 
 /* Selection */
@@ -287,6 +295,15 @@ select option {
   -webkit-text-fill-color: unset;
   animation: none;
   color: rgba(0, 0, 0, 0.8);
+}
+
+/* Icon inside glass buttons */
+.btn-glass-icon {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="light"] .btn-glass-icon {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 @keyframes text-shine {

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Toast, useToast } from "@/components/Toast";
 import { updateTribeSettings } from "@/lib/actions";
 import { Avatar } from "@/components/Avatar";
+import { useTheme } from "@/lib/theme";
 
 interface Settings {
   id: string;
@@ -20,6 +21,7 @@ interface JoinPageClientProps {
 
 export function JoinPageClient({ settings }: JoinPageClientProps) {
   const { toast, showToast, hideToast } = useToast();
+  const { theme } = useTheme();
 
   const [displayUrl, setDisplayUrl] = useState("");
   const [fullJoinUrl, setFullJoinUrl] = useState("");
@@ -27,6 +29,8 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
   const [isSaving, setIsSaving] = useState(false);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const origin = window.location.origin;
@@ -83,37 +87,37 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
       <div className="w-full max-w-[600px]">
         {/* Header */}
-        <h1 className="text-[28px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+        <h1 className={`text-[28px] font-normal mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`} style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           Join Page
         </h1>
-        <p className="text-[13px] text-white/40 mb-5 leading-relaxed">
+        <p className={`text-[13px] mb-5 leading-relaxed ${isLight ? 'text-black/50' : 'text-white/40'}`}>
           This is your public page where people can join your tribe. Share the link to grow your community.
         </p>
 
         {/* Browser Preview Card */}
         <div 
-          className="rounded-[14px] border border-white/[0.08] overflow-hidden"
-          style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+          className={`rounded-[14px] border overflow-hidden ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
+          style={{ background: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
         >
           {/* Browser Top Bar */}
           <div 
-            className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            className={`flex items-center gap-3 px-4 py-3 border-b ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
           >
             {/* Traffic Lights */}
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+              <div className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
+              <div className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
+              <div className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
             </div>
             
             {/* URL Bar */}
             <div 
               className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md"
-              style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+              style={{ background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)' }}
             >
-              <LockIcon className="w-3 h-3 text-white/30" />
-              <span className="flex-1 text-[11px] text-white/50 truncate font-mono">{displayUrl}</span>
+              <LockIcon className={`w-3 h-3 ${isLight ? 'text-black/30' : 'text-white/30'}`} />
+              <span className={`flex-1 text-[11px] truncate font-mono ${isLight ? 'text-black/50' : 'text-white/50'}`}>{displayUrl}</span>
             </div>
             
             {/* Open in new tab */}
@@ -121,19 +125,19 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
               href={fullJoinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-md hover:bg-white/[0.06] transition-colors group"
+              className={`p-2 rounded-md transition-colors group ${isLight ? 'hover:bg-black/[0.06]' : 'hover:bg-white/[0.06]'}`}
               aria-label="Open in new tab"
             >
-              <ExternalLinkIcon className="w-4 h-4 text-white/35 group-hover:text-white/60 transition-colors" />
+              <ExternalLinkIcon className={`w-4 h-4 transition-colors ${isLight ? 'text-black/35 group-hover:text-black/60' : 'text-white/35 group-hover:text-white/60'}`} />
             </a>
             
             {/* Copy Button */}
             <button
               onClick={copyLink}
-              className="p-2 rounded-md hover:bg-white/[0.06] transition-colors group"
+              className={`p-2 rounded-md transition-colors group ${isLight ? 'hover:bg-black/[0.06]' : 'hover:bg-white/[0.06]'}`}
               aria-label="Copy link"
             >
-              <CopyIcon className="w-4 h-4 text-white/35 group-hover:text-white/60 transition-colors" />
+              <CopyIcon className={`w-4 h-4 transition-colors ${isLight ? 'text-black/35 group-hover:text-black/60' : 'text-white/35 group-hover:text-white/60'}`} />
             </button>
           </div>
 
@@ -146,10 +150,10 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
               </div>
               
               {/* Name */}
-              <p className="text-[13px] text-white/50 mb-4">{settings.ownerName}</p>
+              <p className={`text-[13px] mb-4 ${isLight ? 'text-black/50' : 'text-white/50'}`}>{settings.ownerName}</p>
               
               {/* Heading */}
-              <h2 className="text-[18px] font-medium text-white/90 mb-1.5">
+              <h2 className={`text-[18px] font-medium mb-1.5 ${isLight ? 'text-black/85' : 'text-white/90'}`} style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
                 Join my tribe
               </h2>
               
@@ -159,24 +163,33 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
                 value={description}
                 onChange={(e) => handleDescriptionChange(e.target.value)}
                 placeholder="Add a description..."
-                className="text-[12px] text-white/40 leading-[1.6] mb-5 w-full max-w-[280px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2 overflow-hidden"
+                className={`text-[12px] leading-[1.6] mb-5 w-full max-w-[280px] text-center bg-transparent resize-none focus:outline-none underline decoration-1 underline-offset-2 overflow-hidden ${
+                  isLight 
+                    ? 'text-black/45 decoration-black/20 placeholder:text-black/30' 
+                    : 'text-white/40 decoration-white/20 placeholder:text-white/25'
+                }`}
               />
               
               {/* Email Input (disabled preview) */}
               <div 
-                className="w-full max-w-[280px] px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/25 text-left"
-                style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+                className={`w-full max-w-[280px] px-3.5 py-2.5 rounded-[8px] text-[13px] text-left ${isLight ? 'text-black/30' : 'text-white/25'}`}
+                style={{ 
+                  background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.04)', 
+                  border: isLight ? '1px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.06)' 
+                }}
               >
                 your email address
               </div>
               
               {/* Join Button (disabled preview) */}
-              <div className="mt-4 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase opacity-60 btn-glass pointer-events-none">
-                <span className="btn-glass-text">JOIN</span>
+              <div className={`mt-4 px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase opacity-60 pointer-events-none ${
+                isLight ? 'bg-black text-white' : 'btn-glass'
+              }`}>
+                <span className={isLight ? '' : 'btn-glass-text'}>JOIN</span>
               </div>
               
               {/* Footer */}
-              <div className="mt-6 flex items-center gap-1 text-[11px] text-white/30">
+              <div className={`mt-6 flex items-center gap-1 text-[11px] ${isLight ? 'text-black/30' : 'text-white/30'}`}>
                 <span>made with</span>
                 <TribeLogo className="h-[11px] w-auto relative -top-[1px]" />
               </div>
@@ -186,9 +199,9 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
 
         {/* Saving indicator */}
         {isSaving && (
-          <p className="mt-4 text-[11px] text-white/30 text-center">Saving...</p>
+          <p className={`mt-4 text-[11px] text-center ${isLight ? 'text-black/30' : 'text-white/30'}`}>Saving...</p>
         )}
-        <p className="mt-2 text-[11px] text-white/25 text-center">
+        <p className={`mt-2 text-[11px] text-center ${isLight ? 'text-black/25' : 'text-white/25'}`}>
           Changes are saved automatically
         </p>
 
