@@ -81,7 +81,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
 
   return (
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
-      <div className="w-full max-w-[540px]">
+      <div className="w-full max-w-[600px]">
         {/* Header */}
         <h1 className="text-[24px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           Join Page
@@ -159,7 +159,7 @@ export function JoinPageClient({ settings }: JoinPageClientProps) {
                 value={description}
                 onChange={(e) => handleDescriptionChange(e.target.value)}
                 placeholder="Add a description..."
-                className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2 overflow-hidden"
+                className="text-[12px] text-white/40 leading-[1.6] mb-5 w-full max-w-[280px] text-center bg-transparent resize-none focus:outline-none underline decoration-white/20 decoration-1 underline-offset-2 overflow-hidden"
               />
               
               {/* Email Input (disabled preview) */}

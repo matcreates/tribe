@@ -115,7 +115,6 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
                         : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
                       }
                     `}
-                    style={{ fontFamily: 'HeritageSerifLight, Georgia, serif' }}
                   >
                     <Icon className="w-[16px] h-[16px] lg:w-[15px] lg:h-[15px]" />
                     {item.label}

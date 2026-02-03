@@ -347,7 +347,7 @@ export default function TribePage() {
 
   return (
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
-      <div className="w-full max-w-[540px]">
+        <div className="w-full max-w-[600px]">
         {/* Header */}
         <div className="mb-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">

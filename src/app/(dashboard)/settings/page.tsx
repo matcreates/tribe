@@ -24,7 +24,16 @@ export default function SettingsPage() {
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const signatureRef = useRef<HTMLTextAreaElement>(null);
   const { toast, showToast, hideToast } = useToast();
+
+  // Auto-resize signature textarea
+  useEffect(() => {
+    if (signatureRef.current) {
+      signatureRef.current.style.height = 'auto';
+      signatureRef.current.style.height = signatureRef.current.scrollHeight + 'px';
+    }
+  }, [emailSignature]);
 
   // Populate form when settings are loaded
   useEffect(() => {
@@ -166,7 +175,7 @@ export default function SettingsPage() {
       />
 
       <div className="flex flex-col items-center pt-14 px-6 pb-12">
-        <div className="w-full max-w-[540px]">
+        <div className="w-full max-w-[600px]">
           <h1 className="text-[24px] font-normal text-white/90 mb-6" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Account settings</h1>
 
         {/* Email (read-only) */}
@@ -240,12 +249,13 @@ export default function SettingsPage() {
         <div className="mb-6">
           <label className="block text-[12px] text-white/40 mb-2">Email signature</label>
           <textarea
+            ref={signatureRef}
             value={emailSignature}
             onChange={(e) => setEmailSignature(e.target.value)}
             placeholder="Add your signature here..."
-            rows={4}
-            className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors resize-none border border-white/[0.06]"
-            style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+            rows={2}
+            className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors resize-none border border-white/[0.06] overflow-hidden"
+            style={{ background: 'rgba(255, 255, 255, 0.02)', minHeight: '60px' }}
           />
           <p className="text-[11px] text-white/25 mt-1.5">
             This signature will be automatically added at the end of every email you send. Links will be auto-detected and underlined.
@@ -317,7 +327,7 @@ export default function SettingsPage() {
                   {subscription.tier === 'small' && (
                     <button
                       onClick={() => setShowPaywall(true)}
-                      className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase text-[#E8B84A] hover:bg-[#E8B84A]/10 transition-colors"
+                      className="px-4 py-2 rounded-[8px] text-[10px] font-medium tracking-[0.1em] uppercase text-[#A855F7] hover:bg-[#A855F7]/10 transition-colors"
                     >
                       Upgrade to Big Creators
                     </button>

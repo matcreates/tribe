@@ -98,7 +98,6 @@ export function InteractiveDemo() {
                             ? "bg-white/[0.08] text-white/90"
                             : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
                         }`}
-                        style={{ fontFamily: 'HeritageSerifLight, Georgia, serif' }}
                       >
                         <Icon className="w-[13px] h-[13px]" />
                         {label}

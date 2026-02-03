@@ -50,7 +50,7 @@ export function PricingSection() {
               className={
                 "px-4 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase transition-colors " +
                 (billing === "monthly"
-                  ? "text-black bg-white/90"
+                  ? "text-white/90 bg-white/15"
                   : "text-white/50 hover:text-white/80")
               }
               aria-pressed={billing === "monthly"}
@@ -63,7 +63,7 @@ export function PricingSection() {
               className={
                 "px-4 py-2 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase transition-colors " +
                 (billing === "yearly"
-                  ? "text-black bg-white/90"
+                  ? "text-white/90 bg-white/15"
                   : "text-white/50 hover:text-white/80")
               }
               aria-pressed={billing === "yearly"}
