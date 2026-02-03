@@ -51,7 +51,7 @@ export default async function LandingPage() {
               letterSpacing: '-0.08em',
             }}
           >
-            A newsletter tool that doesn&apos;t s*ck, made for creators
+            The newsletter tool<br />made for creators
           </h1>
           
           <p className="text-[14px] sm:text-[15px] md:text-[17px] text-black/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">

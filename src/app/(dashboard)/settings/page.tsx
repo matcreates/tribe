@@ -236,7 +236,7 @@ export default function SettingsPage() {
         <div className="mb-6">
           <label className="block text-[12px] text-white/40 mb-2">Your username</label>
           <div className="flex items-center gap-2">
-            <span className="text-[13px] text-white/35">madewithtribe.com/@</span>
+            <span className={`text-[13px] ${theme === 'light' ? 'text-black/35' : 'text-white/35'}`}>madewithtribe.com/@</span>
             <input
               type="text"
               value={slug}
@@ -334,9 +334,9 @@ export default function SettingsPage() {
                     </span>
                   </div>
                   {subscription.tribeSizeLimit && (
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: theme === 'light' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)' }}>
                       <div 
-                        className={`h-full rounded-full transition-all ${subscription.isTribeFull ? 'bg-red-400' : 'bg-emerald-400'}`}
+                        className={`h-full rounded-full transition-all ${subscription.isTribeFull ? 'bg-red-400' : theme === 'light' ? 'bg-emerald-600' : 'bg-emerald-400'}`}
                         style={{ width: `${Math.min(100, ((subscription.currentTribeSize || 0) / subscription.tribeSizeLimit) * 100)}%` }}
                       />
                     </div>
@@ -416,9 +416,9 @@ export default function SettingsPage() {
                       {subscription?.currentTribeSize?.toLocaleString() || 0} / 500
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: theme === 'light' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)' }}>
                     <div 
-                      className={`h-full rounded-full transition-all ${subscription?.isTribeFull ? 'bg-red-400' : 'bg-white/30'}`}
+                      className={`h-full rounded-full transition-all ${subscription?.isTribeFull ? 'bg-red-400' : theme === 'light' ? 'bg-black/30' : 'bg-white/30'}`}
                       style={{ width: `${Math.min(100, ((subscription?.currentTribeSize || 0) / 500) * 100)}%` }}
                     />
                   </div>

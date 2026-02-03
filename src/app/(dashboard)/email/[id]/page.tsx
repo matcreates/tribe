@@ -338,7 +338,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
             >
               {/* Subject */}
               <h4 
-                className={`text-[18px] font-normal mb-4 pb-4 border-b ${isLight ? 'text-black/80 border-black/[0.06]' : 'text-white/80 border-white/[0.06]'}`}
+                className={`text-[22px] font-normal mb-4 pb-4 border-b ${isLight ? 'text-black/80 border-black/[0.06]' : 'text-white/80 border-white/[0.06]'}`}
                 style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
               >
                 {email.subject || "Untitled"}
