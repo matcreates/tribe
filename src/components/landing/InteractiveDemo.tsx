@@ -345,7 +345,6 @@ function DemoWrite() {
             onChange={(e) => setBody(e.target.value)}
             rows={8}
             className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed"
-            style={{ fontFamily: 'Garamond, Georgia, serif' }}
             placeholder="Write your message..."
           />
         </div>

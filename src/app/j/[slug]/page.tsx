@@ -91,38 +91,37 @@ export default function PublicJoinPage({ params }: PageProps) {
 
   if (!tribeSettings && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(18, 18, 18)' }}>
-        <p className="text-[13px] text-white/30">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(252, 250, 247)' }}>
+        <p className="text-[13px] text-black/30">Loading...</p>
       </div>
     );
   }
 
   if (error && !tribeSettings) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
         <div 
-          className="w-full max-w-[360px] rounded-[16px] border border-white/[0.08] p-8 text-center"
-          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+          className="w-full max-w-[360px] rounded-[16px] border border-black/[0.08] p-8 text-center bg-white/80"
         >
           {/* Logo */}
-          <TribeLogo className="h-6 w-auto mx-auto mb-6 text-white/80" />
+          <TribeLogo className="h-6 w-auto mx-auto mb-6 text-black/70" />
           
           {/* Error Message */}
-          <h1 className="text-[18px] font-medium text-white/90 mb-3">
+          <h1 className="text-[18px] font-medium text-black/85 mb-3">
             {error === "Tribe not found" ? "This tribe doesn't exist" : error}
           </h1>
           
           {/* Description */}
-          <p className="text-[13px] text-white/50 leading-relaxed mb-6">
+          <p className="text-[13px] text-black/50 leading-relaxed mb-6">
             Tribe is a platform that helps creators build and connect with their community through beautiful email newsletters.
           </p>
           
           {/* CTA Button */}
           <a
             href="https://www.madewithtribe.com"
-            className="inline-block px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+            className="inline-block px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase bg-black text-white hover:bg-black/90 transition-colors"
           >
-            <span className="btn-glass-text">DISCOVER TRIBE</span>
+            DISCOVER TRIBE
           </a>
         </div>
       </div>
@@ -133,10 +132,9 @@ export default function PublicJoinPage({ params }: PageProps) {
   const ownerAvatar = tribeSettings?.ownerAvatar ?? null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(18, 18, 18)' }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
       <div 
-        className="w-full max-w-[320px] rounded-[16px] border border-white/[0.08] p-7"
-        style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+        className="w-full max-w-[320px] rounded-[16px] border border-black/[0.08] p-7 bg-white/80"
       >
         <div className="flex flex-col items-center text-center">
           {/* Avatar */}
@@ -145,39 +143,39 @@ export default function PublicJoinPage({ params }: PageProps) {
           </div>
           
           {/* Name */}
-          <p className="text-[13px] text-white/50 mb-4">{ownerName}</p>
+          <p className="text-[13px] text-black/50 mb-4">{ownerName}</p>
           
           {/* Heading */}
-          <h1 className="text-[18px] font-medium text-white/90 mb-1.5">
+          <h1 className="text-[18px] font-medium text-black/85 mb-1.5" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
             Join my tribe
           </h1>
           
           {/* Description */}
-          <p className="text-[12px] text-white/40 leading-[1.6] mb-5 max-w-[260px]">
+          <p className="text-[12px] text-black/45 leading-[1.6] mb-5 max-w-[260px]">
             {tribeSettings?.description || "A tribe is a group of people who choose to follow your work, support your ideas, and stay connected."}
           </p>
 
           {tribeSettings?.isTribeFull ? (
             <div className="py-3">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)' }}>
-                <LockIcon className="w-5 h-5 text-red-400/80" />
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
+                <LockIcon className="w-5 h-5 text-red-500/80" />
               </div>
-              <p className="text-[14px] text-white/80 font-medium mb-1">
+              <p className="text-[14px] text-black/80 font-medium mb-1">
                 This tribe is full
               </p>
-              <p className="text-[12px] text-white/50">
+              <p className="text-[12px] text-black/50">
                 The creator&apos;s tribe has reached its capacity. Check back later!
               </p>
             </div>
           ) : isJoined ? (
             <div className="py-3">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(45, 138, 138, 0.2)' }}>
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(45, 138, 138, 0.15)' }}>
                 <MailIcon className="w-5 h-5 text-[#2d8a8a]" />
               </div>
-              <p className="text-[14px] text-white/80 font-medium mb-1">
+              <p className="text-[14px] text-black/80 font-medium mb-1">
                 Check your email
               </p>
-              <p className="text-[12px] text-white/50">
+              <p className="text-[12px] text-black/50">
                 We sent a confirmation link to verify your email.
               </p>
             </div>
@@ -189,22 +187,21 @@ export default function PublicJoinPage({ params }: PageProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your email address"
-                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 placeholder:text-white/25 mb-4 focus:outline-none transition-colors"
-                style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
+                className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-black/70 placeholder:text-black/30 mb-4 focus:outline-none transition-colors bg-black/[0.03] border border-black/[0.1]"
                 required
               />
               
               {error && (
-                <p className="text-[12px] text-red-400/80 mb-3">{error}</p>
+                <p className="text-[12px] text-red-500/80 mb-3">{error}</p>
               )}
               
               {/* Join Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+                className="px-6 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase bg-black text-white hover:bg-black/90 transition-colors disabled:opacity-50"
               >
-                <span className="btn-glass-text">{isSubmitting ? "..." : "JOIN"}</span>
+                {isSubmitting ? "..." : "JOIN"}
               </button>
             </form>
           )}
@@ -214,7 +211,7 @@ export default function PublicJoinPage({ params }: PageProps) {
             href="https://madewithtribe.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="mt-6 flex items-center gap-1 text-[11px] text-white/30 hover:text-white/50 transition-colors"
+            className="mt-6 flex items-center gap-1 text-[11px] text-black/30 hover:text-black/50 transition-colors"
           >
             <span>made with</span>
             <TribeLogo className="h-[11px] w-auto relative -top-[1px]" />

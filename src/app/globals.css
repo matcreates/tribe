@@ -153,6 +153,25 @@
   /* Keep gradient but ensure good contrast */
 }
 
+/* Light mode button style - black with white text */
+[data-theme="light"] .btn-glass {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="light"] .btn-glass .btn-glass-text {
+  color: white;
+}
+
+[data-theme="light"] .btn-glass:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 1);
+}
+
+/* Emerald color adjustments for light mode - darker green */
+[data-theme="light"] .text-emerald-400,
+[data-theme="light"] .text-emerald-500 { color: #059669; }
+[data-theme="light"] .bg-emerald-500 { background-color: #059669; }
+
 @theme inline {
   --color-background: rgb(var(--bg-base));
   --color-foreground: rgb(var(--text-primary));
@@ -213,6 +232,11 @@ textarea::placeholder {
 ::selection {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.9);
 }
 
 /* Select dropdown styling */
