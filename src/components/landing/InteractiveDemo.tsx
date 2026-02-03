@@ -25,7 +25,7 @@ export function InteractiveDemo() {
       <div className="max-w-6xl mx-auto">
         {/* Mobile: Static image */}
         <div className="lg:hidden">
-          <div className="rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl">
+          <div className="rounded-2xl border border-black/[0.08] overflow-hidden shadow-xl bg-white">
             <Image 
               src="/demo-mobile.png" 
               alt="Tribe app demo" 
@@ -34,21 +34,21 @@ export function InteractiveDemo() {
               className="w-full h-auto"
             />
           </div>
-          <p className="text-center text-[12px] text-white/30 mt-4">
+          <p className="text-center text-[12px] text-black/30 mt-4">
             Try the full demo on desktop
           </p>
         </div>
 
         {/* Desktop: Interactive demo */}
         <div 
-          className="hidden lg:block rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl"
+          className="hidden lg:block rounded-2xl border border-black/[0.1] overflow-hidden shadow-xl"
           style={{ 
-            background: "rgb(24, 24, 24)",
+            background: "rgb(250, 248, 245)",
             aspectRatio: "16/10",
           }}
         >
           {/* Browser toolbar */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]" style={{ background: "rgba(255, 255, 255, 0.02)" }}>
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]" style={{ background: "rgb(245, 243, 240)" }}>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
               <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
@@ -57,8 +57,7 @@ export function InteractiveDemo() {
             
             <div className="flex-1 max-w-md mx-auto">
               <div 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-white/40"
-                style={{ background: "rgba(255, 255, 255, 0.04)" }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-black/50 bg-white border border-black/[0.06]"
               >
                 <LockIcon className="w-3 h-3" />
                 <span>madewithtribe.com/{activeTab === "join" ? "join-page" : activeTab}</span>
@@ -72,12 +71,12 @@ export function InteractiveDemo() {
           <div className="flex h-[calc(100%-48px)]">
             {/* Sidebar */}
             <div 
-              className="w-[180px] border-r border-white/[0.06] flex flex-col"
-              style={{ background: "rgb(18, 18, 18)" }}
+              className="w-[180px] border-r border-black/[0.06] flex flex-col"
+              style={{ background: "rgb(245, 243, 240)" }}
             >
               {/* Logo */}
               <div className="px-8 pt-8 pb-6">
-                <TribeLogo className="h-[18px] w-auto opacity-90" />
+                <TribeLogo className="h-[18px] w-auto text-black/80" />
               </div>
               
               {/* Nav items - centered vertically */}
@@ -95,8 +94,8 @@ export function InteractiveDemo() {
                         onClick={() => setActiveTab(id)}
                         className={`w-full flex items-center gap-2.5 px-4 py-2 rounded-md text-[11px] transition-colors ${
                           activeTab === id
-                            ? "bg-white/[0.08] text-white/90"
-                            : "text-white/45 hover:text-white/70 hover:bg-white/[0.05]"
+                            ? "bg-black/[0.06] text-black/90"
+                            : "text-black/45 hover:text-black/70 hover:bg-black/[0.04]"
                         }`}
                       >
                         <Icon className="w-[13px] h-[13px]" />
@@ -109,13 +108,13 @@ export function InteractiveDemo() {
               
               {/* Sent emails section */}
               <div className="px-4 pb-6">
-                <p className="px-4 mb-2 text-[10px] text-white/25 tracking-wide">
+                <p className="px-4 mb-2 text-[10px] text-black/30 tracking-wide">
                   Emails sent
                 </p>
                 <ul className="space-y-0">
                   {SENT_EMAILS.slice(0, 3).map((email) => (
                     <li key={email.id}>
-                      <button className="w-full text-left px-4 py-1.5 text-[10px] text-white/50 truncate rounded-md hover:bg-white/[0.05] hover:text-white/70 transition-colors">
+                      <button className="w-full text-left px-4 py-1.5 text-[10px] text-black/50 truncate rounded-md hover:bg-black/[0.04] hover:text-black/70 transition-colors">
                         {email.subject}
                       </button>
                     </li>
@@ -124,18 +123,18 @@ export function InteractiveDemo() {
               </div>
               
               {/* User section */}
-              <div className="px-4 pb-8 border-t border-white/[0.06] pt-4">
-                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/[0.05] transition-colors cursor-pointer">
+              <div className="px-4 pb-8 border-t border-black/[0.06] pt-4">
+                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/[0.04] transition-colors cursor-pointer">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-medium text-white">
                     M
                   </div>
-                  <span className="text-[11px] text-white/60">Mat</span>
+                  <span className="text-[11px] text-black/60">Mat</span>
                 </div>
               </div>
             </div>
 
             {/* Main content */}
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto" style={{ background: "rgb(250, 248, 245)" }}>
               <div className="pt-10 px-6 pb-8 flex justify-center">
                 <div className="w-full max-w-[480px]">
                   {activeTab === "dashboard" && <DemoDashboard />}
@@ -149,7 +148,7 @@ export function InteractiveDemo() {
           </div>
         </div>
 
-        <p className="hidden lg:block text-center text-[13px] text-white/30 mt-6">
+        <p className="hidden lg:block text-center text-[13px] text-black/35 mt-6">
           Interactive demo · Click around to explore Tribe
         </p>
       </div>
@@ -349,7 +348,7 @@ function DemoWrite() {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            rows={5}
+            rows={8}
             className="w-full text-[12px] text-white/70 bg-transparent focus:outline-none resize-none leading-relaxed"
             style={{ fontFamily: 'Garamond, Georgia, serif' }}
             placeholder="Write your message..."

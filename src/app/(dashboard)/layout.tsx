@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { Shell } from "@/components/Shell";
 import { getSentEmailsByTribeId, getTribeByUserId } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { ThemeProvider } from "@/lib/theme";
 
 export default async function DashboardLayout({
   children,
@@ -23,11 +24,13 @@ export default async function DashboardLayout({
   };
 
   return (
-    <Shell 
-      sentEmails={sentEmails.map(e => ({ id: e.id, subject: e.subject }))}
-      user={user}
-    >
-      {children}
-    </Shell>
+    <ThemeProvider>
+      <Shell 
+        sentEmails={sentEmails.map(e => ({ id: e.id, subject: e.subject }))}
+        user={user}
+      >
+        {children}
+      </Shell>
+    </ThemeProvider>
   );
 }

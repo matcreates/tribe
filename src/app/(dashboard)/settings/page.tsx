@@ -7,6 +7,7 @@ import { useTribeSettings, useSubscriptionStatus } from "@/lib/hooks";
 import { Toast, useToast } from "@/components/Toast";
 import { PaywallModal } from "@/components/PaywallModal";
 import { AvatarLarge } from "@/components/Avatar";
+import { useTheme } from "@/lib/theme";
 
 export default function SettingsPage() {
   // Use SWR hooks for cached data
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const signatureRef = useRef<HTMLTextAreaElement>(null);
   const { toast, showToast, hideToast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // Auto-resize signature textarea
   useEffect(() => {
@@ -176,7 +178,7 @@ export default function SettingsPage() {
 
       <div className="flex flex-col items-center pt-14 px-6 pb-12">
         <div className="w-full max-w-[600px]">
-          <h1 className="text-[24px] font-normal text-white/90 mb-6" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Account settings</h1>
+          <h1 className="text-[28px] font-normal text-white/90 mb-6" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Account settings</h1>
 
         {/* Email (read-only) */}
         <div className="mb-5">
@@ -257,9 +259,49 @@ export default function SettingsPage() {
             className="w-full px-3.5 py-2.5 rounded-[8px] text-[13px] text-white/70 focus:outline-none transition-colors resize-none border border-white/[0.06] overflow-hidden"
             style={{ background: 'rgba(255, 255, 255, 0.02)', minHeight: '60px' }}
           />
-          <p className="text-[11px] text-white/25 mt-1.5">
+          <p className={`text-[11px] mt-1.5 ${theme === 'light' ? 'text-black/30' : 'text-white/25'}`}>
             This signature will be automatically added at the end of every email you send. Links will be auto-detected and underlined.
           </p>
+        </div>
+
+        {/* Appearance */}
+        <div className="mb-8">
+          <label className={`block text-[12px] mb-3 ${theme === 'light' ? 'text-black/50' : 'text-white/40'}`}>Appearance</label>
+          <div 
+            className={`p-5 rounded-[12px] border ${theme === 'light' ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+            style={{ background: theme === 'light' ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-[13px] font-medium ${theme === 'light' ? 'text-black/80' : 'text-white/80'}`}>
+                  {theme === 'light' ? 'Light mode' : 'Dark mode'}
+                </p>
+                <p className={`text-[11px] mt-0.5 ${theme === 'light' ? 'text-black/40' : 'text-white/35'}`}>
+                  Switch between light and dark themes
+                </p>
+              </div>
+              <button
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className={`relative w-12 h-7 rounded-full transition-colors ${
+                  theme === 'light' ? 'bg-black/10' : 'bg-white/10'
+                }`}
+              >
+                <div 
+                  className={`absolute top-1 w-5 h-5 rounded-full transition-all flex items-center justify-center ${
+                    theme === 'light' 
+                      ? 'left-1 bg-amber-400' 
+                      : 'left-6 bg-slate-600'
+                  }`}
+                >
+                  {theme === 'light' ? (
+                    <SunIcon className="w-3 h-3 text-white" />
+                  ) : (
+                    <MoonIcon className="w-3 h-3 text-white" />
+                  )}
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Subscription */}
@@ -439,5 +481,22 @@ export default function SettingsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.414 1.414M11.536 11.536l1.414 1.414M3.05 12.95l1.414-1.414M11.536 4.464l1.414-1.414" />
+    </svg>
+  );
+}
+
+function MoonIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13.5 8.5a5.5 5.5 0 11-6-6 4.5 4.5 0 006 6z" />
+    </svg>
   );
 }

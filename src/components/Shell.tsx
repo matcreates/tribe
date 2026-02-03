@@ -1,6 +1,7 @@
 "use client";
 
 import { Sidebar } from "./Sidebar";
+import { useTheme } from "@/lib/theme";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -12,8 +13,13 @@ interface ShellProps {
 }
 
 export function Shell({ children, sentEmails, user }: ShellProps) {
+  const { theme } = useTheme();
+  
   return (
-    <div className="min-h-screen" style={{ background: 'rgb(24, 24, 24)' }}>
+    <div 
+      className="min-h-screen transition-colors duration-300" 
+      style={{ background: theme === 'light' ? 'rgb(250, 248, 245)' : 'rgb(24, 24, 24)' }}
+    >
       <Sidebar sentEmails={sentEmails} user={user} />
       {/* Main content: full width on mobile, offset by sidebar on desktop */}
       <main className="min-h-screen pt-16 lg:pt-0 lg:ml-[260px]">

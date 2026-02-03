@@ -176,7 +176,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
         </Link>
 
         {/* Email subject */}
-        <h1 className="text-[24px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+        <h1 className="text-[28px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
           {email.subject || "Untitled"}
         </h1>
         <p className="text-[13px] text-white/40 mb-8">

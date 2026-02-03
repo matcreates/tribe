@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { AvatarMedium } from "./Avatar";
+import { useTheme } from "@/lib/theme";
 
 interface SidebarProps {
   sentEmails: { id: string; subject: string | null }[];
@@ -16,6 +17,7 @@ interface SidebarProps {
 export function Sidebar({ sentEmails, user }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { theme } = useTheme();
 
   // Close menu when route changes
   useEffect(() => {
@@ -45,13 +47,16 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
   return (
     <>
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4" style={{ background: 'rgb(18, 18, 18)' }}>
+      <header 
+        className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4 transition-colors duration-300" 
+        style={{ background: theme === 'light' ? 'rgb(245, 243, 240)' : 'rgb(18, 18, 18)' }}
+      >
         <Link href="/dashboard" className="hover:opacity-100 transition-opacity">
           <TribeLogo className="h-[18px] w-auto opacity-90" />
         </Link>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 -mr-2 text-white/70 hover:text-white/90 transition-colors"
+          className={`p-2 -mr-2 transition-colors ${theme === 'light' ? 'text-black/50 hover:text-black/80' : 'text-white/70 hover:text-white/90'}`}
           aria-label="Toggle menu"
         >
           {isOpen ? (
@@ -75,10 +80,10 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
         className={`
           fixed top-0 right-0 lg:left-0 z-50 h-screen flex flex-col
           w-[280px] lg:w-[260px]
-          transform transition-transform duration-300 ease-out
+          transform transition-all duration-300 ease-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
         `}
-        style={{ background: 'rgb(18, 18, 18)' }}
+        style={{ background: theme === 'light' ? 'rgb(245, 243, 240)' : 'rgb(18, 18, 18)' }}
       >
         {/* Logo - Hidden on mobile (shown in header instead) */}
         <div className="hidden lg:block px-10 pt-12 pb-8">
@@ -91,7 +96,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
         <div className="lg:hidden flex items-center justify-end px-5 py-4">
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 -mr-2 text-white/70 hover:text-white/90 transition-colors"
+            className={`p-2 -mr-2 transition-colors ${theme === 'light' ? 'text-black/50 hover:text-black/80' : 'text-white/70 hover:text-white/90'}`}
             aria-label="Close menu"
           >
             <CloseIcon className="w-5 h-5" />
@@ -111,8 +116,12 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
                     className={`
                       flex items-center gap-3 px-5 py-3 lg:py-2.5 rounded-md text-[14px] lg:text-[13px] transition-colors
                       ${isActive 
-                        ? "bg-white/[0.08] text-white/90" 
-                        : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
+                        ? theme === 'light' 
+                          ? "bg-black/[0.06] text-black/90" 
+                          : "bg-white/[0.08] text-white/90"
+                        : theme === 'light'
+                          ? "text-black/45 hover:bg-black/[0.04] hover:text-black/70"
+                          : "text-white/45 hover:bg-white/[0.05] hover:text-white/70"
                       }
                     `}
                   >
@@ -127,7 +136,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
 
         {/* Emails Sent */}
         <div className="px-5 pb-8">
-          <p className="px-5 mb-3 text-[11px] text-white/25 tracking-wide">
+          <p className={`px-5 mb-3 text-[11px] tracking-wide ${theme === 'light' ? 'text-black/30' : 'text-white/25'}`}>
             Emails sent
           </p>
           <ul className="space-y-0 max-h-[120px] overflow-y-auto">
@@ -139,8 +148,12 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
                     href={`/email/${email.id}`}
                     className={`block px-5 py-2 text-[13px] truncate rounded-md transition-colors ${
                       isActive 
-                        ? "bg-white/[0.08] text-white/70" 
-                        : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
+                        ? theme === 'light'
+                          ? "bg-black/[0.06] text-black/70"
+                          : "bg-white/[0.08] text-white/70"
+                        : theme === 'light'
+                          ? "text-black/55 hover:bg-black/[0.04] hover:text-black/70"
+                          : "text-white/55 hover:bg-white/[0.05] hover:text-white/70"
                     }`}
                   >
                     {email.subject || "Untitled"}
@@ -149,7 +162,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
               );
             })}
             {sentEmails.length === 0 && (
-              <li className="px-5 py-2 text-[13px] text-white/25 italic">
+              <li className={`px-5 py-2 text-[13px] italic ${theme === 'light' ? 'text-black/25' : 'text-white/25'}`}>
                 No emails sent yet
               </li>
             )}
@@ -157,13 +170,19 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
         </div>
 
         {/* User Profile */}
-        <div className="px-5 pb-10 border-t border-white/[0.06] pt-6 mt-4">
+        <div className={`px-5 pb-10 pt-6 mt-4 border-t ${theme === 'light' ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}>
           <Link
             href="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/[0.05] transition-colors group"
+            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors group ${
+              theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'
+            }`}
           >
             <AvatarMedium src={user.avatar} name={user.name} className="flex-shrink-0" />
-            <span className="text-[13px] text-white/60 group-hover:text-white/80 transition-colors truncate">
+            <span className={`text-[13px] transition-colors truncate ${
+              theme === 'light' 
+                ? 'text-black/60 group-hover:text-black/80' 
+                : 'text-white/60 group-hover:text-white/80'
+            }`}>
               {user.name}
             </span>
           </Link>
