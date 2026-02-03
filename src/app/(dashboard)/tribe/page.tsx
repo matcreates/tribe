@@ -6,6 +6,7 @@ import type { SubscriberFilter, SubscriberSort, PaginatedSubscribersResult } fro
 import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
 import { ImportChooserModal, ManualEntryModal } from "@/components/ImportChooserModal";
+import { TribeVisualization } from "@/components/TribeVisualization";
 
 interface Subscriber {
   id: string;
@@ -381,6 +382,9 @@ export default function TribePage() {
             A tribe is a group of people who choose to follow your work, support your ideas, and stay connected.
           </p>
         </div>
+
+        {/* Tribe Visualization */}
+        <TribeVisualization memberCount={totalVerified} />
 
         {/* Filter Tabs */}
         <div className="flex gap-1 mb-4 overflow-x-auto">
