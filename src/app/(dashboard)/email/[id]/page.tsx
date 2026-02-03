@@ -5,6 +5,7 @@ import { getEmailDetails, getEmailRepliesPaginated, deleteSentEmail } from "@/li
 import type { PaginatedRepliesResult } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/theme";
 
 interface EmailInsightsPageProps {
   params: Promise<{ id: string }>;
@@ -57,6 +58,8 @@ function ChevronRightIcon({ className }: { className?: string }) {
 export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [email, setEmail] = useState<SentEmail | null>(null);
   const [replies, setReplies] = useState<EmailReply[]>([]);
   const [repliesPage, setRepliesPage] = useState(1);
@@ -331,18 +334,18 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
           <div className="p-5">
             <div 
               className="rounded-[8px] p-5"
-              style={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(0, 0, 0, 0.2)' }}
             >
               {/* Subject */}
               <h4 
-                className="text-[18px] font-normal text-white/80 mb-4 pb-4 border-b border-white/[0.06]"
+                className={`text-[18px] font-normal mb-4 pb-4 border-b ${isLight ? 'text-black/80 border-black/[0.06]' : 'text-white/80 border-white/[0.06]'}`}
                 style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
               >
                 {email.subject || "Untitled"}
               </h4>
               {/* Body */}
               <div 
-                className="text-[14px] text-white/60 leading-[1.8] whitespace-pre-wrap mb-6"
+                className={`text-[14px] leading-[1.8] whitespace-pre-wrap mb-6 ${isLight ? 'text-black/60' : 'text-white/60'}`}
                 style={{ fontFamily: 'Garamond, Georgia, serif' }}
               >
                 {email.body || "No content"}
@@ -396,23 +399,23 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
                     return (
                       <div 
                         key={reply.id}
-                        className="rounded-[10px] border border-white/[0.06] overflow-hidden"
-                        style={{ background: 'rgba(0, 0, 0, 0.15)' }}
+                        className={`rounded-[10px] border overflow-hidden ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+                        style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(0, 0, 0, 0.15)' }}
                       >
-                        <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
+                        <div className={`px-4 py-3 border-b flex items-center justify-between ${isLight ? 'border-black/[0.04]' : 'border-white/[0.04]'}`}>
                           <div className="flex items-center gap-2">
                             <div 
-                              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium text-white/70"
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium ${isLight ? 'text-black/70' : 'text-white/70'}`}
                               style={{ background: 'rgba(45, 138, 138, 0.3)' }}
                             >
                               {reply.subscriber_email.charAt(0).toUpperCase()}
                             </div>
-                            <span className="text-[12px] text-white/60">{reply.subscriber_email}</span>
+                            <span className={`text-[12px] ${isLight ? 'text-black/60' : 'text-white/60'}`}>{reply.subscriber_email}</span>
                           </div>
-                          <span className="text-[10px] text-white/30">{replyFormatted}</span>
+                          <span className={`text-[10px] ${isLight ? 'text-black/30' : 'text-white/30'}`}>{replyFormatted}</span>
                         </div>
                         <div className="px-4 py-3">
-                          <p className="text-[13px] text-white/50 leading-relaxed whitespace-pre-wrap">
+                          <p className={`text-[13px] leading-relaxed whitespace-pre-wrap ${isLight ? 'text-black/50' : 'text-white/50'}`}>
                             {reply.reply_text}
                           </p>
                         </div>

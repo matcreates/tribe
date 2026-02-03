@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ContactSupportModal } from "./ContactSupportModal";
+import { useTheme } from "@/lib/theme";
 
 export interface ImportPreview {
   totalInFile: number;
@@ -32,7 +33,10 @@ export function ImportModal({
   onImportWithVerification,
   onImportWithoutVerification,
 }: ImportModalProps) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [showContactSupport, setShowContactSupport] = useState(false);
+  
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -60,8 +64,8 @@ export function ImportModal({
             onClick={onClose}
           />
           <div 
-            className="relative w-full max-w-[420px] mx-4 rounded-2xl border border-white/[0.08] p-8"
-            style={{ background: 'rgb(24, 24, 24)' }}
+            className={`relative w-full max-w-[420px] mx-4 rounded-2xl border p-8 ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
+            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
           >
             <div className="text-center">
               <div 
@@ -74,22 +78,26 @@ export function ImportModal({
                   <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                 </svg>
               </div>
-              <h3 className="text-[18px] font-medium text-white/90 mb-2">Import limit exceeded</h3>
-              <p className="text-[14px] text-white/50 mb-2">
-                Your file contains <span className="text-white/80 font-medium">{preview.toImport.toLocaleString()}</span> contacts.
+              <h3 className={`text-[18px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Import limit exceeded</h3>
+              <p className={`text-[14px] mb-2 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
+                Your file contains <span className={`font-medium ${isLight ? 'text-black/80' : 'text-white/80'}`}>{preview.toImport.toLocaleString()}</span> contacts.
               </p>
-              <p className="text-[13px] text-white/40 mb-6">
+              <p className={`text-[13px] mb-6 ${isLight ? 'text-black/40' : 'text-white/40'}`}>
                 The maximum import limit is {MAX_IMPORT_LIMIT.toLocaleString()} contacts at a time. Please contact support for bulk imports.
               </p>
               <button
                 onClick={() => setShowContactSupport(true)}
-                className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass mb-3"
+                className={`w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase mb-3 ${
+                  isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+                }`}
               >
-                <span className="btn-glass-text">Contact Support</span>
+                <span className={isLight ? '' : 'btn-glass-text'}>Contact Support</span>
               </button>
               <button
                 onClick={onClose}
-                className="w-full py-3 text-[11px] font-medium tracking-[0.1em] uppercase text-white/40 hover:text-white/60 transition-colors"
+                className={`w-full py-3 text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
+                  isLight ? 'text-black/40 hover:text-black/60' : 'text-white/40 hover:text-white/60'
+                }`}
               >
                 Cancel
               </button>
@@ -116,28 +124,31 @@ export function ImportModal({
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-[520px] mx-4 rounded-2xl border border-white/[0.08] p-8"
-        style={{ background: 'rgb(24, 24, 24)' }}
+        className={`relative w-full max-w-[520px] mx-4 rounded-2xl border p-8 ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
+        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
       >
         {/* Header - Show NEW people count */}
-        <p className="text-center text-[16px] text-white/80 mb-6">
-          We found <span className="font-semibold text-white">{preview.toImport} new {preview.toImport === 1 ? 'person' : 'people'}</span> in your file.
+        <p className={`text-center text-[16px] mb-6 ${isLight ? 'text-black/80' : 'text-white/80'}`}>
+          We found <span className={`font-semibold ${isLight ? 'text-black' : 'text-white'}`}>{preview.toImport} new {preview.toImport === 1 ? 'person' : 'people'}</span> in your file.
         </p>
 
         {/* Stats - Always show details */}
-        <div className="mb-6 p-5 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-          <p className="text-[13px] text-white/50 flex items-center gap-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+        <div 
+          className={`mb-6 p-5 rounded-xl border ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+          style={{ background: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
+        >
+          <p className={`text-[13px] flex items-center gap-2.5 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-black/40' : 'bg-white/40'}`} />
             {preview.totalInFile} {preview.totalInFile === 1 ? 'email' : 'emails'} found in the file
           </p>
           {preview.duplicates > 0 && (
-            <p className="text-[13px] text-white/50 flex items-center gap-2.5 mt-2.5">
+            <p className={`text-[13px] flex items-center gap-2.5 mt-2.5 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/70" />
               {preview.duplicates} already in your tribe
             </p>
           )}
           {preview.invalid > 0 && (
-            <p className="text-[13px] text-white/50 flex items-center gap-2.5 mt-2.5">
+            <p className={`text-[13px] flex items-center gap-2.5 mt-2.5 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-red-500/70" />
               {preview.invalid} invalid {preview.invalid === 1 ? 'email' : 'emails'}
             </p>
@@ -146,14 +157,14 @@ export function ImportModal({
 
         {/* Main info box */}
         <div 
-          className="p-5 rounded-xl border border-white/[0.08] mb-6"
-          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+          className={`p-5 rounded-xl border mb-6 ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
+          style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
         >
           <div className="flex items-start gap-3">
-            <CheckCircleIcon className="w-5 h-5 text-white/60 mt-0.5 flex-shrink-0" />
+            <CheckCircleIcon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${isLight ? 'text-black/50' : 'text-white/60'}`} />
             <div>
-              <h3 className="text-[14px] font-medium text-white/90 mb-2">Verification</h3>
-              <p className="text-[13px] text-white/50 leading-relaxed">
+              <h3 className={`text-[14px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Verification</h3>
+              <p className={`text-[13px] leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>
                 You can either automatically send a verification email to everyone in that list, 
                 or add them to your tribe without sending verification emails.
               </p>
@@ -167,16 +178,24 @@ export function ImportModal({
             <button
               onClick={onImportWithVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
+              className={`flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase transition-colors ${
+                isLight 
+                  ? 'bg-black/[0.06] text-black/70 hover:bg-black/[0.1]' 
+                  : 'btn-glass-secondary'
+              }`}
             >
-              <span className="btn-glass-text">{isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}</span>
+              <span className={isLight ? '' : 'btn-glass-text'}>{isImporting ? "IMPORTING..." : "ADD WITH VERIFICATION"}</span>
             </button>
             <button
               onClick={onImportWithoutVerification}
               disabled={isImporting}
-              className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+              className={`flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase transition-colors ${
+                isLight 
+                  ? 'bg-black text-white hover:bg-black/90' 
+                  : 'btn-glass'
+              }`}
             >
-              <span className="btn-glass-text">{isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}</span>
+              <span className={isLight ? '' : 'btn-glass-text'}>{isImporting ? "IMPORTING..." : "ADD WITHOUT VERIFICATION"}</span>
             </button>
           </div>
         ) : (
@@ -191,17 +210,19 @@ export function ImportModal({
         <button
           onClick={onClose}
           disabled={isImporting}
-          className="w-full py-3 text-[10px] font-medium tracking-[0.12em] uppercase text-white/40 hover:text-white/60 transition-colors"
+          className={`w-full py-3 text-[10px] font-medium tracking-[0.12em] uppercase transition-colors ${
+            isLight ? 'text-black/40 hover:text-black/60' : 'text-white/40 hover:text-white/60'
+          }`}
         >
-          <span className="btn-glass-text">CANCEL</span>
+          CANCEL
         </button>
 
         {/* Importing overlay */}
         {isImporting && (
           <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-              <p className="text-[13px] text-white/60">Importing...</p>
+              <div className={`w-8 h-8 border-2 rounded-full animate-spin ${isLight ? 'border-black/20 border-t-black/70' : 'border-white/20 border-t-white/70'}`} />
+              <p className={`text-[13px] ${isLight ? 'text-black/60' : 'text-white/60'}`}>Importing...</p>
             </div>
           </div>
         )}
@@ -219,4 +240,3 @@ function CheckCircleIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

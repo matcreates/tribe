@@ -115,7 +115,7 @@ export function PricingSection() {
             className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{
               borderColor: `${GOLD}4D`,
-              background: `linear-gradient(180deg, ${GOLD}15 0%, rgba(255, 255, 255, 0.8) 100%)`,
+              background: `linear-gradient(180deg, ${GOLD}15 0%, #ffffff 100%)`,
             }}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -163,7 +163,7 @@ export function PricingSection() {
             className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{ 
               borderColor: `${PURPLE}4D`,
-              background: `linear-gradient(180deg, ${PURPLE}15 0%, rgba(255, 255, 255, 0.8) 100%)`,
+              background: `linear-gradient(180deg, ${PURPLE}15 0%, #ffffff 100%)`,
             }}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">

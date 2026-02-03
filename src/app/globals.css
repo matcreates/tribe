@@ -64,6 +64,12 @@
   background-size: 24px 24px;
 }
 
+/* Landing page text selection - dark grey */
+.landing-paper-bg ::selection {
+  background: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.9);
+}
+
 :root {
   /* Dark mode colors (default) */
   --bg-base: 18, 18, 18;
