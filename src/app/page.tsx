@@ -15,7 +15,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen landing-paper-bg">
       {/* Navigation with gradient background */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5" style={{ background: 'linear-gradient(180deg, rgba(250, 248, 245, 0.98) 0%, rgba(250, 248, 245, 0.9) 60%, rgba(250, 248, 245, 0) 100%)' }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5" style={{ background: 'linear-gradient(180deg, rgba(252, 250, 247, 0.98) 0%, rgba(252, 250, 247, 0.9) 60%, rgba(252, 250, 247, 0) 100%)' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <TribeLogo className="h-[18px] sm:h-[22px] w-auto text-black/80" />
           <div className="flex items-center gap-1 sm:gap-3">

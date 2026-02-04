@@ -87,9 +87,9 @@
 
 /* Light mode overrides */
 [data-theme="light"] {
-  --bg-base: 250, 248, 245;
+  --bg-base: 252, 250, 247;
   --bg-elevated: 255, 255, 255;
-  --bg-surface: 245, 243, 240;
+  --bg-surface: 252, 250, 247;
   --text-primary: 28, 28, 28;
   --text-secondary: 28, 28, 28;
   --border-color: 28, 28, 28;

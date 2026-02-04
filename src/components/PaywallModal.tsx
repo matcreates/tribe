@@ -89,7 +89,7 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
         className={`relative w-full max-w-lg mx-4 rounded-[16px] border overflow-hidden max-h-[90vh] overflow-y-auto ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'linear-gradient(180deg, rgba(252, 250, 247, 0.98) 0%, rgba(245, 243, 240, 0.98) 100%)' : 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
+        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
       >
         {/* Close Button */}
         <button
