@@ -7,6 +7,7 @@ import type { Gift } from "@/lib/types";
 import { MAX_GIFTS } from "@/lib/types";
 import { Toast, useToast } from "@/components/Toast";
 import { upload } from "@vercel/blob/client";
+import { useTheme } from "@/lib/theme";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
@@ -25,6 +26,8 @@ function sanitizeFilename(name: string): string {
 }
 
 export default function GiftsPage() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [giftCount, setGiftCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -232,30 +235,38 @@ export default function GiftsPage() {
 
   const canUploadMore = giftCount < MAX_GIFTS;
 
+  // Darker green for light mode
+  const greenText = isLight ? 'text-emerald-700' : 'text-emerald-400';
+  const greenTextLight = isLight ? 'text-emerald-600' : 'text-emerald-400/70';
+  const greenBg = isLight ? 'rgba(5, 150, 105, 0.08)' : 'rgba(34, 197, 94, 0.03)';
+  const greenBgHover = isLight ? 'rgba(5, 150, 105, 0.12)' : 'rgba(34, 197, 94, 0.1)';
+
   return (
     <div className="flex flex-col items-center pt-14 px-6 pb-12">
         <div className="w-full max-w-[600px]">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
           <div className="flex-1">
-            <h1 className="text-[26px] sm:text-[28px] font-normal text-white/90 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+            <h1 className={`text-[26px] sm:text-[28px] font-normal mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`} style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
               Gifts
             </h1>
-            <p className="text-[13px] text-white/50 leading-relaxed">
+            <p className={`text-[13px] leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               Sharing is caring: encourage your community to join your tribe by giving them something in return, it might boost your growth.
             </p>
           </div>
           <button
             onClick={() => setShowUploadModal(true)}
             disabled={!canUploadMore}
-            className="px-5 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className={`px-5 py-2.5 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase disabled:opacity-40 disabled:cursor-not-allowed shrink-0 transition-colors ${
+              isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+            }`}
           >
-            <span className="btn-glass-text">UPLOAD GIFT</span>
+            <span className={isLight ? '' : 'btn-glass-text'}>UPLOAD GIFT</span>
           </button>
         </div>
 
         {/* Gift count */}
-        <p className="text-[12px] text-white/40 mb-4">
+        <p className={`text-[12px] mb-4 ${isLight ? 'text-black/40' : 'text-white/40'}`}>
           {giftCount}/{MAX_GIFTS} gifts uploaded
         </p>
 
@@ -263,21 +274,21 @@ export default function GiftsPage() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-12">
-              <p className="text-[13px] text-white/35">Loading...</p>
+              <p className={`text-[13px] ${isLight ? 'text-black/35' : 'text-white/35'}`}>Loading...</p>
             </div>
           ) : gifts.length === 0 ? (
             <div
-              className="text-center py-12 rounded-[12px] border border-dashed border-white/[0.1]"
-              style={{ background: 'rgba(255, 255, 255, 0.01)' }}
+              className={`text-center py-12 rounded-[12px] border border-dashed ${isLight ? 'border-black/[0.1]' : 'border-white/[0.1]'}`}
+              style={{ background: isLight ? 'rgba(0, 0, 0, 0.01)' : 'rgba(255, 255, 255, 0.01)' }}
             >
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+                style={{ background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)' }}
               >
-                <GiftIcon className="w-7 h-7 text-white/25" />
+                <GiftIcon className={`w-7 h-7 ${isLight ? 'text-black/25' : 'text-white/25'}`} />
               </div>
-              <p className="text-[13px] text-white/40 mb-1">No gifts yet</p>
-              <p className="text-[12px] text-white/25">
+              <p className={`text-[13px] mb-1 ${isLight ? 'text-black/40' : 'text-white/40'}`}>No gifts yet</p>
+              <p className={`text-[12px] ${isLight ? 'text-black/25' : 'text-white/25'}`}>
                 Upload files to share with your tribe members
               </p>
             </div>
@@ -290,15 +301,15 @@ export default function GiftsPage() {
               return (
                 <div
                   key={gift.id}
-                  className="rounded-[10px] border border-white/[0.06] overflow-hidden"
-                  style={{ background: 'rgba(255, 255, 255, 0.02)' }}
+                  className={`rounded-[10px] border overflow-hidden ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+                  style={{ background: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
                 >
                   {/* Main row */}
-                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors group">
+                  <div className={`flex items-center gap-3 px-4 py-3 transition-colors group ${isLight ? 'hover:bg-black/[0.02]' : 'hover:bg-white/[0.02]'}`}>
                     {/* Thumbnail or file icon */}
                     <div
                       className="w-12 h-12 rounded-[8px] flex items-center justify-center flex-shrink-0 overflow-hidden relative"
-                      style={{ background: 'rgba(255, 255, 255, 0.06)' }}
+                      style={{ background: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)' }}
                     >
                       {gift.thumbnail_url ? (
                         <Image
@@ -308,19 +319,19 @@ export default function GiftsPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <FileIcon className="w-5 h-5 text-white/40" />
+                        <FileIcon className={`w-5 h-5 ${isLight ? 'text-black/40' : 'text-white/40'}`} />
                       )}
                     </div>
 
                     {/* File info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-white/70 truncate">{gift.file_name}</p>
-                      <div className="flex items-center gap-2 text-[11px] text-white/40">
+                      <p className={`text-[13px] truncate ${isLight ? 'text-black/70' : 'text-white/70'}`}>{gift.file_name}</p>
+                      <div className={`flex items-center gap-2 text-[11px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>
                         <span>{formatFileSize(gift.file_size)}</span>
                         {(gift.member_count ?? 0) > 0 && (
                           <>
-                            <span className="text-white/20">•</span>
-                            <span className="text-emerald-400/70">
+                            <span className={isLight ? 'text-black/20' : 'text-white/20'}>•</span>
+                            <span className={greenTextLight}>
                               {gift.member_count} {gift.member_count === 1 ? 'member' : 'members'} joined
                             </span>
                           </>
@@ -331,38 +342,38 @@ export default function GiftsPage() {
                     {/* Actions */}
                     <button
                       onClick={() => handleStartUpdate(gift)}
-                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
+                      className={`p-2 rounded-md opacity-40 group-hover:opacity-70 transition-all ${isLight ? 'hover:bg-black/[0.08]' : 'hover:bg-white/[0.08]'}`}
                       aria-label="Update file"
                     >
-                      <RefreshIcon className="w-4 h-4 text-white/50" />
+                      <RefreshIcon className={`w-4 h-4 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
                     </button>
                     <a
                       href={gift.file_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all"
+                      className={`p-2 rounded-md opacity-40 group-hover:opacity-70 transition-all ${isLight ? 'hover:bg-black/[0.08]' : 'hover:bg-white/[0.08]'}`}
                       aria-label="Download"
                     >
-                      <DownloadIcon className="w-4 h-4 text-white/50" />
+                      <DownloadIcon className={`w-4 h-4 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
                     </a>
                     <button
                       onClick={() => handleDelete(gift.id)}
                       disabled={deletingId === gift.id}
-                      className="p-2 rounded-md hover:bg-white/[0.08] opacity-40 group-hover:opacity-70 transition-all disabled:opacity-20"
+                      className={`p-2 rounded-md opacity-40 group-hover:opacity-70 transition-all disabled:opacity-20 ${isLight ? 'hover:bg-black/[0.08]' : 'hover:bg-white/[0.08]'}`}
                       aria-label="Delete gift"
                     >
-                      <TrashIcon className="w-4 h-4 text-white/50" />
+                      <TrashIcon className={`w-4 h-4 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
                     </button>
                   </div>
                   
                   {/* Gift Link Row */}
                   {giftUrl && (
                     <div 
-                      className="px-4 py-2.5 flex items-center gap-2 border-t border-white/[0.04]"
-                      style={{ background: 'rgba(34, 197, 94, 0.03)' }}
+                      className={`px-4 py-2.5 flex items-center gap-2 border-t ${isLight ? 'border-black/[0.04]' : 'border-white/[0.04]'}`}
+                      style={{ background: greenBg }}
                     >
-                      <LinkIcon className="w-3.5 h-3.5 text-emerald-400/60 flex-shrink-0" />
-                      <span className="text-[11px] text-emerald-400/70 truncate flex-1 font-mono">
+                      <LinkIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400/60'}`} />
+                      <span className={`text-[11px] truncate flex-1 font-mono ${greenTextLight}`}>
                         {giftUrl.replace('https://', '').replace('http://', '')}
                       </span>
                       <button
@@ -370,7 +381,10 @@ export default function GiftsPage() {
                           navigator.clipboard.writeText(giftUrl);
                           showToast("Link copied!");
                         }}
-                        className="px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider text-emerald-400/80 hover:bg-emerald-400/10 transition-colors"
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider transition-colors ${greenText}`}
+                        style={{ background: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = greenBgHover}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
                         Copy
                       </button>
@@ -412,125 +426,177 @@ export default function GiftsPage() {
 
       {/* Update File Modal */}
       {updatingGift && updateStep === 2 && selectedFile && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          onClick={() => !isUpdating && handleCloseUpdateModal()}
+        <UpdateFileModal
+          isLight={isLight}
+          selectedFile={selectedFile}
+          thumbnailPreview={thumbnailPreview}
+          isUpdating={isUpdating}
+          updateError={updateError}
+          onClose={handleCloseUpdateModal}
+          onUpdate={handleUpdateFile}
+          onThumbnailClick={() => thumbnailInputRef.current?.click()}
+          onRemoveThumbnail={removeThumbnail}
+        />
+      )}
+    </div>
+  );
+}
+
+// Update File Modal Component
+function UpdateFileModal({
+  isLight,
+  selectedFile,
+  thumbnailPreview,
+  isUpdating,
+  updateError,
+  onClose,
+  onUpdate,
+  onThumbnailClick,
+  onRemoveThumbnail,
+}: {
+  isLight: boolean;
+  selectedFile: File;
+  thumbnailPreview: string | null;
+  isUpdating: boolean;
+  updateError: string | null;
+  onClose: () => void;
+  onUpdate: () => void;
+  onThumbnailClick: () => void;
+  onRemoveThumbnail: () => void;
+}) {
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      onClick={() => !isUpdating && onClose()}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-[420px] rounded-[16px] border p-6 ${
+          isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+        }`}
+        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          disabled={isUpdating}
+          className={`absolute top-4 right-4 p-1 transition-colors disabled:opacity-50 ${
+            isLight ? 'text-black/40 hover:text-black/60' : 'text-white/40 hover:text-white/60'
+          }`}
         >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M5 5l10 10M15 5L5 15" />
+          </svg>
+        </button>
+
+        <div className="text-center mb-6">
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-[420px] rounded-[16px] border border-white/[0.08] p-6"
-            style={{ background: 'rgb(24, 24, 24)' }}
+            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'rgba(232, 184, 74, 0.15)' }}
           >
-            {/* Close button */}
+            <RefreshIcon className="w-7 h-7 text-[#E8B84A]" />
+          </div>
+          <h3 className={`text-[16px] font-medium mb-1 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Update gift file</h3>
+          <p className={`text-[13px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>
+            Replace the file while keeping the same link
+          </p>
+        </div>
+
+        {/* New file preview */}
+        <div
+          className={`flex items-center gap-3 p-4 rounded-[10px] mb-4 border ${
+            isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'
+          }`}
+          style={{ background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)' }}
+        >
+          <div
+            className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0"
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)' }}
+          >
+            <FileIcon className={`w-5 h-5 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`text-[13px] truncate ${isLight ? 'text-black/70' : 'text-white/70'}`}>{selectedFile.name}</p>
+            <p className={`text-[11px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>{formatFileSize(selectedFile.size)}</p>
+          </div>
+          <span 
+            className={`text-[10px] font-medium uppercase px-2 py-1 rounded-md ${isLight ? 'text-emerald-700' : 'text-emerald-400/80'}`}
+            style={{ background: isLight ? 'rgba(5, 150, 105, 0.12)' : 'rgba(34, 197, 94, 0.1)' }}
+          >
+            New
+          </span>
+        </div>
+
+        {/* Thumbnail area */}
+        {thumbnailPreview ? (
+          <div className="relative mb-4">
+            <div className="w-24 h-24 mx-auto rounded-[10px] overflow-hidden relative">
+              <Image
+                src={thumbnailPreview}
+                alt="Thumbnail preview"
+                fill
+                className="object-cover"
+              />
+            </div>
             <button
-              onClick={handleCloseUpdateModal}
-              disabled={isUpdating}
-              className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors disabled:opacity-50"
+              onClick={onRemoveThumbnail}
+              className="absolute top-0 right-1/2 translate-x-14 -translate-y-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
             >
-              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M5 5l10 10M15 5L5 15" />
+              <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 3l6 6M9 3l-6 6" />
               </svg>
             </button>
-
-            <div className="text-center mb-6">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'rgba(232, 184, 74, 0.15)' }}
-              >
-                <RefreshIcon className="w-7 h-7 text-[#E8B84A]" />
-              </div>
-              <h3 className="text-[16px] font-medium text-white/90 mb-1">Update gift file</h3>
-              <p className="text-[13px] text-white/50">
-                Replace the file while keeping the same link
-              </p>
-            </div>
-
-            {/* New file preview */}
-            <div
-              className="flex items-center gap-3 p-4 rounded-[10px] mb-4"
-              style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <div
-                className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(255, 255, 255, 0.06)' }}
-              >
-                <FileIcon className="w-5 h-5 text-white/50" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] text-white/70 truncate">{selectedFile.name}</p>
-                <p className="text-[11px] text-white/40">{formatFileSize(selectedFile.size)}</p>
-              </div>
-              <span className="text-[10px] text-emerald-400/80 font-medium uppercase px-2 py-1 rounded-md" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
-                New
-              </span>
-            </div>
-
-            {/* Thumbnail area */}
-            {thumbnailPreview ? (
-              <div className="relative mb-4">
-                <div className="w-24 h-24 mx-auto rounded-[10px] overflow-hidden relative">
-                  <Image
-                    src={thumbnailPreview}
-                    alt="Thumbnail preview"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <button
-                  onClick={removeThumbnail}
-                  className="absolute top-0 right-1/2 translate-x-14 -translate-y-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
-                >
-                  <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M3 3l6 6M9 3l-6 6" />
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <div
-                className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-6 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4"
-                onClick={() => thumbnailInputRef.current?.click()}
-              >
-                <svg className="w-8 h-8 text-white/30 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21,15 16,10 5,21" />
-                </svg>
-                <p className="text-[12px] text-white/50 mb-1">
-                  Update thumbnail (optional)
-                </p>
-                <p className="text-[10px] text-white/30">
-                  Square image, max 2MB
-                </p>
-              </div>
-            )}
-
-            {updateError && (
-              <p className="text-[12px] text-red-400 text-center mb-4">{updateError}</p>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleCloseUpdateModal}
-                disabled={isUpdating}
-                className="flex-1 py-3 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateFile}
-                disabled={isUpdating}
-                className="flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-50"
-              >
-                <span className="btn-glass-text">
-                  {isUpdating ? "UPDATING..." : "UPDATE"}
-                </span>
-              </button>
-            </div>
           </div>
+        ) : (
+          <div
+            className={`border-2 border-dashed rounded-[12px] p-6 text-center cursor-pointer transition-colors mb-4 ${
+              isLight ? 'border-black/[0.12] hover:border-black/[0.2]' : 'border-white/[0.12] hover:border-white/[0.2]'
+            }`}
+            onClick={onThumbnailClick}
+          >
+            <svg className={`w-8 h-8 mx-auto mb-2 ${isLight ? 'text-black/30' : 'text-white/30'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21,15 16,10 5,21" />
+            </svg>
+            <p className={`text-[12px] mb-1 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
+              Update thumbnail (optional)
+            </p>
+            <p className={`text-[10px] ${isLight ? 'text-black/30' : 'text-white/30'}`}>
+              Square image, max 2MB
+            </p>
+          </div>
+        )}
+
+        {updateError && (
+          <p className="text-[12px] text-red-400 text-center mb-4">{updateError}</p>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={isUpdating}
+            className={`flex-1 py-3 rounded-[10px] text-[12px] font-medium transition-colors disabled:opacity-50 ${
+              isLight ? 'text-black/60 hover:bg-black/[0.05]' : 'text-white/60 hover:bg-white/[0.05]'
+            }`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onUpdate}
+            disabled={isUpdating}
+            className={`flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase disabled:opacity-50 transition-colors ${
+              isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+            }`}
+          >
+            <span className={isLight ? '' : 'btn-glass-text'}>
+              {isUpdating ? "UPDATING..." : "UPDATE"}
+            </span>
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -547,6 +613,8 @@ function UploadModal({
   currentGiftCount: number;
   maxGifts: number;
 }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedThumbnail, setSelectedThumbnail] = useState<File | null>(null);
@@ -675,8 +743,19 @@ function UploadModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={!isUploading ? handleClose : undefined} />
-      <div className="relative w-full max-w-[420px] mx-4 rounded-[16px] p-6" style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <button onClick={handleClose} disabled={isUploading} className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors disabled:opacity-50">
+      <div 
+        className={`relative w-full max-w-[420px] mx-4 rounded-[16px] p-6 border ${
+          isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+        }`}
+        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+      >
+        <button 
+          onClick={handleClose} 
+          disabled={isUploading} 
+          className={`absolute top-4 right-4 p-1 transition-colors disabled:opacity-50 ${
+            isLight ? 'text-black/40 hover:text-black/60' : 'text-white/40 hover:text-white/60'
+          }`}
+        >
           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M5 5l10 10M15 5L5 15" /></svg>
         </button>
 
@@ -686,33 +765,46 @@ function UploadModal({
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(232, 184, 74, 0.15)' }}>
                 <GiftIcon className="w-7 h-7 text-[#E8B84A]" />
               </div>
-              <h3 className="text-[16px] font-medium text-white/90 mb-1">Upload a gift</h3>
-              <p className="text-[13px] text-white/50">Step 1 of 2 — Select a file to share with your tribe</p>
+              <h3 className={`text-[16px] font-medium mb-1 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Upload a gift</h3>
+              <p className={`text-[13px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>Step 1 of 2 — Select a file to share with your tribe</p>
             </div>
-            <div className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-8 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4" onClick={() => fileInputRef.current?.click()}>
-              <svg className="w-10 h-10 text-white/30 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <div 
+              className={`border-2 border-dashed rounded-[12px] p-8 text-center cursor-pointer transition-colors mb-4 ${
+                isLight ? 'border-black/[0.12] hover:border-black/[0.2]' : 'border-white/[0.12] hover:border-white/[0.2]'
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <svg className={`w-10 h-10 mx-auto mb-3 ${isLight ? 'text-black/30' : 'text-white/30'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17,8 12,3 7,8" /><line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <p className="text-[13px] text-white/50 mb-1">Click to select a file</p>
-              <p className="text-[11px] text-white/30">Maximum size: 20MB</p>
+              <p className={`text-[13px] mb-1 ${isLight ? 'text-black/50' : 'text-white/50'}`}>Click to select a file</p>
+              <p className={`text-[11px] ${isLight ? 'text-black/30' : 'text-white/30'}`}>Maximum size: 20MB</p>
             </div>
             <input ref={fileInputRef} type="file" onChange={handleFileSelect} className="hidden" />
             {error && <p className="text-[12px] text-red-400 text-center mb-4">{error}</p>}
-            <p className="text-[11px] text-white/30 text-center">{currentGiftCount}/{maxGifts} gifts uploaded</p>
+            <p className={`text-[11px] text-center ${isLight ? 'text-black/30' : 'text-white/30'}`}>{currentGiftCount}/{maxGifts} gifts uploaded</p>
           </>
         ) : (
           <>
             <div className="text-center mb-6">
-              <h3 className="text-[16px] font-medium text-white/90 mb-1">Add a thumbnail</h3>
-              <p className="text-[13px] text-white/50">Step 2 of 2 — Optional: add a preview image</p>
+              <h3 className={`text-[16px] font-medium mb-1 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Add a thumbnail</h3>
+              <p className={`text-[13px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>Step 2 of 2 — Optional: add a preview image</p>
             </div>
-            <div className="flex items-center gap-3 p-4 rounded-[10px] mb-4" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.06)' }}>
-                <FileIcon className="w-5 h-5 text-white/50" />
+            <div 
+              className={`flex items-center gap-3 p-4 rounded-[10px] mb-4 border ${
+                isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'
+              }`}
+              style={{ background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)' }}
+            >
+              <div 
+                className="w-10 h-10 rounded-[8px] flex items-center justify-center flex-shrink-0"
+                style={{ background: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)' }}
+              >
+                <FileIcon className={`w-5 h-5 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] text-white/70 truncate">{selectedFile?.name}</p>
-                <p className="text-[11px] text-white/40">{selectedFile && formatFileSize(selectedFile.size)}</p>
+                <p className={`text-[13px] truncate ${isLight ? 'text-black/70' : 'text-white/70'}`}>{selectedFile?.name}</p>
+                <p className={`text-[11px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>{selectedFile && formatFileSize(selectedFile.size)}</p>
               </div>
             </div>
             {thumbnailPreview ? (
@@ -725,20 +817,39 @@ function UploadModal({
                 </button>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-white/[0.12] rounded-[12px] p-6 text-center cursor-pointer hover:border-white/[0.2] transition-colors mb-4" onClick={() => thumbnailInputRef.current?.click()}>
-                <svg className="w-8 h-8 text-white/30 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div 
+                className={`border-2 border-dashed rounded-[12px] p-6 text-center cursor-pointer transition-colors mb-4 ${
+                  isLight ? 'border-black/[0.12] hover:border-black/[0.2]' : 'border-white/[0.12] hover:border-white/[0.2]'
+                }`}
+                onClick={() => thumbnailInputRef.current?.click()}
+              >
+                <svg className={`w-8 h-8 mx-auto mb-2 ${isLight ? 'text-black/30' : 'text-white/30'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" />
                 </svg>
-                <p className="text-[12px] text-white/50 mb-1">Click to add thumbnail</p>
-                <p className="text-[10px] text-white/30">Square image, max 2MB (optional)</p>
+                <p className={`text-[12px] mb-1 ${isLight ? 'text-black/50' : 'text-white/50'}`}>Click to add thumbnail</p>
+                <p className={`text-[10px] ${isLight ? 'text-black/30' : 'text-white/30'}`}>Square image, max 2MB (optional)</p>
               </div>
             )}
             <input ref={thumbnailInputRef} type="file" accept="image/*" onChange={handleThumbnailSelect} className="hidden" />
             {error && <p className="text-[12px] text-red-400 text-center mb-4">{error}</p>}
             <div className="flex gap-3">
-              <button onClick={handleBack} disabled={isUploading} className="flex-1 py-3 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50">Back</button>
-              <button onClick={handleUpload} disabled={isUploading} className="flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-50">
-                <span className="btn-glass-text">{isUploading ? "UPLOADING..." : "UPLOAD GIFT"}</span>
+              <button 
+                onClick={handleBack} 
+                disabled={isUploading} 
+                className={`flex-1 py-3 rounded-[10px] text-[12px] font-medium transition-colors disabled:opacity-50 ${
+                  isLight ? 'text-black/60 hover:bg-black/[0.05]' : 'text-white/60 hover:bg-white/[0.05]'
+                }`}
+              >
+                Back
+              </button>
+              <button 
+                onClick={handleUpload} 
+                disabled={isUploading} 
+                className={`flex-1 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase disabled:opacity-50 transition-colors ${
+                  isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+                }`}
+              >
+                <span className={isLight ? '' : 'btn-glass-text'}>{isUploading ? "UPLOADING..." : "UPLOAD GIFT"}</span>
               </button>
             </div>
           </>

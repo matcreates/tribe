@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getCampaignStatus } from "@/lib/actions";
+import { useTheme } from "@/lib/theme";
 
 type Particle = {
   left: string;
@@ -28,6 +29,8 @@ interface EmailSentSuccessProps {
 
 export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: EmailSentSuccessProps) {
   const router = useRouter();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [isVisible, setIsVisible] = useState(false);
   const [status, setStatus] = useState<'queued' | 'sending' | 'sent' | 'failed'>('queued');
   const [sentCount, setSentCount] = useState(0);
@@ -95,7 +98,7 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
       className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
-      style={{ background: 'rgb(12, 12, 12)' }}
+      style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(12, 12, 12)' }}
     >
       {/* Animated background gradient */}
       <div className="absolute inset-0 overflow-hidden">
@@ -107,7 +110,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
           style={{
             background: isFailed 
               ? 'radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 40%, transparent 70%)'
-              : 'radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 40%, transparent 70%)',
+              : isLight 
+                ? 'radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, rgba(5, 150, 105, 0.04) 40%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 40%, transparent 70%)',
             animation: isVisible && !isProcessing ? 'pulse-glow 3s ease-in-out infinite' : 'none',
           }}
         />
@@ -117,7 +122,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
             isVisible ? "opacity-60" : "opacity-0"
           }`}
           style={{
-            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 60%)',
+            background: isLight 
+              ? 'radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, transparent 60%)'
+              : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 60%)',
             animation: isVisible ? 'float-1 8s ease-in-out infinite' : 'none',
           }}
         />
@@ -126,7 +133,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
             isVisible ? "opacity-50" : "opacity-0"
           }`}
           style={{
-            background: 'radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 60%)',
+            background: isLight 
+              ? 'radial-gradient(circle, rgba(5, 150, 105, 0.06) 0%, transparent 60%)'
+              : 'radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 60%)',
             animation: isVisible ? 'float-2 6s ease-in-out infinite' : 'none',
           }}
         />
@@ -134,9 +143,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
         {particles.map((p, i) => (
           <div
             key={i}
-            className={`absolute w-1 h-1 rounded-full bg-emerald-400/30 transition-all duration-1000 ${
+            className={`absolute w-1 h-1 rounded-full transition-all duration-1000 ${
               isVisible ? "opacity-100" : "opacity-0"
-            }`}
+            } ${isLight ? 'bg-emerald-600/30' : 'bg-emerald-400/30'}`}
             style={{
               left: p.left,
               top: p.top,
@@ -160,14 +169,18 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
             isVisible ? "scale-100" : "scale-0"
           }`}
           style={{ 
-            background: isFailed ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-            border: `1px solid ${isFailed ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)'}`,
+            background: isFailed 
+              ? 'rgba(239, 68, 68, 0.15)' 
+              : isLight 
+                ? 'rgba(5, 150, 105, 0.12)' 
+                : 'rgba(34, 197, 94, 0.15)',
+            border: `1px solid ${isFailed ? 'rgba(239, 68, 68, 0.3)' : isLight ? 'rgba(5, 150, 105, 0.25)' : 'rgba(34, 197, 94, 0.3)'}`,
           }}
         >
           {isProcessing ? (
             /* Spinner for processing */
             <svg 
-              className="w-10 h-10 text-emerald-400 animate-spin"
+              className={`w-10 h-10 animate-spin ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}
               viewBox="0 0 24 24" 
               fill="none"
             >
@@ -190,9 +203,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
           ) : (
             /* Checkmark for complete */
             <svg 
-              className={`w-10 h-10 text-emerald-400 transition-all duration-300 delay-500 ${
+              className={`w-10 h-10 transition-all duration-300 delay-500 ${
                 isVisible ? "opacity-100 scale-100" : "opacity-0 scale-50"
-              }`}
+              } ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -207,9 +220,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
 
         {/* Message */}
         <h1 
-          className={`text-[28px] font-medium text-white/90 mb-3 transition-all duration-500 delay-400 ${
+          className={`text-[28px] font-medium mb-3 transition-all duration-500 delay-400 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          } ${isLight ? 'text-black/85' : 'text-white/90'}`}
         >
           {isFailed ? "Sending failed" : isComplete ? "Email sent!" : "Sending your email..."}
         </h1>
@@ -219,20 +232,25 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
           <div className={`mb-6 transition-all duration-500 delay-500 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}>
-            <p className="text-[15px] text-white/50 mb-4">
+            <p className={`text-[15px] mb-4 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               {sentCount.toLocaleString()} / {totalRecipients.toLocaleString()} members
             </p>
             {/* Progress bar */}
-            <div className="w-64 mx-auto h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <div 
+              className="w-64 mx-auto h-2 rounded-full overflow-hidden"
+              style={{ background: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)' }}
+            >
               <div 
                 className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{ 
                   width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, rgba(34, 197, 94, 0.8), rgba(16, 185, 129, 0.8))'
+                  background: isLight 
+                    ? 'linear-gradient(90deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.9))'
+                    : 'linear-gradient(90deg, rgba(34, 197, 94, 0.8), rgba(16, 185, 129, 0.8))'
                 }}
               />
             </div>
-            <p className="text-[12px] text-white/30 mt-2">
+            <p className={`text-[12px] mt-2 ${isLight ? 'text-black/30' : 'text-white/30'}`}>
               {progressPercent}% complete
             </p>
           </div>
@@ -240,9 +258,9 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
 
         {isComplete && (
           <p 
-            className={`text-[15px] text-white/50 mb-10 transition-all duration-500 delay-500 ${
+            className={`text-[15px] mb-10 transition-all duration-500 delay-500 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+            } ${isLight ? 'text-black/50' : 'text-white/50'}`}
           >
             Successfully delivered to {sentCount.toLocaleString()} {sentCount === 1 ? "member" : "members"}
           </p>
@@ -262,17 +280,17 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
         {(isComplete || isFailed) && (
           <button
             onClick={handleDone}
-            className={`px-8 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase btn-glass transition-all duration-500 delay-600 hover:scale-105 ${
+            className={`px-8 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.12em] uppercase transition-all duration-500 delay-600 hover:scale-105 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+            } ${isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'}`}
           >
-            <span className="btn-glass-text">DONE</span>
+            <span className={isLight ? '' : 'btn-glass-text'}>DONE</span>
           </button>
         )}
 
         {/* Leave running note for processing */}
         {isProcessing && (
-          <p className="text-[12px] text-white/25 mt-4">
+          <p className={`text-[12px] mt-4 ${isLight ? 'text-black/25' : 'text-white/25'}`}>
             You can leave this page — emails will continue sending in the background.
           </p>
         )}
@@ -301,4 +319,3 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
     </div>
   );
 }
-

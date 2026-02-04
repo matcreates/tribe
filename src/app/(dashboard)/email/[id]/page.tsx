@@ -473,18 +473,24 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
             onClick={() => !isDeleting && setShowDeleteConfirm(false)}
           />
           <div 
-            className="relative w-full max-w-[360px] mx-4 rounded-[16px] p-6"
-            style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}
+            className={`relative w-full max-w-[360px] mx-4 rounded-[16px] p-6 border ${
+              isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+            }`}
+            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
           >
-            <h3 className="text-[16px] font-medium text-white/90 mb-2">Delete this email?</h3>
-            <p className="text-[13px] text-white/50 mb-6 leading-relaxed">
+            <h3 className={`text-[16px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Delete this email?</h3>
+            <p className={`text-[13px] mb-6 leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               Are you sure you want to delete &ldquo;{email?.subject || "Untitled"}&rdquo;? This will also delete all replies and tracking data. This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.08em] uppercase text-white/60 hover:bg-white/5 transition-colors border border-white/[0.08]"
+                className={`flex-1 px-4 py-3 rounded-[10px] text-[11px] font-medium tracking-[0.08em] uppercase transition-colors border ${
+                  isLight 
+                    ? 'text-black/60 hover:bg-black/5 border-black/[0.08]' 
+                    : 'text-white/60 hover:bg-white/5 border-white/[0.08]'
+                }`}
               >
                 Cancel
               </button>

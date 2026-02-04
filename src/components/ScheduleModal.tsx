@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTheme } from "@/lib/theme";
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -89,6 +90,8 @@ export function ScheduleModal({
   onClose,
   onSchedule,
 }: ScheduleModalProps) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const detectedTimezone = useMemo(() => detectTimezone(), []);
   
   const [selectedDate, setSelectedDate] = useState("");
@@ -165,18 +168,20 @@ export function ScheduleModal({
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-[440px] mx-4 rounded-2xl border border-white/[0.08] p-8"
-        style={{ background: 'rgb(24, 24, 24)' }}
+        className={`relative w-full max-w-[440px] mx-4 rounded-2xl border p-8 ${
+          isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+        }`}
+        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <ClockIcon className="w-5 h-5 text-white/50" />
-          <h2 className="text-[16px] font-medium text-white/90">Schedule email</h2>
+          <ClockIcon className={`w-5 h-5 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
+          <h2 className={`text-[16px] font-medium ${isLight ? 'text-black/85' : 'text-white/90'}`}>Schedule email</h2>
         </div>
 
         {/* Date Picker */}
         <div className="mb-4">
-          <label className="block text-[12px] text-white/40 mb-2">Date</label>
+          <label className={`block text-[12px] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Date</label>
           <input
             type="date"
             value={selectedDate}
@@ -185,14 +190,18 @@ export function ScheduleModal({
               setError("");
             }}
             min={getMinDate()}
-            className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/70 focus:outline-none border border-white/[0.06] [color-scheme:dark]"
-            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            className={`w-full px-4 py-3 rounded-[10px] text-[14px] focus:outline-none border ${
+              isLight 
+                ? 'text-black/70 border-black/[0.06] [color-scheme:light]' 
+                : 'text-white/70 border-white/[0.06] [color-scheme:dark]'
+            }`}
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
           />
         </div>
 
         {/* Time Picker */}
         <div className="mb-4">
-          <label className="block text-[12px] text-white/40 mb-2">Time</label>
+          <label className={`block text-[12px] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Time</label>
           <input
             type="time"
             value={selectedTime}
@@ -201,20 +210,28 @@ export function ScheduleModal({
               setError("");
             }}
             min={selectedDate === getMinDate() ? minTime : undefined}
-            className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/70 focus:outline-none border border-white/[0.06] [color-scheme:dark]"
-            style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+            className={`w-full px-4 py-3 rounded-[10px] text-[14px] focus:outline-none border ${
+              isLight 
+                ? 'text-black/70 border-black/[0.06] [color-scheme:light]' 
+                : 'text-white/70 border-white/[0.06] [color-scheme:dark]'
+            }`}
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
           />
         </div>
 
         {/* Timezone Selector */}
         <div className="mb-6">
-          <label className="block text-[12px] text-white/40 mb-2">Timezone</label>
+          <label className={`block text-[12px] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Timezone</label>
           <div className="relative">
             <select
               value={selectedTimezone}
               onChange={(e) => setSelectedTimezone(e.target.value)}
-              className="w-full appearance-none px-4 py-3 pr-10 rounded-[10px] text-[14px] text-white/70 focus:outline-none cursor-pointer border border-white/[0.06]"
-              style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              className={`w-full appearance-none px-4 py-3 pr-10 rounded-[10px] text-[14px] focus:outline-none cursor-pointer border ${
+                isLight 
+                  ? 'text-black/70 border-black/[0.06]' 
+                  : 'text-white/70 border-white/[0.06]'
+              }`}
+              style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz.value} value={tz.value}>
@@ -222,7 +239,7 @@ export function ScheduleModal({
                 </option>
               ))}
             </select>
-            <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
+            <ChevronDownIcon className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isLight ? 'text-black/35' : 'text-white/35'}`} />
           </div>
         </div>
 
@@ -233,10 +250,13 @@ export function ScheduleModal({
 
         {/* Preview */}
         {selectedDate && selectedTime && (
-          <div className="mb-6 p-4 rounded-xl border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-            <p className="text-[13px] text-white/50">
+          <div 
+            className={`mb-6 p-4 rounded-xl border ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
+          >
+            <p className={`text-[13px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               Your email will be sent on{" "}
-              <span className="text-white/70">
+              <span className={isLight ? 'text-black/70' : 'text-white/70'}>
                 {new Date(`${selectedDate}T${selectedTime}`).toLocaleDateString("en-US", {
                   weekday: "long",
                   month: "long",
@@ -244,7 +264,7 @@ export function ScheduleModal({
                 })}
               </span>
               {" "}at{" "}
-              <span className="text-white/70">
+              <span className={isLight ? 'text-black/70' : 'text-white/70'}>
                 {new Date(`${selectedDate}T${selectedTime}`).toLocaleTimeString("en-US", {
                   hour: "numeric",
                   minute: "2-digit",
@@ -261,16 +281,24 @@ export function ScheduleModal({
           <button
             onClick={onClose}
             disabled={isScheduling}
-            className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass-secondary"
+            className={`flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase transition-colors ${
+              isLight 
+                ? 'bg-black/[0.06] text-black/70 hover:bg-black/[0.1]' 
+                : 'btn-glass-secondary'
+            }`}
           >
-            <span className="btn-glass-text">CANCEL</span>
+            <span className={isLight ? '' : 'btn-glass-text'}>CANCEL</span>
           </button>
           <button
             onClick={handleSchedule}
             disabled={isScheduling || !selectedDate || !selectedTime}
-            className="flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase btn-glass"
+            className={`flex-1 px-5 py-3 rounded-[10px] text-[10px] font-medium tracking-[0.12em] uppercase transition-colors disabled:opacity-40 ${
+              isLight 
+                ? 'bg-black text-white hover:bg-black/90' 
+                : 'btn-glass'
+            }`}
           >
-            <span className="btn-glass-text">{isScheduling ? "SCHEDULING..." : "SCHEDULE"}</span>
+            <span className={isLight ? '' : 'btn-glass-text'}>{isScheduling ? "SCHEDULING..." : "SCHEDULE"}</span>
           </button>
         </div>
 
@@ -278,8 +306,8 @@ export function ScheduleModal({
         {isScheduling && (
           <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-              <p className="text-[13px] text-white/60">Scheduling...</p>
+              <div className={`w-8 h-8 border-2 rounded-full animate-spin ${isLight ? 'border-black/20 border-t-black/70' : 'border-white/20 border-t-white/70'}`} />
+              <p className={`text-[13px] ${isLight ? 'text-black/60' : 'text-white/60'}`}>Scheduling...</p>
             </div>
           </div>
         )}
@@ -304,4 +332,3 @@ function ChevronDownIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

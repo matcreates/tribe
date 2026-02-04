@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/theme";
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ type PlanType = "small_monthly" | "small_yearly" | "big_monthly" | "big_yearly";
 
 export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallModalProps) {
   const router = useRouter();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [selectedTier, setSelectedTier] = useState<"small" | "big">("small");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [isLoading, setIsLoading] = useState(false);
@@ -83,13 +86,17 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-lg mx-4 rounded-[16px] border border-white/[0.08] overflow-hidden max-h-[90vh] overflow-y-auto"
-        style={{ background: 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
+        className={`relative w-full max-w-lg mx-4 rounded-[16px] border overflow-hidden max-h-[90vh] overflow-y-auto ${
+          isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+        }`}
+        style={{ background: isLight ? 'linear-gradient(180deg, rgba(252, 250, 247, 0.98) 0%, rgba(245, 243, 240, 0.98) 100%)' : 'linear-gradient(180deg, rgba(30, 30, 35, 0.98) 0%, rgba(20, 20, 24, 0.98) 100%)' }}
       >
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/10 transition-all z-10"
+          className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all z-10 ${
+            isLight ? 'text-black/40 hover:text-black/70 hover:bg-black/10' : 'text-white/40 hover:text-white/70 hover:bg-white/10'
+          }`}
         >
           <CloseIcon className="w-4 h-4" />
         </button>
@@ -102,23 +109,26 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
           >
             <LockIcon className="w-7 h-7 text-[#E8B84A]" />
           </div>
-          <h2 className="text-[20px] font-medium text-white/90 mb-2">
+          <h2 className={`text-[20px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>
             Unlock Email Sending
           </h2>
-          <p className="text-[14px] text-white/50 leading-relaxed">
+          <p className={`text-[14px] leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>
             Choose the plan that fits your tribe
           </p>
         </div>
 
         {/* Billing Toggle */}
         <div className="px-6 pb-4">
-          <div className="flex gap-1 p-1 rounded-[10px] border border-white/[0.06]" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+          <div 
+            className={`flex gap-1 p-1 rounded-[10px] border ${isLight ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}
+            style={{ background: isLight ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)' }}
+          >
             <button
               onClick={() => setBillingCycle("monthly")}
               className={`flex-1 py-2 rounded-[8px] text-[12px] font-medium tracking-[0.05em] uppercase transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-white/[0.1] text-white/80"
-                  : "text-white/40 hover:text-white/60"
+                  ? isLight ? "bg-black/[0.08] text-black/80" : "bg-white/[0.1] text-white/80"
+                  : isLight ? "text-black/40 hover:text-black/60" : "text-white/40 hover:text-white/60"
               }`}
             >
               Monthly
@@ -127,8 +137,8 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
               onClick={() => setBillingCycle("yearly")}
               className={`flex-1 py-2 rounded-[8px] text-[12px] font-medium tracking-[0.05em] uppercase transition-all ${
                 billingCycle === "yearly"
-                  ? "bg-white/[0.1] text-white/80"
-                  : "text-white/40 hover:text-white/60"
+                  ? isLight ? "bg-black/[0.08] text-black/80" : "bg-white/[0.1] text-white/80"
+                  : isLight ? "text-black/40 hover:text-black/60" : "text-white/40 hover:text-white/60"
               }`}
             >
               Yearly <span className="text-[#E8B84A]">Save 17%+</span>
@@ -145,46 +155,46 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
               disabled={needsBigCreator}
               className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
                 needsBigCreator
-                  ? "border-white/[0.04] bg-white/[0.01] opacity-50 cursor-not-allowed"
+                  ? isLight ? "border-black/[0.04] bg-black/[0.01] opacity-50 cursor-not-allowed" : "border-white/[0.04] bg-white/[0.01] opacity-50 cursor-not-allowed"
                   : selectedTier === "small"
                   ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
-                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+                  : isLight ? "border-black/[0.08] bg-black/[0.02] hover:border-black/[0.12]" : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[15px] font-medium text-white/80">Small Creators</p>
+                    <p className={`text-[15px] font-medium ${isLight ? 'text-black/80' : 'text-white/80'}`}>Small Creators</p>
                     {selectedTier === "small" && !needsBigCreator && (
                       <div className="w-4 h-4 rounded-full bg-[#E8B84A] flex items-center justify-center">
                         <CheckIcon className="w-2.5 h-2.5 text-black" />
                       </div>
                     )}
                   </div>
-                  <p className="text-[12px] text-white/40 mb-2">Up to 10,000 tribe members</p>
+                  <p className={`text-[12px] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Up to 10,000 tribe members</p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[11px] text-white/50">2 emails per week</span>
+                      <CheckIcon className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                      <span className={`text-[11px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>2 emails per week</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[11px] text-white/50">All features included</span>
+                      <CheckIcon className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                      <span className={`text-[11px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>All features included</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[22px] font-medium text-white/90">
+                  <p className={`text-[22px] font-medium ${isLight ? 'text-black/85' : 'text-white/90'}`}>
                     {billingCycle === "yearly" ? "$5" : "$8"}
-                    <span className="text-[12px] text-white/40">/mo</span>
+                    <span className={`text-[12px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>/mo</span>
                   </p>
                   {billingCycle === "yearly" && (
-                    <p className="text-[11px] text-white/40">$60/year</p>
+                    <p className={`text-[11px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>$60/year</p>
                   )}
                 </div>
               </div>
               {needsBigCreator && (
-                <p className="text-[11px] text-amber-400 mt-2">
+                <p className="text-[11px] text-amber-500 mt-2">
                   Your tribe has {currentTribeSize.toLocaleString()} members - upgrade to Big Creators
                 </p>
               )}
@@ -196,7 +206,7 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
               className={`w-full p-4 rounded-[12px] border transition-all text-left relative ${
                 selectedTier === "big"
                   ? "border-[#E8B84A]/50 bg-[#E8B84A]/[0.08]"
-                  : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
+                  : isLight ? "border-black/[0.08] bg-black/[0.02] hover:border-black/[0.12]" : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]"
               }`}
             >
               {/* Popular Badge */}
@@ -209,36 +219,36 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[15px] font-medium text-white/80">Big Creators</p>
+                    <p className={`text-[15px] font-medium ${isLight ? 'text-black/80' : 'text-white/80'}`}>Big Creators</p>
                     {selectedTier === "big" && (
                       <div className="w-4 h-4 rounded-full bg-[#E8B84A] flex items-center justify-center">
                         <CheckIcon className="w-2.5 h-2.5 text-black" />
                       </div>
                     )}
                   </div>
-                  <p className="text-[12px] text-white/40 mb-2">Unlimited tribe members</p>
+                  <p className={`text-[12px] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Unlimited tribe members</p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[11px] text-white/50">2 emails per week</span>
+                      <CheckIcon className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                      <span className={`text-[11px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>2 emails per week</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[11px] text-white/50">All features included</span>
+                      <CheckIcon className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                      <span className={`text-[11px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>All features included</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <CheckIcon className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[11px] text-white/50">No tribe size limits</span>
+                      <CheckIcon className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                      <span className={`text-[11px] ${isLight ? 'text-black/50' : 'text-white/50'}`}>No tribe size limits</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[22px] font-medium text-white/90">
+                  <p className={`text-[22px] font-medium ${isLight ? 'text-black/85' : 'text-white/90'}`}>
                     {billingCycle === "yearly" ? "$17" : "$20"}
-                    <span className="text-[12px] text-white/40">/mo</span>
+                    <span className={`text-[12px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>/mo</span>
                   </p>
                   {billingCycle === "yearly" && (
-                    <p className="text-[11px] text-white/40">$200/year</p>
+                    <p className={`text-[11px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>$200/year</p>
                   )}
                 </div>
               </div>
@@ -264,7 +274,7 @@ export function PaywallModal({ isOpen, onClose, currentTribeSize = 0 }: PaywallM
           >
             <span>{isLoading ? "Loading..." : `Upgrade for ${getPriceDisplay()}`}</span>
           </button>
-          <p className="text-[11px] text-white/30 text-center mt-3">
+          <p className={`text-[11px] text-center mt-3 ${isLight ? 'text-black/30' : 'text-white/30'}`}>
             Secure payment powered by Stripe · Cancel anytime
           </p>
         </div>

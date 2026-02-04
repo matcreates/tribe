@@ -16,7 +16,6 @@ interface Particle {
   baseZ: number;
   size: number;
   opacity: number;
-  connections: number[];
 }
 
 export function TribeVisualization({ memberCount }: TribeVisualizationProps) {
@@ -48,13 +47,6 @@ export function TribeVisualization({ memberCount }: TribeVisualizationProps) {
       const y = radius * Math.sin(phi) * Math.sin(theta);
       const z = radius * Math.cos(phi);
       
-      // Generate connections to nearby particles
-      const connections: number[] = [];
-      if (i > 0 && Math.random() > 0.7) {
-        const connectTo = Math.floor(Math.random() * i);
-        connections.push(connectTo);
-      }
-      
       particles.push({
         x, y, z,
         baseX: x,
@@ -62,7 +54,6 @@ export function TribeVisualization({ memberCount }: TribeVisualizationProps) {
         baseZ: z,
         size: 1 + Math.random() * 2,
         opacity: 0.3 + Math.random() * 0.7,
-        connections,
       });
     }
     
@@ -148,28 +139,8 @@ export function TribeVisualization({ memberCount }: TribeVisualizationProps) {
       };
     }).sort((a, b) => a.depth - b.depth);
     
-    // Draw connections first (behind particles)
-    const baseColor = isLight ? '0, 0, 0' : '255, 255, 255';
-    
-    ctx.lineWidth = 0.5;
-    transformedParticles.forEach(p => {
-      p.connections.forEach(targetIdx => {
-        const target = transformedParticles.find(t => t.index === targetIdx);
-        if (target) {
-          const avgDepth = (p.depth + target.depth) / 2;
-          const depthFactor = (avgDepth + 1) / 2;
-          const opacity = depthFactor * 0.15;
-          
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(${baseColor}, ${opacity})`;
-          ctx.moveTo(p.screenX, p.screenY);
-          ctx.lineTo(target.screenX, target.screenY);
-          ctx.stroke();
-        }
-      });
-    });
-    
     // Draw particles
+    const baseColor = isLight ? '0, 0, 0' : '255, 255, 255';
     transformedParticles.forEach(p => {
       const depthFactor = (p.depth + 1) / 2; // 0 to 1
       const size = p.size * (0.5 + depthFactor * 0.8);

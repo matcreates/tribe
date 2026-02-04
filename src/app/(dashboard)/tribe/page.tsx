@@ -7,6 +7,7 @@ import { Toast, useToast } from "@/components/Toast";
 import { ImportModal, ImportPreview } from "@/components/ImportModal";
 import { ImportChooserModal, ManualEntryModal } from "@/components/ImportChooserModal";
 import { TribeVisualization } from "@/components/TribeVisualization";
+import { useTheme } from "@/lib/theme";
 
 interface Subscriber {
   id: string;
@@ -53,6 +54,8 @@ function extractEmailsFromText(text: string): string[] {
 }
 
 export default function TribePage() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -621,8 +624,10 @@ export default function TribePage() {
             onClick={() => !isDeletingAll && setShowDeleteAllModal(false)}
           />
           <div
-            className="relative w-full max-w-[360px] rounded-[14px] border border-white/[0.08] p-6"
-            style={{ background: 'rgba(18, 18, 18, 0.98)' }}
+            className={`relative w-full max-w-[360px] rounded-[14px] border p-6 ${
+              isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+            }`}
+            style={{ background: isLight ? 'rgba(252, 250, 247, 0.98)' : 'rgba(18, 18, 18, 0.98)' }}
           >
             <div className="flex items-center gap-3 mb-4">
               <div 
@@ -632,12 +637,12 @@ export default function TribePage() {
                 <WarningIcon className="w-5 h-5 text-red-400" />
               </div>
               <div>
-                <h3 className="text-[15px] font-medium text-white/90">Delete all unverified</h3>
-                <p className="text-[12px] text-white/40">{totalNonVerified} members will be removed</p>
+                <h3 className={`text-[15px] font-medium ${isLight ? 'text-black/85' : 'text-white/90'}`}>Delete all unverified</h3>
+                <p className={`text-[12px] ${isLight ? 'text-black/40' : 'text-white/40'}`}>{totalNonVerified} members will be removed</p>
               </div>
             </div>
             
-            <p className="text-[13px] text-white/50 mb-5 leading-relaxed">
+            <p className={`text-[13px] mb-5 leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>
               This action is <span className="text-red-400 font-medium">irreversible</span>. All unverified members will be permanently deleted from your tribe.
             </p>
             
@@ -645,7 +650,9 @@ export default function TribePage() {
               <button
                 onClick={() => setShowDeleteAllModal(false)}
                 disabled={isDeletingAll}
-                className="flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium text-white/60 hover:bg-white/[0.05] transition-colors disabled:opacity-50"
+                className={`flex-1 px-4 py-2.5 rounded-[10px] text-[12px] font-medium transition-colors disabled:opacity-50 ${
+                  isLight ? 'text-black/60 hover:bg-black/[0.05]' : 'text-white/60 hover:bg-white/[0.05]'
+                }`}
               >
                 Cancel
               </button>

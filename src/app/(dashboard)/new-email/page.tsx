@@ -9,10 +9,13 @@ import { ScheduleModal } from "@/components/ScheduleModal";
 import { PaywallModal } from "@/components/PaywallModal";
 import { ContactSupportModal } from "@/components/ContactSupportModal";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTheme } from "@/lib/theme";
 
 export default function NewEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [counts, setCounts] = useState({ verified: 0, nonVerified: 0, all: 0 });
   const [isSending, setIsSending] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
@@ -446,12 +449,16 @@ export default function NewEmailPage() {
             onClick={closeTestModal}
           />
           <div 
-            className="relative w-full max-w-[400px] mx-4 rounded-[16px] p-6"
-            style={{ background: 'rgb(24, 24, 24)', border: '1px solid rgba(255,255,255,0.08)' }}
+            className={`relative w-full max-w-[400px] mx-4 rounded-[16px] p-6 border ${
+              isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+            }`}
+            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
           >
             <button
               onClick={closeTestModal}
-              className="absolute top-4 right-4 p-1 text-white/40 hover:text-white/60 transition-colors"
+              className={`absolute top-4 right-4 p-1 transition-colors ${
+                isLight ? 'text-black/40 hover:text-black/60' : 'text-white/40 hover:text-white/60'
+              }`}
             >
               <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M5 5l10 10M15 5L5 15" />
@@ -461,12 +468,12 @@ export default function NewEmailPage() {
             {!testEmailSent ? (
               <>
                 <div className="mb-4">
-                  <h3 className="text-[16px] font-medium text-white/90">Send test email</h3>
-                  <p className="text-[12px] text-white/40 mt-1">Preview how your email will look</p>
+                  <h3 className={`text-[16px] font-medium ${isLight ? 'text-black/85' : 'text-white/90'}`}>Send test email</h3>
+                  <p className={`text-[12px] mt-1 ${isLight ? 'text-black/40' : 'text-white/40'}`}>Preview how your email will look</p>
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-[11px] text-white/40 uppercase tracking-[0.08em] mb-2">
+                  <label className={`block text-[11px] uppercase tracking-[0.08em] mb-2 ${isLight ? 'text-black/40' : 'text-white/40'}`}>
                     Send to
                   </label>
                   <input
@@ -477,8 +484,12 @@ export default function NewEmailPage() {
                       setTestEmailError("");
                     }}
                     placeholder="your@email.com"
-                    className="w-full px-4 py-3 rounded-[10px] text-[14px] text-white/80 placeholder:text-white/25 focus:outline-none border border-white/[0.06] transition-colors focus:border-white/[0.12]"
-                    style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                    className={`w-full px-4 py-3 rounded-[10px] text-[14px] focus:outline-none border transition-colors ${
+                      isLight 
+                        ? 'text-black/80 placeholder:text-black/30 border-black/[0.06] focus:border-black/[0.12]' 
+                        : 'text-white/80 placeholder:text-white/25 border-white/[0.06] focus:border-white/[0.12]'
+                    }`}
+                    style={{ background: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)' }}
                     autoFocus
                   />
                   {testEmailError && (
@@ -489,36 +500,40 @@ export default function NewEmailPage() {
                 <button
                   onClick={handleSendTest}
                   disabled={isSendingTest || !testEmail.trim()}
-                  className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={`w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase disabled:opacity-40 disabled:cursor-not-allowed transition-colors ${
+                    isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+                  }`}
                 >
-                  <span className="btn-glass-text">{isSendingTest ? "SENDING..." : "SEND TEST EMAIL"}</span>
+                  <span className={isLight ? '' : 'btn-glass-text'}>{isSendingTest ? "SENDING..." : "SEND TEST EMAIL"}</span>
                 </button>
               </>
             ) : (
               <div className="text-center py-4">
                 <div 
                   className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: 'rgba(34, 197, 94, 0.15)' }}
+                  style={{ background: isLight ? 'rgba(5, 150, 105, 0.12)' : 'rgba(34, 197, 94, 0.15)' }}
                 >
-                  <CheckCircleIcon className="w-7 h-7 text-emerald-400" />
+                  <CheckCircleIcon className={`w-7 h-7 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                 </div>
-                <h3 className="text-[16px] font-medium text-white/90 mb-2">Test email sent!</h3>
-                <p className="text-[13px] text-white/50 mb-4">
-                  Sent to <span className="text-white/70">{testEmail}</span>
+                <h3 className={`text-[16px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Test email sent!</h3>
+                <p className={`text-[13px] mb-4 ${isLight ? 'text-black/50' : 'text-white/50'}`}>
+                  Sent to <span className={isLight ? 'text-black/70' : 'text-white/70'}>{testEmail}</span>
                 </p>
                 <div 
                   className="p-4 rounded-[10px] mb-5 text-left"
                   style={{ background: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.2)' }}
                 >
-                  <p className="text-[12px] text-amber-200/80 leading-relaxed">
+                  <p className={`text-[12px] leading-relaxed ${isLight ? 'text-amber-700' : 'text-amber-200/80'}`}>
                     💡 The email might take a couple of minutes to arrive. Remember to check your Junk/Spam folder if you don&apos;t see it in your inbox.
                   </p>
                 </div>
                 <button
                   onClick={closeTestModal}
-                  className="w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase btn-glass"
+                  className={`w-full py-3 rounded-[10px] text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
+                    isLight ? 'bg-black text-white hover:bg-black/90' : 'btn-glass'
+                  }`}
                 >
-                  <span className="btn-glass-text">BACK TO WRITING</span>
+                  <span className={isLight ? '' : 'btn-glass-text'}>BACK TO WRITING</span>
                 </button>
               </div>
             )}
