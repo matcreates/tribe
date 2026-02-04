@@ -106,7 +106,7 @@ export default function GiftJoinPage({ params }: PageProps) {
 
   if (!giftData && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(252, 250, 247)' }}>
+      <div data-theme="light" className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(252, 250, 247)' }}>
         <p className="text-[13px] text-black/30">Loading...</p>
       </div>
     );
@@ -114,7 +114,7 @@ export default function GiftJoinPage({ params }: PageProps) {
 
   if (error && !giftData) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
+      <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
         <div 
           className="w-full max-w-[360px] rounded-[16px] border border-black/[0.08] p-8 text-center bg-white/80"
         >
@@ -153,7 +153,7 @@ export default function GiftJoinPage({ params }: PageProps) {
   const greenBorder = 'rgba(5, 150, 105, 0.2)';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
+    <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
       <div 
         className="w-full max-w-[320px] rounded-[16px] border border-black/[0.08] p-7 bg-white/80"
       >
