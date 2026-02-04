@@ -81,7 +81,9 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
           fixed top-0 right-0 lg:left-0 z-50 h-screen flex flex-col
           w-[280px] lg:w-[260px]
           transform transition-all duration-300 ease-out
+          lg:border-r
           ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          ${theme === 'light' ? 'lg:border-black/[0.06]' : 'lg:border-white/[0.06]'}
         `}
         style={{ background: theme === 'light' ? 'rgb(252, 250, 247)' : 'rgb(18, 18, 18)' }}
       >
