@@ -21,8 +21,6 @@ export function Shell({ children, sentEmails, user }: ShellProps) {
       className="min-h-screen transition-colors duration-300" 
       style={{ 
         backgroundColor: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)',
-        backgroundImage: isLight ? 'radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px)' : 'none',
-        backgroundSize: isLight ? '24px 24px' : 'auto',
       }}
     >
       <Sidebar sentEmails={sentEmails} user={user} />

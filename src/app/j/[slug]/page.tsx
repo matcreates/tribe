@@ -146,7 +146,7 @@ export default function PublicJoinPage({ params }: PageProps) {
           <p className="text-[13px] text-black/50 mb-4">{ownerName}</p>
           
           {/* Heading */}
-          <h1 className="text-[18px] font-medium text-black/85 mb-1.5" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
+          <h1 className="text-[24px] font-medium text-black/85 mb-2" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>
             Join my tribe
           </h1>
           

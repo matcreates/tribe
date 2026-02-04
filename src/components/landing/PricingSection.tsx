@@ -24,14 +24,14 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="relative py-16 sm:py-32 px-4 sm:px-6" id="pricing">
+    <section className="relative pt-24 sm:pt-40 pb-16 sm:pb-32 px-4 sm:px-6" id="pricing">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
           <h2 
             className="text-[clamp(1.5rem,4vw,2.5rem)] font-normal text-black/85 mb-4"
             style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
           >
-            Simple, transparent pricing
+            Free until you&apos;re ready to send.
           </h2>
           <p className="text-[15px] text-black/45 max-w-lg mx-auto">
             Start free. Upgrade when you&apos;re ready to send emails.
