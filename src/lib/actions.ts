@@ -868,9 +868,13 @@ export async function getDashboardStats(period: TimePeriod = "7d") {
   const periodOpenStats = await getOpenRateSince(tribe.id, since);
   const periodReplies = await getTribeReplyCount(tribe.id, since);
   
-  // Calculate open rate for the period
-  const openRate = periodOpenStats.sent > 0 
-    ? Math.round((periodOpenStats.opens / periodOpenStats.sent) * 100 * 10) / 10 
+  // Get the most recent sent email to calculate its specific open rate
+  const allSentEmails = await getSentEmailsByTribeId(tribe.id);
+  const lastSentEmail = allSentEmails.find(e => e.status === 'sent');
+  
+  // Calculate open rate from the last sent email only
+  const openRate = lastSentEmail && lastSentEmail.recipient_count > 0
+    ? Math.round((lastSentEmail.open_count / lastSentEmail.recipient_count) * 100 * 10) / 10
     : 0;
 
   // Get total stats

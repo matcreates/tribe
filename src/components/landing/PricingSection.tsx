@@ -15,7 +15,7 @@ export function PricingSection() {
 
   const paidFeatures = [
     "Create your newsletter",
-    "Collect subscribers",
+    "Collect members",
     "Gift downloads",
     "Send 2 emails/week",
     "Email scheduling",
@@ -87,7 +87,7 @@ export function PricingSection() {
             <div className="space-y-2.5 mb-6 flex-grow">
               {[
                 "Create your newsletter",
-                "Collect subscribers",
+                "Collect members",
                 "Gift downloads",
                 "Preview emails",
               ].map((feature) => (
@@ -154,7 +154,7 @@ export function PricingSection() {
               className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase text-black transition-all hover:opacity-90 mt-auto"
               style={{ background: GOLD }}
             >
-              Upgrade
+              Get started
             </Link>
           </div>
 
@@ -204,7 +204,7 @@ export function PricingSection() {
               className="block w-full py-3 rounded-full text-center text-[10px] font-medium tracking-[0.1em] uppercase text-white transition-all hover:opacity-90 mt-auto"
               style={{ background: PURPLE }}
             >
-              Upgrade
+              Get started
             </Link>
           </div>
         </div>

@@ -297,7 +297,7 @@ function DemoChart() {
           className="flex-1 rounded-t-[3px] transition-all hover:opacity-80 cursor-pointer"
           style={{ 
             height: `${(value / max) * 100}%`,
-            background: "linear-gradient(180deg, rgba(232, 184, 74, 0.6) 0%, rgba(232, 184, 74, 0.2) 100%)",
+            background: "linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%)",
           }}
         />
       ))}

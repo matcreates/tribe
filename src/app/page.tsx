@@ -55,7 +55,7 @@ export default async function LandingPage() {
           </h1>
           
           <p className="text-[14px] sm:text-[15px] md:text-[17px] text-black/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">
-            Stop depending on an algorithm to deliver your message and build a real community.
+            Time to start building a community that doesn&apos;t depend on any algorithm.
           </p>
 
           <Link
@@ -109,7 +109,7 @@ export default async function LandingPage() {
                 description: "See who is reading, track opens, and understand your audience with clear analytics."
               },
               {
-                icon: "✓",
+                icon: "✅",
                 title: "Verified members",
                 description: "Double opt in keeps your list clean and your engagement rates high."
               },
