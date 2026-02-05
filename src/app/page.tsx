@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
+import { HeroVisualization } from "@/components/landing/HeroVisualization";
 
 export default async function LandingPage() {
   // If user is already logged in, redirect to dashboard
@@ -43,6 +44,11 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden">
+        {/* Background Visualization */}
+        <div className="absolute inset-0 z-0">
+          <HeroVisualization />
+        </div>
+        
         <div className="relative z-10 max-w-5xl mx-auto text-center px-2">
           <h1 
             className="text-[2rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-light leading-[1.05] mb-4 sm:mb-6 hero-title-light"

@@ -24,7 +24,7 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="relative pt-24 sm:pt-40 pb-16 sm:pb-32 px-4 sm:px-6" id="pricing">
+    <section className="relative py-16 sm:py-32 px-4 sm:px-6" id="pricing">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
           <h2 
@@ -115,7 +115,8 @@ export function PricingSection() {
             className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{
               borderColor: `${GOLD}4D`,
-              background: `linear-gradient(180deg, ${GOLD}15 0%, #ffffff 100%)`,
+              backgroundColor: '#ffffff',
+              backgroundImage: `linear-gradient(180deg, ${GOLD}15 0%, transparent 50%)`,
             }}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -163,7 +164,8 @@ export function PricingSection() {
             className="relative p-7 rounded-2xl border transition-colors flex flex-col"
             style={{ 
               borderColor: `${PURPLE}4D`,
-              background: `linear-gradient(180deg, ${PURPLE}15 0%, #ffffff 100%)`,
+              backgroundColor: '#ffffff',
+              backgroundImage: `linear-gradient(180deg, ${PURPLE}15 0%, transparent 50%)`,
             }}
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">

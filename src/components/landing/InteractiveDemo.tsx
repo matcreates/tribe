@@ -342,9 +342,19 @@ function DemoWrite() {
         <div className="px-4 py-3 border-b border-black/[0.06]">
           <textarea
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={8}
-            className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed"
+            onChange={(e) => {
+              setBody(e.target.value);
+              // Auto-resize
+              e.target.style.height = 'auto';
+              e.target.style.height = e.target.scrollHeight + 'px';
+            }}
+            ref={(el) => {
+              if (el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+              }
+            }}
+            className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed overflow-hidden"
             placeholder="Write your message..."
           />
         </div>
