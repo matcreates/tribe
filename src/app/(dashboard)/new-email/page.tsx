@@ -766,24 +766,30 @@ export default function NewEmailPage() {
                   <button
                     onClick={() => setShowMoreMenu(!showMoreMenu)}
                     disabled={isSending || isScheduling || !canSend}
-                    className="px-2.5 py-2.5 rounded-r-[10px] text-[10px] btn-glass disabled:opacity-40 disabled:cursor-not-allowed border-l border-white/[0.08]"
+                    className={`px-2.5 py-2.5 rounded-r-[10px] text-[10px] btn-glass disabled:opacity-40 disabled:cursor-not-allowed border-l ${
+                      isLight ? 'border-white/[0.15]' : 'border-white/[0.08]'
+                    }`}
                   >
-                    <ChevronDownIcon className="w-3.5 h-3.5 btn-glass-icon" />
+                    <ChevronDownIcon className={`w-3.5 h-3.5 ${isLight ? 'text-white' : 'btn-glass-icon'}`} />
                   </button>
                   
                   {showMoreMenu && (
                     <div 
-                      className="absolute right-0 bottom-full mb-2 w-44 rounded-[10px] border border-white/[0.08] overflow-hidden shadow-xl z-10"
-                      style={{ background: 'rgb(28, 28, 28)' }}
+                      className={`absolute right-0 bottom-full mb-2 w-44 rounded-[10px] border overflow-hidden shadow-xl z-10 ${
+                        isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
+                      }`}
+                      style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(28, 28, 28)' }}
                     >
                       <button
                         onClick={() => {
                           setShowMoreMenu(false);
                           setShowScheduleModal(true);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-[12px] text-white/70 hover:bg-white/[0.05] transition-colors text-left"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-[12px] transition-colors text-left ${
+                          isLight ? 'text-black/70 hover:bg-black/[0.05]' : 'text-white/70 hover:bg-white/[0.05]'
+                        }`}
                       >
-                        <ClockIcon className="w-4 h-4 text-white/50" />
+                        <ClockIcon className={`w-4 h-4 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
                         Schedule for later
                       </button>
                       <button
@@ -792,9 +798,11 @@ export default function NewEmailPage() {
                           setShowTestModal(true);
                         }}
                         disabled={!subject.trim() || isEmpty}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-[12px] text-white/70 hover:bg-white/[0.05] transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed border-t border-white/[0.04]"
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-[12px] transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed border-t ${
+                          isLight ? 'text-black/70 hover:bg-black/[0.05] border-black/[0.04]' : 'text-white/70 hover:bg-white/[0.05] border-white/[0.04]'
+                        }`}
                       >
-                        <TestIcon className="w-4 h-4 text-white/50" />
+                        <TestIcon className={`w-4 h-4 ${isLight ? 'text-black/50' : 'text-white/50'}`} />
                         Send test email
                       </button>
                     </div>
