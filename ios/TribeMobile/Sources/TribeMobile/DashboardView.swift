@@ -21,7 +21,6 @@ struct DashboardView: View {
                             VStack(spacing: 12) {
                                 statsGrid(data)
                                 growthChart(data)
-                                TipsCarouselView()
                                 recentEmailsCard(data)
                             }
                         } else if let error {
@@ -55,15 +54,9 @@ struct DashboardView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Dashboard")
-                .font(TribeTheme.pageTitle())
-                .foregroundStyle(TribeTheme.textPrimary)
-
-            Text("Quick overview")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(TribeTheme.textSecondary)
-        }
+        Text("Dashboard")
+            .font(TribeTheme.pageTitle())
+            .foregroundStyle(TribeTheme.textPrimary)
     }
 
     private var periodPicker: some View {
@@ -94,20 +87,42 @@ struct DashboardView: View {
         }
     }
 
+    @State private var tappedBarIndex: Int? = nil
+
     private func growthChart(_ data: MobileDashboardResponse) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Tribe growth")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(TribeTheme.textTertiary)
-                .textCase(.uppercase)
+            HStack {
+                Text("Tribe growth")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(TribeTheme.textTertiary)
+                    .textCase(.uppercase)
+
+                Spacer()
+
+                if let idx = tappedBarIndex, idx < data.chartData.count {
+                    let label = idx < data.chartLabels.count ? data.chartLabels[idx] : ""
+                    Text("\(label): \(data.chartData[idx])")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(TribeTheme.textPrimary)
+                        .transition(.opacity)
+                }
+            }
 
             HStack(alignment: .bottom, spacing: 4) {
                 let maxVal = max(data.chartData.max() ?? 1, 1)
                 ForEach(Array(data.chartData.enumerated()), id: \ .offset) { idx, v in
                     let h = CGFloat(v) / CGFloat(maxVal)
+                    let isSelected = tappedBarIndex == idx
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(idx == data.chartData.count - 1 ? Color.blue.opacity(0.55) : Color.blue.opacity(0.22))
+                        .fill(isSelected
+                              ? TribeTheme.textPrimary.opacity(0.35)
+                              : TribeTheme.textPrimary.opacity(0.12))
                         .frame(height: max(10, 80 * h))
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                tappedBarIndex = (tappedBarIndex == idx) ? nil : idx
+                            }
+                        }
                 }
             }
             .frame(height: 90)
@@ -215,42 +230,6 @@ struct DashboardView: View {
             data = try await APIClient.shared.dashboard(token: token, period: period)
         } catch {
             self.error = error.localizedDescription
-        }
-    }
-}
-
-private struct TipsCarouselView: View {
-    private let tips: [String] = [
-        "Try sending 1 email per week to stay top-of-mind.",
-        "Short subject lines often perform better.",
-        "Ask a question to increase replies.",
-        "Share one useful link or insight every email.",
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Tips for creators")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(TribeTheme.textTertiary)
-                .textCase(.uppercase)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(tips, id: \ .self) { tip in
-                        Text(tip)
-                            .font(.system(size: 13))
-                            .foregroundStyle(TribeTheme.textPrimary)
-                            .padding(14)
-                            .frame(width: 260, alignment: .leading)
-                            .background(TribeTheme.cardBg)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(TribeTheme.stroke)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                }
-            }
         }
     }
 }

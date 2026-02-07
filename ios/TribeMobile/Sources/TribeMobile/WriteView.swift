@@ -113,7 +113,7 @@ struct WriteView: View {
             // Body
             VStack(alignment: .leading, spacing: 8) {
                 TextEditor(text: $bodyText)
-                    .frame(minHeight: 260)
+                    .frame(minHeight: 130)
                     .scrollContentBackground(.hidden)
                     .foregroundStyle(TribeTheme.textPrimary)
                     .overlay(alignment: .topLeading) {
@@ -176,19 +176,34 @@ struct WriteView: View {
     }
 
     private var bottomBar: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(spacing: 12) {
+            // Full-width dark send button
+            Button {
+                Task { await submit() }
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(isSubmitting ? "SENDING…" : (sendMode == .now ? "SEND" : "SCHEDULE"))
+                        .font(.system(size: 12, weight: .semibold))
+                        .tracking(2)
+                        .foregroundStyle(Color(uiColor: .systemBackground))
+                    Spacer()
+                }
+                .padding(.vertical, 14)
+                .background(TribeTheme.textPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .disabled(isSubmitting)
+
+            // Secondary actions row
             HStack {
-                Text("Links auto-detected • Type - for bullets")
-                    .font(.system(size: 12))
-                    .foregroundStyle(TribeTheme.textTertiary)
+                Button("Send test") { showingTest = true }
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(TribeTheme.textSecondary)
 
                 Spacer()
 
                 Menu {
-                    Button("Send test email") {
-                        showingTest = true
-                    }
-
                     Picker("Delivery", selection: $sendMode) {
                         ForEach(SendMode.allCases) { m in
                             Text(m.rawValue).tag(m)
@@ -203,28 +218,14 @@ struct WriteView: View {
                         )
                     }
                 } label: {
-                    HStack(spacing: 0) {
-                        Button {
-                            Task { await submit() }
-                        } label: {
-                            Text(isSubmitting ? "…" : (sendMode == .now ? "SEND" : "SCHEDULE"))
-                                .font(.system(size: 11, weight: .semibold))
-                                .tracking(2)
-                                .foregroundStyle(TribeTheme.textPrimary)
-                                .padding(.vertical, 12)
-                                .padding(.horizontal, 20)
-                        }
-                        .disabled(isSubmitting)
-
-                        Divider().overlay(TribeTheme.stroke)
-
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 12, weight: .semibold))
+                    HStack(spacing: 4) {
+                        Text(sendMode == .now ? "Send now" : "Schedule")
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(TribeTheme.textSecondary)
-                            .padding(.horizontal, 12)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(TribeTheme.textTertiary)
                     }
-                    .background(TribeTheme.textPrimary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
         }
@@ -277,7 +278,18 @@ struct WriteView: View {
         do {
             meta = try await APIClient.shared.writeMeta(token: token)
         } catch {
-            // keep silent
+            // /api/mobile/email/meta may fail if the backend uses NextAuth session
+            // internally. Fall back to dashboard data for the recipient count.
+            do {
+                let dash = try await APIClient.shared.dashboard(token: token, period: .sevenDays)
+                meta = WriteMetaResponse(
+                    ok: true,
+                    recipients: .init(verified: dash.verifiedSubscribers, nonVerified: dash.totalSubscribers - dash.verifiedSubscribers, all: dash.totalSubscribers),
+                    signature: ""
+                )
+            } catch {
+                // keep silent
+            }
         }
     }
 

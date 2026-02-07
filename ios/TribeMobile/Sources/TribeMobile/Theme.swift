@@ -24,8 +24,9 @@ enum TribeTheme {
     // MARK: - Fonts
 
     /// Heritage Serif page title font (matches web branding).
+    /// The font file is HeritageSerif.ttf but its internal PostScript name is "AppleGaramond".
     static func pageTitle(size: CGFloat = 26) -> Font {
-        .custom("HeritageSerif", size: size)
+        .custom("AppleGaramond", size: size)
     }
 
     /// Standard spacing constants for consistent layout.

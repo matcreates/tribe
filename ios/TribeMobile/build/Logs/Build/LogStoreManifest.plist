@@ -6,7 +6,7 @@
 	<integer>11</integer>
 	<key>logs</key>
 	<dict>
-		<key>65D8E7B5-CAEE-4893-98B5-61EDCA39CBB7</key>
+		<key>3097F77D-8789-430E-9AD2-4D5373AC7324</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>65D8E7B5-CAEE-4893-98B5-61EDCA39CBB7.xcactivitylog</string>
+			<string>3097F77D-8789-430E-9AD2-4D5373AC7324.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -40,13 +40,13 @@
 			<key>signature</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>timeStartedRecording</key>
-			<real>792165687.15285599</real>
+			<real>792178721.04658902</real>
 			<key>timeStoppedRecording</key>
-			<real>792165696.53857994</real>
+			<real>792178724.04809105</real>
 			<key>title</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>uniqueIdentifier</key>
-			<string>65D8E7B5-CAEE-4893-98B5-61EDCA39CBB7</string>
+			<string>3097F77D-8789-430E-9AD2-4D5373AC7324</string>
 		</dict>
 		<key>8466F080-0CFF-4225-AC7A-27CDC6E8078C</key>
 		<dict>

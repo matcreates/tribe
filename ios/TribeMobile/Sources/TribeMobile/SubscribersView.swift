@@ -109,10 +109,7 @@ struct SubscribersView: View {
             showingExportSheet: $showingExportSheet,
             exportedText: exportedText
         ))
-        .toolbar {
-            toolbar
-            SettingsToolbarItem()
-        }
+        .toolbar { toolbar }
     }
 
     private var content: some View {
@@ -155,6 +152,7 @@ struct SubscribersView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { SettingsToolbarItem() }
     }
 
     @ToolbarContentBuilder
