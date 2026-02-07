@@ -23,9 +23,19 @@ struct JoinPageView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Join page")
-                                .font(TribeTheme.pageTitle())
-                                .foregroundStyle(TribeTheme.textPrimary)
+                            HStack {
+                                Text("Join page")
+                                    .font(TribeTheme.pageTitle())
+                                    .foregroundStyle(TribeTheme.textPrimary)
+
+                                Spacer()
+
+                                if isSaving {
+                                    Text("Saving…")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(TribeTheme.textTertiary)
+                                }
+                            }
 
                             Text("This is the public page people use to subscribe to your tribe.")
                                 .font(.system(size: 13))
@@ -34,46 +44,8 @@ struct JoinPageView: View {
 
                         if let join {
                             joinPreviewCard(join)
-
-                            // Description editor
-                            VStack(alignment: .leading, spacing: 10) {
-                                HStack {
-                                    Text("Page description")
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundStyle(TribeTheme.textTertiary)
-                                        .textCase(.uppercase)
-
-                                    Spacer()
-
-                                    if isSaving {
-                                        Text("Saving…")
-                                            .font(.system(size: 11))
-                                            .foregroundStyle(TribeTheme.textTertiary)
-                                    }
-                                }
-
-                                TextEditor(text: $description)
-                                    .frame(minHeight: 90)
-                                    .scrollContentBackground(.hidden)
-                                    .padding(8)
-                                    .background(TribeTheme.cardBg)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .stroke(TribeTheme.stroke)
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                    .foregroundStyle(TribeTheme.textPrimary)
-                                    .onChange(of: description) { _, newValue in
-                                        debouncedSave(newValue)
-                                    }
-
-                                Text("Changes are saved automatically")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(TribeTheme.textTertiary)
-                            }
-                            .tribeCard()
                         } else if let error {
-                            Text("Couldn’t load join page")
+                            Text("Couldn't load join page")
                                 .font(.headline)
                                 .foregroundStyle(TribeTheme.textPrimary)
                             Text(error)
@@ -98,30 +70,18 @@ struct JoinPageView: View {
 
     private func joinPreviewCard(_ join: JoinSettings) -> some View {
         VStack(spacing: 0) {
-            // Browser bar
-            HStack(spacing: 10) {
-                HStack(spacing: 6) {
-                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
-                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
-                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
-                }
+            // Browser bar – URL left-aligned
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(TribeTheme.textTertiary)
 
-                HStack(spacing: 8) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 11))
-                        .foregroundStyle(TribeTheme.textTertiary)
+                Text(displayUrl)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(TribeTheme.textSecondary)
+                    .lineLimit(1)
 
-                    Text(displayUrl)
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(TribeTheme.textSecondary)
-                        .lineLimit(1)
-
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-                .background(TribeTheme.overlayLight)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                Spacer(minLength: 0)
 
                 Button {
                     UIPasteboard.general.string = fullJoinUrl
@@ -140,15 +100,25 @@ struct JoinPageView: View {
 
             // Page preview content
             VStack(spacing: 12) {
-                Circle()
-                    .fill(TribeTheme.overlaySubtle)
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Text(initials(join.ownerName))
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(TribeTheme.textSecondary)
-                    )
+                // Avatar – load from URL if available, else show initials
+                if let avatarUrl = join.ownerAvatar, let url = URL(string: avatarUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 56, height: 56)
+                                .clipShape(Circle())
+                        default:
+                            initialsCircle(join.ownerName)
+                        }
+                    }
                     .padding(.top, 18)
+                } else {
+                    initialsCircle(join.ownerName)
+                        .padding(.top, 18)
+                }
 
                 Text(join.ownerName)
                     .font(.system(size: 13))
@@ -158,13 +128,21 @@ struct JoinPageView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(TribeTheme.textPrimary)
 
-                Text(description.isEmpty ? defaultJoinDescription : description)
+                // Editable description – directly in the preview
+                TextEditor(text: $description)
                     .font(.system(size: 12))
                     .foregroundStyle(TribeTheme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
-                    .padding(.horizontal, 40)
+                    .scrollContentBackground(.hidden)
+                    .frame(minHeight: 60, maxHeight: 120)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 28)
+                    .onChange(of: description) { _, newValue in
+                        debouncedSave(newValue)
+                    }
 
+                // Email field placeholder
                 HStack {
                     Text("your email address")
                         .font(.system(size: 13))
@@ -175,24 +153,25 @@ struct JoinPageView: View {
                 .padding(.vertical, 12)
                 .background(TribeTheme.overlayLight)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous)
                         .stroke(TribeTheme.overlayDivider)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                 .padding(.horizontal, 28)
 
+                // JOIN button – same border-radius as email field
                 HStack {
                     Spacer()
                     Text("JOIN")
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(2)
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .foregroundStyle(Color(uiColor: .systemBackground))
                     Spacer()
                 }
                 .padding(.vertical, 12)
-                .background(TribeTheme.overlaySubtle)
-                .clipShape(RoundedRectangle(cornerRadius: 999, style: .continuous))
-                .padding(.horizontal, 70)
+                .background(TribeTheme.textPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
+                .padding(.horizontal, 28)
                 .padding(.bottom, 16)
 
                 HStack(spacing: 6) {
@@ -208,10 +187,21 @@ struct JoinPageView: View {
             .frame(maxWidth: .infinity)
         }
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
                 .stroke(TribeTheme.stroke)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
+    }
+
+    private func initialsCircle(_ name: String) -> some View {
+        Circle()
+            .fill(TribeTheme.overlaySubtle)
+            .frame(width: 56, height: 56)
+            .overlay(
+                Text(initials(name))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(TribeTheme.textSecondary)
+            )
     }
 
     private func load() async {
@@ -234,6 +224,7 @@ struct JoinPageView: View {
         saveTask?.cancel()
         saveTask = Task {
             try? await Task.sleep(nanoseconds: 900_000_000)
+            guard !Task.isCancelled else { return }
             await save(newValue)
         }
     }
@@ -248,7 +239,7 @@ struct JoinPageView: View {
         do {
             try await APIClient.shared.updateJoinDescription(token: token, description: newValue)
         } catch {
-            // keep silent for MVP; could surface toast
+            // keep silent for MVP
         }
     }
 

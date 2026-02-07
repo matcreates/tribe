@@ -103,7 +103,7 @@ struct SettingsView: View {
                                         .padding(.vertical, 10)
                                         .padding(.horizontal, 14)
                                         .background(TribeTheme.textPrimary.opacity(0.08))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                                 }
                                 .disabled(isUploading)
 
@@ -212,7 +212,7 @@ struct SettingsView: View {
                                             .padding(.vertical, 10)
                                             .padding(.horizontal, 14)
                                             .background(TribeTheme.textPrimary.opacity(0.08))
-                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                                     }
 
                                     Button {
@@ -225,7 +225,7 @@ struct SettingsView: View {
                                             .padding(.vertical, 10)
                                             .padding(.horizontal, 14)
                                             .background(TribeTheme.textPrimary.opacity(0.08))
-                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                                     }
                                     .disabled(isLoadingPortal)
 
@@ -248,7 +248,7 @@ struct SettingsView: View {
                             }
                             .padding(.vertical, 12)
                             .background(TribeTheme.textPrimary.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                         }
                         .disabled(isSaving)
 
@@ -296,9 +296,9 @@ struct SettingsView: View {
             content()
                 .padding(12)
                 .background(TribeTheme.cardBg)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous)
                         .stroke(TribeTheme.stroke)
                 )
         }

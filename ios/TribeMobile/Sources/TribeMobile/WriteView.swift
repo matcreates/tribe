@@ -89,7 +89,7 @@ struct WriteView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(TribeTheme.textPrimary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
             }
             .padding(16)
 
@@ -101,7 +101,8 @@ struct WriteView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(TribeTheme.textTertiary)
 
-                TextField("", text: $subject)
+                TextField("Hello Tribe", text: $subject)
+                    .font(TribeTheme.pageTitle(size: 20))
                     .textInputAutocapitalization(.sentences)
                     .foregroundStyle(TribeTheme.textPrimary)
                     .padding(.vertical, 8)
@@ -113,12 +114,14 @@ struct WriteView: View {
             // Body
             VStack(alignment: .leading, spacing: 8) {
                 TextEditor(text: $bodyText)
+                    .font(.system(size: 13))
                     .frame(minHeight: 130)
                     .scrollContentBackground(.hidden)
                     .foregroundStyle(TribeTheme.textPrimary)
                     .overlay(alignment: .topLeading) {
                         if bodyText.isEmpty {
                             Text("Write your message…")
+                                .font(.system(size: 13))
                                 .foregroundStyle(TribeTheme.textTertiary)
                                 .padding(.top, 8)
                                 .padding(.leading, 5)
@@ -147,7 +150,7 @@ struct WriteView: View {
 
             // Allow replies
             HStack(spacing: 12) {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous)
                     .fill(Color.green.opacity(0.16))
                     .frame(width: 36, height: 36)
                     .overlay(
@@ -191,7 +194,7 @@ struct WriteView: View {
                 }
                 .padding(.vertical, 14)
                 .background(TribeTheme.textPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
             }
             .disabled(isSubmitting)
 
@@ -248,7 +251,7 @@ struct WriteView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
                     .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
 
                 Button {
                     Task { await sendTest() }
@@ -263,7 +266,7 @@ struct WriteView: View {
                     }
                     .padding(.vertical, 12)
                     .background(TribeTheme.textPrimary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                 }
                 .disabled(isSendingTest || testEmail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 

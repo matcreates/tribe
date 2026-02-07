@@ -349,7 +349,6 @@ private struct TopControlsView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .colorScheme(.dark)
 
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
@@ -381,10 +380,10 @@ private struct TopControlsView: View {
             .padding(.vertical, 12)
             .background(TribeTheme.cardBg)
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous)
                     .stroke(TribeTheme.stroke)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
         }
     }
 }
@@ -412,28 +411,48 @@ private struct PaginationView: View {
     let onNext: () -> Void
 
     var body: some View {
-        HStack {
-            if isLoading {
-                ProgressView()
-                    .tint(TribeTheme.textSecondary)
-            }
-
-            Spacer()
-
-            if totalPages > 1 {
-                Button("Prev", action: onPrev)
+        if isLoading || totalPages > 1 {
+            HStack(spacing: 16) {
+                if totalPages > 1 {
+                    Button(action: onPrev) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(page <= 1 ? TribeTheme.textTertiary.opacity(0.3) : TribeTheme.textPrimary)
+                            .frame(width: 36, height: 36)
+                            .background(TribeTheme.cardBg)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(TribeTheme.stroke))
+                    }
                     .disabled(page <= 1 || isLoading)
 
-                Text("\(page)/\(totalPages)")
-                    .font(.system(size: 12))
-                    .foregroundStyle(TribeTheme.textTertiary)
-                    .frame(minWidth: 60)
+                    if isLoading {
+                        ProgressView()
+                            .tint(TribeTheme.textSecondary)
+                            .scaleEffect(0.8)
+                    } else {
+                        Text("\(page) of \(totalPages)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(TribeTheme.textSecondary)
+                    }
 
-                Button("Next", action: onNext)
+                    Button(action: onNext) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(page >= totalPages ? TribeTheme.textTertiary.opacity(0.3) : TribeTheme.textPrimary)
+                            .frame(width: 36, height: 36)
+                            .background(TribeTheme.cardBg)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(TribeTheme.stroke))
+                    }
                     .disabled(page >= totalPages || isLoading)
+                } else if isLoading {
+                    ProgressView()
+                        .tint(TribeTheme.textSecondary)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 16)
         }
-        .padding(.top, 12)
     }
 }
 
@@ -459,13 +478,13 @@ private struct AddSubscriberSheet: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
                     .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
 
                 TextField("Name (optional)", text: $name)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
                     .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
 
                 HStack {
                     Button("Cancel", action: onCancel)
@@ -607,7 +626,7 @@ private struct ExportSheet: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(12)
                         .background(TribeTheme.cardBg)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                 }
 
                 Button("Copy") {

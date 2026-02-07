@@ -68,12 +68,12 @@ struct LoginView: View {
                                     Text(isLoading ? (isSignup ? "CREATING..." : "SIGNING IN...") : (isSignup ? "CREATE ACCOUNT" : "SIGN IN"))
                                         .font(.system(size: 11, weight: .semibold))
                                         .tracking(2)
-                                        .foregroundStyle(TribeTheme.textPrimary)
+                                        .foregroundStyle(Color(uiColor: .systemBackground))
                                         .padding(.vertical, 14)
                                     Spacer()
                                 }
-                                .background(TribeTheme.textPrimary.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .background(TribeTheme.textPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
                             }
                             .disabled(isLoading || !canSubmit)
                             .opacity(isLoading ? 0.7 : 1)
@@ -130,7 +130,7 @@ struct LoginView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .background(TribeTheme.textPrimary.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
         }
     }
 

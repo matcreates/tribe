@@ -15,6 +15,7 @@
 		4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */; };
 		609C495ABD07F85EDEE30939 /* GiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */; };
 		642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B3089B62279AC0940E7B9 /* Config.swift */; };
+		6BE678C6CF68A025D3593C30 /* TribeSphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77EA08D85A3530C0A17424F /* TribeSphereView.swift */; };
 		75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4743326CDB9FEA49310AE968 /* SessionStore.swift */; };
 		7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CBD123C9DD86E8B936F1E1 /* RootView.swift */; };
 		8C01F6DBB0943D5D6F649ECC /* WriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */; };
@@ -47,6 +48,7 @@
 		9954785828361C5B3D4596DC /* JoinPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinPageView.swift; sourceTree = "<group>"; };
 		A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		A12DAA6C65703FF7090C827E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		A77EA08D85A3530C0A17424F /* TribeSphereView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TribeSphereView.swift; sourceTree = "<group>"; };
 		A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeritageSerif.ttf; sourceTree = "<group>"; };
 		CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */,
 				A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */,
 				3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */,
+				A77EA08D85A3530C0A17424F /* TribeSphereView.swift */,
 				526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */,
 			);
 			name = TribeMobile;
@@ -194,6 +197,7 @@
 				1972358696DB78709029203A /* Theme.swift in Sources */,
 				4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */,
 				F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */,
+				6BE678C6CF68A025D3593C30 /* TribeSphereView.swift in Sources */,
 				8C01F6DBB0943D5D6F649ECC /* WriteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

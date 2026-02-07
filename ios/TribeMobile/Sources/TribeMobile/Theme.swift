@@ -44,6 +44,10 @@ enum TribeTheme {
 
     /// Standard spacing constants for consistent layout.
     static let contentSpacing: CGFloat = 16
+
+    /// Consistent corner radius used for cards, buttons, and inputs.
+    static let cardRadius: CGFloat = 14
+    static let inputRadius: CGFloat = 12
 }
 
 struct TribeCard: ViewModifier {
@@ -52,10 +56,10 @@ struct TribeCard: ViewModifier {
             .padding(16)
             .background(TribeTheme.cardBg)
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
                     .stroke(TribeTheme.stroke)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
     }
 }
 

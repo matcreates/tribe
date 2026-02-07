@@ -50,7 +50,7 @@ struct EmailDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Text(data?.subject ?? "Email")
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(TribeTheme.pageTitle())
                         .foregroundStyle(TribeTheme.textPrimary)
 
                     if let data {
@@ -147,10 +147,10 @@ struct EmailDetailView: View {
         .padding(14)
         .background(TribeTheme.cardBg)
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
                 .stroke(TribeTheme.stroke)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
     }
 
     private func openRate(_ data: EmailDetail) -> String {

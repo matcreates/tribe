@@ -15,11 +15,23 @@ struct DashboardView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         header
-                        periodPicker
 
                         if let data {
                             VStack(spacing: 12) {
-                                growthChart(data)
+                                // Tribe sphere
+                                VStack(spacing: 6) {
+                                    TribeSphereView(memberCount: data.verifiedSubscribers)
+
+                                    Text("Your Tribe is made of \(data.verifiedSubscribers) members")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(TribeTheme.textSecondary)
+                                        .multilineTextAlignment(.center)
+                                }
+                                .tribeCard()
+
+                                periodPicker
+                                    .padding(.vertical, 2)
+
                                 statsGrid(data)
                                 recentEmailsCard(data)
                             }
@@ -66,8 +78,6 @@ struct DashboardView: View {
             Text("30D").tag(MobileDashboardPeriod.thirtyDays)
         }
         .pickerStyle(.segmented)
-        .padding(.bottom, 4)
-        .colorScheme(.dark)
     }
 
     // MARK: – Stats Grid (2×2)
@@ -84,8 +94,7 @@ struct DashboardView: View {
                 )
                 statCard(
                     title: "Emails sent",
-                    value: String(data.totalEmailsSent),
-                    periodValue: data.periodEmailsSent > 0 ? "+\(data.periodEmailsSent)" : nil,
+                    value: String(data.periodEmailsSent),
                     subtitle: period.label,
                     icon: "paperplane.fill",
                     color: .green
@@ -108,79 +117,6 @@ struct DashboardView: View {
                 )
             }
         }
-    }
-
-    // MARK: – Growth Chart (matches web visualization)
-
-    @State private var tappedBarIndex: Int? = nil
-
-    private func growthChart(_ data: MobileDashboardResponse) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Tribe growth")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(TribeTheme.textTertiary)
-                    .textCase(.uppercase)
-
-                Spacer()
-
-                if let idx = tappedBarIndex, idx < data.chartData.count {
-                    let label = idx < data.chartLabels.count ? data.chartLabels[idx] : ""
-                    Text("\(label): \(data.chartData[idx])")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(TribeTheme.textPrimary)
-                        .transition(.opacity)
-                } else {
-                    Text(period.label)
-                        .font(.system(size: 11))
-                        .foregroundStyle(TribeTheme.textTertiary)
-                }
-            }
-
-            HStack(alignment: .bottom, spacing: 4) {
-                let maxVal = data.chartData.max() ?? 1
-                let minVal = data.chartData.min() ?? 0
-                let range = max(maxVal - minVal, 1)
-                ForEach(Array(data.chartData.enumerated()), id: \.offset) { idx, v in
-                    let h = CGFloat(v - minVal) / CGFloat(range) * 0.8 + 0.2 // min 20% height
-                    let isLast = idx == data.chartData.count - 1
-                    let isSelected = tappedBarIndex == idx
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(isSelected
-                              ? Color.blue.opacity(0.7)
-                              : isLast
-                                ? Color.blue.opacity(0.6)
-                                : Color.blue.opacity(0.25))
-                        .frame(height: max(10, 100 * h))
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                tappedBarIndex = (tappedBarIndex == idx) ? nil : idx
-                            }
-                        }
-                }
-            }
-            .frame(height: 100)
-
-            // X-axis labels (avoid crowding)
-            HStack(spacing: 0) {
-                let labels = data.chartLabels
-                ForEach(Array(labels.enumerated()), id: \.offset) { i, label in
-                    let show: Bool = {
-                        if period == .thirtyDays {
-                            return i % 5 == 0 || i == labels.count - 1
-                        } else if period == .twentyFourHours {
-                            return i % 4 == 0 || i == labels.count - 1
-                        }
-                        return true
-                    }()
-                    Text(show ? label : "")
-                        .font(.system(size: 10))
-                        .foregroundStyle(TribeTheme.textTertiary.opacity(0.7))
-                        .frame(maxWidth: .infinity)
-                }
-            }
-        }
-        .tribeCard()
     }
 
     // MARK: – Recent Emails
@@ -236,7 +172,6 @@ struct DashboardView: View {
     private func statCard(
         title: String,
         value: String,
-        periodValue: String? = nil,
         subtitle: String,
         icon: String,
         color: Color
@@ -263,25 +198,18 @@ struct DashboardView: View {
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundStyle(TribeTheme.textPrimary)
 
-            HStack(spacing: 4) {
-                Text(subtitle)
-                    .font(.system(size: 11))
-                    .foregroundStyle(TribeTheme.textTertiary)
-                if let pv = periodValue {
-                    Text(pv)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Color.green)
-                }
-            }
+            Text(subtitle)
+                .font(.system(size: 11))
+                .foregroundStyle(TribeTheme.textTertiary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(TribeTheme.cardBg)
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
                 .stroke(TribeTheme.stroke)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
     }
 
     private func plus(_ v: Int) -> String { v > 0 ? "+\(v)" : "0" }

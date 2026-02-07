@@ -22,10 +22,10 @@ struct RootView: View {
                     JoinPageView()
                         .tabItem { Label("Join", systemImage: "person.badge.plus" ) }
                 }
+                .tint(Color(uiColor: .label))
             } else {
                 LoginView()
             }
         }
     }
 }
-
