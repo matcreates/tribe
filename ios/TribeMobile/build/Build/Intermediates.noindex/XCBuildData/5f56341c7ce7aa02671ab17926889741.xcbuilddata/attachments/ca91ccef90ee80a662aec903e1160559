@@ -2,9 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>LastAccessedDate</key>
-	<date>2026-02-07T13:51:56Z</date>
-	<key>WorkspacePath</key>
-	<string>/Users/mat/Documents/Tribe/ios/TribeMobile/TribeMobile.xcodeproj</string>
+	<key>application-identifier</key>
+	<string>Z2RT4J42R5.com.madewithtribe.mobile</string>
 </dict>
 </plist>

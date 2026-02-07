@@ -142,26 +142,55 @@ export function HeroVisualization() {
       ctx.fill();
     });
     
-    // Draw central node (smaller, no label for hero)
+    // Draw central node with "you" label
     const centerRotated = rotatePoint(0, 0, 0, rotX, rotY);
     const nodeX = centerX + centerRotated.x * scale;
     const nodeY = centerY + centerRotated.y * scale;
     const nodeDepth = (centerRotated.z + 1) / 2;
     
     // Central node glow
-    const glowGradient = ctx.createRadialGradient(nodeX, nodeY, 0, nodeX, nodeY, 15);
-    glowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+    const glowGradient = ctx.createRadialGradient(nodeX, nodeY, 0, nodeX, nodeY, 20);
+    glowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.25)');
     glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.beginPath();
-    ctx.arc(nodeX, nodeY, 15, 0, Math.PI * 2);
+    ctx.arc(nodeX, nodeY, 20, 0, Math.PI * 2);
     ctx.fillStyle = glowGradient;
     ctx.fill();
     
     // Central node
     ctx.beginPath();
-    ctx.arc(nodeX, nodeY, 4, 0, Math.PI * 2);
+    ctx.arc(nodeX, nodeY, 5, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(0, 0, 0, ${0.5 + nodeDepth * 0.4})`;
     ctx.fill();
+    
+    // Arrow and "you" label
+    const arrowStartX = nodeX + 25;
+    const arrowStartY = nodeY - 15;
+    const arrowEndX = nodeX + 10;
+    const arrowEndY = nodeY - 5;
+    
+    // Arrow line
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(arrowStartX, arrowStartY);
+    ctx.lineTo(arrowEndX, arrowEndY);
+    ctx.stroke();
+    
+    // Arrow head
+    const angle = Math.atan2(arrowEndY - arrowStartY, arrowEndX - arrowStartX);
+    ctx.beginPath();
+    ctx.moveTo(arrowEndX, arrowEndY);
+    ctx.lineTo(arrowEndX - 5 * Math.cos(angle - Math.PI / 6), arrowEndY - 5 * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(arrowEndX - 5 * Math.cos(angle + Math.PI / 6), arrowEndY - 5 * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fill();
+    
+    // "you" label
+    ctx.font = '11px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillText('you', arrowStartX + 5, arrowStartY + 4);
     
     animationRef.current = requestAnimationFrame(render);
   }, [rotatePoint]);
@@ -209,7 +238,7 @@ export function HeroVisualization() {
   return (
     <div 
       ref={containerRef}
-      className="absolute inset-0 w-full h-full"
+      className="relative w-full h-full cursor-grab active:cursor-grabbing"
     >
       <canvas
         ref={canvasRef}

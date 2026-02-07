@@ -43,40 +43,42 @@ export default async function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-start justify-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden">
-        {/* Background Visualization */}
-        <div className="absolute inset-0 z-0">
-          <HeroVisualization />
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-center px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-48 overflow-hidden">
+        <div className="relative z-10 max-w-6xl mx-auto w-full flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-0">
+          {/* Left: Text content */}
+          <div className="text-center lg:text-left lg:flex-1 lg:pr-8">
+            <h1 
+              className="text-[2rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-light leading-[1.05] mb-4 sm:mb-6 hero-title-light"
+              style={{ 
+                fontFamily: 'HeritageSerifLight, Georgia, serif',
+                letterSpacing: '-0.08em',
+              }}
+            >
+              The newsletter tool<br />made for creators
+            </h1>
+            
+            <p className="text-[14px] sm:text-[15px] md:text-[17px] text-black/45 leading-relaxed max-w-xl mb-6 sm:mb-10 px-2 lg:px-0 mx-auto lg:mx-0">
+              Time to start building a community that doesn&apos;t depend on any algorithm.
+            </p>
+
+            <Link
+              href="/signup"
+              className="inline-block px-10 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase bg-black/90 text-white hover:bg-black transition-colors"
+            >
+              Start for free
+            </Link>
+
+            {/* Social proof hint */}
+            <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-black/30">
+              Free up to 500 members · Paid plans from $5/mo
+            </p>
+          </div>
+
+          {/* Right: Tribe visualization */}
+          <div className="relative w-[320px] h-[320px] sm:w-[400px] sm:h-[400px] lg:w-[480px] lg:h-[480px] flex-shrink-0">
+            <HeroVisualization />
+          </div>
         </div>
-        
-        <div className="relative z-10 max-w-5xl mx-auto text-center px-2">
-          <h1 
-            className="text-[2rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-light leading-[1.05] mb-4 sm:mb-6 hero-title-light"
-            style={{ 
-              fontFamily: 'HeritageSerifLight, Georgia, serif',
-              letterSpacing: '-0.08em',
-            }}
-          >
-            The newsletter tool<br />made for creators
-          </h1>
-          
-          <p className="text-[14px] sm:text-[15px] md:text-[17px] text-black/45 leading-relaxed max-w-xl mx-auto mb-6 sm:mb-10 px-2">
-            Time to start building a community that doesn&apos;t depend on any algorithm.
-          </p>
-
-          <Link
-            href="/signup"
-            className="inline-block px-10 py-3.5 rounded-full text-[11px] font-medium tracking-[0.12em] uppercase bg-black/90 text-white hover:bg-black transition-colors"
-          >
-            Start for free
-          </Link>
-
-          {/* Social proof hint */}
-          <p className="mt-6 sm:mt-10 text-[11px] sm:text-[12px] text-black/30">
-            Free up to 500 members · Paid plans from $5/mo
-          </p>
-        </div>
-
       </section>
 
       {/* Interactive Demo */}

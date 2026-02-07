@@ -48,6 +48,48 @@
 			<key>uniqueIdentifier</key>
 			<string>A4852278-5D84-4B26-89F8-F092D9B9BA56</string>
 		</dict>
+		<key>B83FEAA6-459C-42F6-BF9C-8C54A1A6B885</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>B83FEAA6-459C-42F6-BF9C-8C54A1A6B885.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>W</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>5</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>TribeMobile project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>TribeMobile</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>timeStartedRecording</key>
+			<real>792165114.96649098</real>
+			<key>timeStoppedRecording</key>
+			<real>792165135.15211797</real>
+			<key>title</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>uniqueIdentifier</key>
+			<string>B83FEAA6-459C-42F6-BF9C-8C54A1A6B885</string>
+		</dict>
 	</dict>
 </dict>
 </plist>
