@@ -19,12 +19,12 @@ struct DashboardView: View {
 
                         if let data {
                             VStack(spacing: 12) {
-                                statsGrid(data)
                                 growthChart(data)
+                                statsGrid(data)
                                 recentEmailsCard(data)
                             }
                         } else if let error {
-                            Text("Couldn’t load dashboard")
+                            Text("Couldn't load dashboard")
                                 .font(.headline)
                                 .foregroundStyle(TribeTheme.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -70,22 +70,47 @@ struct DashboardView: View {
         .colorScheme(.dark)
     }
 
+    // MARK: – Stats Grid (2×2)
+
     private func statsGrid(_ data: MobileDashboardResponse) -> some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                statCard(title: "Your tribe", value: String(data.verifiedSubscribers), subtitle: "Verified", icon: "person.2.fill", color: .blue)
-                statCard(title: "New", value: plus(data.periodSubscribers), subtitle: period.label, icon: "sparkles", color: .green)
+                statCard(
+                    title: "New",
+                    value: plus(data.periodSubscribers),
+                    subtitle: period.label,
+                    icon: "sparkles",
+                    color: .green
+                )
+                statCard(
+                    title: "Emails sent",
+                    value: String(data.totalEmailsSent),
+                    periodValue: data.periodEmailsSent > 0 ? "+\(data.periodEmailsSent)" : nil,
+                    subtitle: period.label,
+                    icon: "paperplane.fill",
+                    color: .green
+                )
             }
             HStack(spacing: 12) {
-                statCard(title: "Emails sent", value: String(data.totalEmailsSent), subtitle: "Total", icon: "paperplane.fill", color: .green)
-                statCard(title: "Open rate", value: data.openRate > 0 ? "\(data.openRate)%" : "—", subtitle: "\(data.periodOpens) opens", icon: "eye.fill", color: .purple)
-            }
-            HStack(spacing: 12) {
-                statCard(title: "Replies", value: String(data.totalReplies), subtitle: "Total", icon: "arrowshape.turn.up.left.fill", color: .orange)
-                statCard(title: "Replies", value: plus(data.periodReplies), subtitle: period.label, icon: "bubble.left.and.bubble.right.fill", color: .orange)
+                statCard(
+                    title: "Open rate",
+                    value: data.openRate > 0 ? "\(data.openRate)%" : "—",
+                    subtitle: "\(data.periodOpens) opens",
+                    icon: "eye.fill",
+                    color: .purple
+                )
+                statCard(
+                    title: "Replies",
+                    value: plus(data.periodReplies),
+                    subtitle: period.label,
+                    icon: "arrowshape.turn.up.left.fill",
+                    color: .orange
+                )
             }
         }
     }
+
+    // MARK: – Growth Chart (matches web visualization)
 
     @State private var tappedBarIndex: Int? = nil
 
@@ -105,19 +130,28 @@ struct DashboardView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(TribeTheme.textPrimary)
                         .transition(.opacity)
+                } else {
+                    Text(period.label)
+                        .font(.system(size: 11))
+                        .foregroundStyle(TribeTheme.textTertiary)
                 }
             }
 
             HStack(alignment: .bottom, spacing: 4) {
-                let maxVal = max(data.chartData.max() ?? 1, 1)
-                ForEach(Array(data.chartData.enumerated()), id: \ .offset) { idx, v in
-                    let h = CGFloat(v) / CGFloat(maxVal)
+                let maxVal = data.chartData.max() ?? 1
+                let minVal = data.chartData.min() ?? 0
+                let range = max(maxVal - minVal, 1)
+                ForEach(Array(data.chartData.enumerated()), id: \.offset) { idx, v in
+                    let h = CGFloat(v - minVal) / CGFloat(range) * 0.8 + 0.2 // min 20% height
+                    let isLast = idx == data.chartData.count - 1
                     let isSelected = tappedBarIndex == idx
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
                         .fill(isSelected
-                              ? TribeTheme.textPrimary.opacity(0.35)
-                              : TribeTheme.textPrimary.opacity(0.12))
-                        .frame(height: max(10, 80 * h))
+                              ? Color.blue.opacity(0.7)
+                              : isLast
+                                ? Color.blue.opacity(0.6)
+                                : Color.blue.opacity(0.25))
+                        .frame(height: max(10, 100 * h))
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.15)) {
                                 tappedBarIndex = (tappedBarIndex == idx) ? nil : idx
@@ -125,18 +159,31 @@ struct DashboardView: View {
                         }
                 }
             }
-            .frame(height: 90)
+            .frame(height: 100)
 
-            HStack {
-                Text(data.chartLabels.first ?? "")
-                Spacer()
-                Text(data.chartLabels.last ?? "")
+            // X-axis labels (avoid crowding)
+            HStack(spacing: 0) {
+                let labels = data.chartLabels
+                ForEach(Array(labels.enumerated()), id: \.offset) { i, label in
+                    let show: Bool = {
+                        if period == .thirtyDays {
+                            return i % 5 == 0 || i == labels.count - 1
+                        } else if period == .twentyFourHours {
+                            return i % 4 == 0 || i == labels.count - 1
+                        }
+                        return true
+                    }()
+                    Text(show ? label : "")
+                        .font(.system(size: 10))
+                        .foregroundStyle(TribeTheme.textTertiary.opacity(0.7))
+                        .frame(maxWidth: .infinity)
+                }
             }
-            .font(.system(size: 11))
-            .foregroundStyle(TribeTheme.textTertiary)
         }
         .tribeCard()
     }
+
+    // MARK: – Recent Emails
 
     private func recentEmailsCard(_ data: MobileDashboardResponse) -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -184,7 +231,16 @@ struct DashboardView: View {
         .tribeCard()
     }
 
-    private func statCard(title: String, value: String, subtitle: String, icon: String, color: Color) -> some View {
+    // MARK: – Stat Card
+
+    private func statCard(
+        title: String,
+        value: String,
+        periodValue: String? = nil,
+        subtitle: String,
+        icon: String,
+        color: Color
+    ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -207,9 +263,16 @@ struct DashboardView: View {
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundStyle(TribeTheme.textPrimary)
 
-            Text(subtitle)
-                .font(.system(size: 11))
-                .foregroundStyle(TribeTheme.textTertiary)
+            HStack(spacing: 4) {
+                Text(subtitle)
+                    .font(.system(size: 11))
+                    .foregroundStyle(TribeTheme.textTertiary)
+                if let pv = periodValue {
+                    Text(pv)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Color.green)
+                }
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

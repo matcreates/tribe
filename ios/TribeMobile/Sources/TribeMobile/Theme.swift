@@ -2,10 +2,23 @@ import SwiftUI
 
 // Uses semantic system colors so the UI follows iOS Light/Dark mode automatically.
 enum TribeTheme {
-    static let bg = Color(uiColor: .systemBackground)
-    static let bgElevated = Color(uiColor: .secondarySystemBackground)
+    /// Warm off-white in light mode (matches web landing page), system dark in dark mode.
+    static let bg = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? .systemBackground
+            : UIColor(red: 252/255, green: 250/255, blue: 247/255, alpha: 1)
+    })
+    static let bgElevated = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? .secondarySystemBackground
+            : UIColor(red: 248/255, green: 246/255, blue: 243/255, alpha: 1)
+    })
 
-    static let cardBg = Color(uiColor: .secondarySystemBackground)
+    static let cardBg = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? .secondarySystemBackground
+            : UIColor(red: 255/255, green: 253/255, blue: 250/255, alpha: 1)
+    })
     static let stroke = Color.primary.opacity(0.10)
 
     static let textPrimary = Color.primary

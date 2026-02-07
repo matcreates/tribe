@@ -173,11 +173,11 @@ export default function AdminPage() {
                     <span
                       className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide"
                       style={{
-                        background: user.plan.includes("big") ? "rgba(168, 85, 247, 0.12)" : "rgba(232, 184, 74, 0.15)",
-                        color: user.plan.includes("big") ? "#7c3aed" : "#92740a",
+                        background: (user.plan || "").includes("big") ? "rgba(168, 85, 247, 0.12)" : "rgba(232, 184, 74, 0.15)",
+                        color: (user.plan || "").includes("big") ? "#7c3aed" : "#92740a",
                       }}
                     >
-                      {formatPlan(user.plan)}
+                      {formatPlan(user.plan || "unknown")}
                     </span>
                   </div>
                 </div>

@@ -14,8 +14,10 @@ targets:
     platform: iOS
     sources:
       - path: Sources/TribeMobile
+      - path: Resources/HeritageSerif.ttf
+        buildPhase: resources
     resources:
-      - path: Resources
+      - path: Resources/Assets.xcassets
       - path: Sources/TribeMobile/Assets.xcassets
     settings:
       base:

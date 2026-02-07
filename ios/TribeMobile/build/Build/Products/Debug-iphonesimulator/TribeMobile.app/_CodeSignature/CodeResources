@@ -16,6 +16,10 @@
 		<data>
 		virokCy3mX7n0CuudbHyFTcZ6lo=
 		</data>
+		<key>HeritageSerif.ttf</key>
+		<data>
+		Y1/Co6ZHS0Ra0K2/h1VeY6J2bBA=
+		</data>
 		<key>Info.plist</key>
 		<data>
 		pXyJkmbI/XWWFKedS1fQYJkHkvo=
@@ -26,7 +30,7 @@
 		</data>
 		<key>TribeMobile.debug.dylib</key>
 		<data>
-		zqEzEVaQxnxxdXqta+H1hCUsnNg=
+		rQJ1WhvJSdlCDnHWXdLF5Oa+O1M=
 		</data>
 		<key>__preview.dylib</key>
 		<data>
@@ -56,11 +60,18 @@
 			wQI/utGmnGjeEKqDQX0+xJ2O9mGYHe5B6LhCQABrPMc=
 			</data>
 		</dict>
+		<key>HeritageSerif.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			FszG9c3BlITuNFtILtJr5njP9rnfUHqOW/mqGKY1U0g=
+			</data>
+		</dict>
 		<key>TribeMobile.debug.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			BAiPwR+3jYSqm/i7QNSg2WGk6OTjg03vgKnU5MCMIcc=
+			Y/TBuvHfChsRCCaP4Ksb9IyzxDw8zO9QuLO0fAZiPTc=
 			</data>
 		</dict>
 		<key>__preview.dylib</key>

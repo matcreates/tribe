@@ -22,6 +22,7 @@
 		AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9257A2DF291377E800E77F46 /* SubscribersView.swift */; };
 		B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */; };
 		BF42BAFCD00628F4A39798EB /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A361BC2280F8653A5EC542C /* SplashView.swift */; };
+		D1424B6B96303ECB8A328974 /* HeritageSerif.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */; };
 		D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12DAA6C65703FF7090C827E /* APIClient.swift */; };
 		E71E0AF97118863D5FD19A6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */; };
 		EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48140FCADF742D7F0388B258 /* Models.swift */; };
@@ -47,6 +48,7 @@
 		A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		A12DAA6C65703FF7090C827E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeritageSerif.ttf; sourceTree = "<group>"; };
 		CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -90,9 +92,18 @@
 		22CB338F5506BF8971774E73 = {
 			isa = PBXGroup;
 			children = (
+				628A4417EEB427C6B8FFA1B4 /* Resources */,
 				02C2EDD294A0ADDD2ABC7305 /* TribeMobile */,
 				00FB134359BFD49F9F0EF977 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		628A4417EEB427C6B8FFA1B4 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -155,6 +166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E71E0AF97118863D5FD19A6D /* Assets.xcassets in Resources */,
+				D1424B6B96303ECB8A328974 /* HeritageSerif.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
