@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+interface PaidUser {
+  email: string;
+  name: string | null;
+  slug: string;
+  plan: string;
+  status: string;
+  endsAt: string | null;
+  memberCount: number;
+}
+
 interface AdminStats {
   totalUsers: number;
   totalTribes: number;
@@ -9,6 +19,8 @@ interface AdminStats {
   totalVerifiedSubscribers: number;
   totalEmailsSent: number;
   totalGifts: number;
+  totalPaidUsers: number;
+  paidUsers: PaidUser[];
   recentUsers: { email: string; name: string | null; createdAt: string }[];
 }
 
@@ -61,13 +73,24 @@ export default function AdminPage() {
   }
 
   const statCards = [
-    { label: "Creators", value: stats.totalUsers, icon: "👤", color: "rgba(59, 130, 246, 0.1)", accent: "#3b82f6" },
-    { label: "Tribes", value: stats.totalTribes, icon: "🏠", color: "rgba(168, 85, 247, 0.1)", accent: "#a855f7" },
-    { label: "Total members", value: stats.totalSubscribers, icon: "👥", color: "rgba(34, 197, 94, 0.1)", accent: "#22c55e" },
-    { label: "Verified members", value: stats.totalVerifiedSubscribers, icon: "✅", color: "rgba(5, 150, 105, 0.1)", accent: "#059669" },
-    { label: "Emails sent", value: stats.totalEmailsSent, icon: "✉️", color: "rgba(232, 184, 74, 0.1)", accent: "#d4a843" },
-    { label: "Gifts uploaded", value: stats.totalGifts, icon: "🎁", color: "rgba(239, 68, 68, 0.1)", accent: "#ef4444" },
+    { label: "Creators", value: stats.totalUsers, icon: "👤", color: "rgba(59, 130, 246, 0.1)" },
+    { label: "Paid users", value: stats.totalPaidUsers, icon: "💰", color: "rgba(232, 184, 74, 0.1)" },
+    { label: "Tribes", value: stats.totalTribes, icon: "🏠", color: "rgba(168, 85, 247, 0.1)" },
+    { label: "Total members", value: stats.totalSubscribers, icon: "👥", color: "rgba(34, 197, 94, 0.1)" },
+    { label: "Verified members", value: stats.totalVerifiedSubscribers, icon: "✅", color: "rgba(5, 150, 105, 0.1)" },
+    { label: "Emails sent", value: stats.totalEmailsSent, icon: "✉️", color: "rgba(232, 184, 74, 0.1)" },
+    { label: "Gifts uploaded", value: stats.totalGifts, icon: "🎁", color: "rgba(239, 68, 68, 0.1)" },
   ];
+
+  const formatPlan = (plan: string) => {
+    switch (plan) {
+      case "small_monthly": return "Small / Monthly";
+      case "small_yearly": return "Small / Yearly";
+      case "big_monthly": return "Big / Monthly";
+      case "big_yearly": return "Big / Yearly";
+      default: return plan;
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -118,6 +141,50 @@ export default function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Paid Users */}
+        {stats.paidUsers.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-[14px] font-medium text-black/70 mb-4">Paid users</h2>
+            <div className="rounded-[14px] border border-black/[0.06] bg-white/80 overflow-hidden">
+              {stats.paidUsers.map((user, i) => (
+                <div
+                  key={user.email}
+                  className={`flex items-center justify-between px-5 py-3.5 ${
+                    i !== stats.paidUsers.length - 1 ? "border-b border-black/[0.04]" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-medium text-black/50 flex-shrink-0"
+                      style={{ background: "rgba(232, 184, 74, 0.15)" }}
+                    >
+                      {(user.name || user.email)[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] text-black/75 truncate">
+                        {user.name || "No name"}
+                        <span className="text-black/30 ml-1.5">@{user.slug}</span>
+                      </p>
+                      <p className="text-[11px] text-black/35 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+                    <span className="text-[11px] text-black/40">{user.memberCount.toLocaleString()} members</span>
+                    <span
+                      className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide"
+                      style={{
+                        background: user.plan.includes("big") ? "rgba(168, 85, 247, 0.12)" : "rgba(232, 184, 74, 0.15)",
+                        color: user.plan.includes("big") ? "#7c3aed" : "#92740a",
+                      }}
+                    >
+                      {formatPlan(user.plan)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Signups */}
         <div>

@@ -28,6 +28,8 @@ export async function GET() {
       emailsSentResult,
       giftsResult,
       recentUsersResult,
+      paidUsersResult,
+      paidBreakdownResult,
     ] = await Promise.all([
       pool.query(`SELECT COUNT(*) as count FROM users`),
       pool.query(`SELECT COUNT(*) as count FROM tribes`),
@@ -36,6 +38,22 @@ export async function GET() {
       pool.query(`SELECT COUNT(*) as count FROM sent_emails WHERE status = 'sent'`),
       pool.query(`SELECT COUNT(*) as count FROM gifts`),
       pool.query(`SELECT email, name, created_at FROM users ORDER BY created_at DESC LIMIT 10`),
+      pool.query(`SELECT COUNT(*) as count FROM tribes WHERE subscription_status = 'active'`),
+      pool.query(`
+        SELECT 
+          t.subscription_plan,
+          t.subscription_status,
+          t.subscription_ends_at,
+          t.owner_name,
+          t.slug,
+          u.email,
+          u.name,
+          (SELECT COUNT(*) FROM subscribers s WHERE s.tribe_id = t.id AND s.verified = true) as member_count
+        FROM tribes t
+        JOIN users u ON t.user_id = u.id
+        WHERE t.subscription_status = 'active'
+        ORDER BY t.subscription_ends_at DESC
+      `),
     ]);
 
     return NextResponse.json({
@@ -45,6 +63,16 @@ export async function GET() {
       totalVerifiedSubscribers: Number(verifiedSubsResult.rows[0].count),
       totalEmailsSent: Number(emailsSentResult.rows[0].count),
       totalGifts: Number(giftsResult.rows[0].count),
+      totalPaidUsers: Number(paidUsersResult.rows[0].count),
+      paidUsers: paidBreakdownResult.rows.map((r: { subscription_plan: string; subscription_status: string; subscription_ends_at: Date; owner_name: string | null; slug: string; email: string; name: string | null; member_count: string }) => ({
+        email: r.email,
+        name: r.name || r.owner_name,
+        slug: r.slug,
+        plan: r.subscription_plan,
+        status: r.subscription_status,
+        endsAt: r.subscription_ends_at,
+        memberCount: Number(r.member_count),
+      })),
       recentUsers: recentUsersResult.rows.map((u: { email: string; name: string | null; created_at: Date }) => ({
         email: u.email,
         name: u.name,
