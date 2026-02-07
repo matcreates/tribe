@@ -21,17 +21,13 @@ struct JoinPageView: View {
                 TribeTheme.bg.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Join page")
-                                .font(.system(size: 26, weight: .semibold))
+                                .font(TribeTheme.pageTitle())
                                 .foregroundStyle(TribeTheme.textPrimary)
 
-                            Text("Preview your join page")
-
                             Text("This is the public page people use to subscribe to your tribe.")
-                                .font(.system(size: 13))
-                                .foregroundStyle(TribeTheme.textTertiary)
                                 .font(.system(size: 13))
                                 .foregroundStyle(TribeTheme.textSecondary)
                         }
@@ -95,6 +91,7 @@ struct JoinPageView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar { SettingsToolbarItem() }
             .task { await load() }
         }
     }
@@ -104,9 +101,9 @@ struct JoinPageView: View {
             // Browser bar
             HStack(spacing: 10) {
                 HStack(spacing: 6) {
-                    Circle().fill(Color.white.opacity(0.10)).frame(width: 10, height: 10)
-                    Circle().fill(Color.white.opacity(0.10)).frame(width: 10, height: 10)
-                    Circle().fill(Color.white.opacity(0.10)).frame(width: 10, height: 10)
+                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
+                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
+                    Circle().fill(TribeTheme.overlaySubtle).frame(width: 10, height: 10)
                 }
 
                 HStack(spacing: 8) {
@@ -123,7 +120,7 @@ struct JoinPageView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
-                .background(Color.white.opacity(0.04))
+                .background(TribeTheme.overlayLight)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 Button {
@@ -137,14 +134,14 @@ struct JoinPageView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color.white.opacity(0.03))
+            .background(TribeTheme.overlayLight)
 
-            Divider().overlay(Color.white.opacity(0.06))
+            Divider().overlay(TribeTheme.overlayDivider)
 
             // Page preview content
             VStack(spacing: 12) {
                 Circle()
-                    .fill(Color.white.opacity(0.08))
+                    .fill(TribeTheme.overlaySubtle)
                     .frame(width: 56, height: 56)
                     .overlay(
                         Text(initials(join.ownerName))
@@ -176,10 +173,10 @@ struct JoinPageView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(Color.white.opacity(0.04))
+                .background(TribeTheme.overlayLight)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(Color.white.opacity(0.06))
+                        .stroke(TribeTheme.overlayDivider)
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .padding(.horizontal, 28)
@@ -193,10 +190,9 @@ struct JoinPageView: View {
                     Spacer()
                 }
                 .padding(.vertical, 12)
-                .background(Color.white.opacity(0.06))
+                .background(TribeTheme.overlaySubtle)
                 .clipShape(RoundedRectangle(cornerRadius: 999, style: .continuous))
                 .padding(.horizontal, 70)
-                .opacity(0.6)
                 .padding(.bottom, 16)
 
                 HStack(spacing: 6) {

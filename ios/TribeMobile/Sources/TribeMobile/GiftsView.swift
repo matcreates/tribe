@@ -20,7 +20,7 @@ struct GiftsView: View {
                 TribeTheme.bg.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         header
 
                         if let error {
@@ -37,7 +37,7 @@ struct GiftsView: View {
                                     .foregroundStyle(TribeTheme.textSecondary)
                                     .padding(.top, 12)
                             } else {
-                                VStack(spacing: 10) {
+                                VStack(spacing: 14) {
                                     ForEach(gifts) { g in
                                         GiftRow(gift: g, onDelete: {
                                             Task { await deleteGift(g) }
@@ -54,19 +54,29 @@ struct GiftsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingPicker = true
-                    } label: {
-                        if isUploading {
-                            ProgressView()
-                                .tint(TribeTheme.textSecondary)
-                        } else {
-                            Image(systemName: "plus")
+                    HStack(spacing: 16) {
+                        Button {
+                            showingPicker = true
+                        } label: {
+                            if isUploading {
+                                ProgressView()
+                                    .tint(TribeTheme.textSecondary)
+                            } else {
+                                Image(systemName: "plus")
+                                    .foregroundStyle(TribeTheme.textSecondary)
+                            }
+                        }
+                        .disabled(isUploading || count >= maxGifts)
+                        .accessibilityLabel("Upload gift")
+
+                        NavigationLink {
+                            SettingsView()
+                        } label: {
+                            Image(systemName: "gearshape")
                                 .foregroundStyle(TribeTheme.textSecondary)
                         }
+                        .accessibilityLabel("Settings")
                     }
-                    .disabled(isUploading || count >= maxGifts)
-                    .accessibilityLabel("Upload gift")
                 }
             }
             .fileImporter(
@@ -89,9 +99,9 @@ struct GiftsView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Gifts")
-                .font(.system(size: 26, weight: .semibold))
+                .font(TribeTheme.pageTitle())
                 .foregroundStyle(TribeTheme.textPrimary)
 
             Text("Sharing is caring: gifts help you grow by rewarding new members.")

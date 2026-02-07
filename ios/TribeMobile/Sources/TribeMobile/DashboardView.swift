@@ -13,7 +13,7 @@ struct DashboardView: View {
                 TribeTheme.bg.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         header
                         periodPicker
 
@@ -45,17 +45,7 @@ struct DashboardView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .foregroundStyle(TribeTheme.textSecondary)
-                    }
-                    .accessibilityLabel("Settings")
-                }
-            }
+            .toolbar { SettingsToolbarItem() }
             .task { await load() }
             .refreshable { await load() }
             .onChange(of: period) { _, _ in
@@ -67,7 +57,7 @@ struct DashboardView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Dashboard")
-                .font(.system(size: 26, weight: .semibold))
+                .font(TribeTheme.pageTitle())
                 .foregroundStyle(TribeTheme.textPrimary)
 
             Text("Quick overview")

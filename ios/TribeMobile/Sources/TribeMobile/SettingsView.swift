@@ -53,7 +53,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Text("Account settings")
-                        .font(.system(size: 26, weight: .semibold))
+                        .font(TribeTheme.pageTitle())
                         .foregroundStyle(TribeTheme.textPrimary)
 
                     if let error {

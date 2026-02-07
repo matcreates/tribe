@@ -109,7 +109,10 @@ struct SubscribersView: View {
             showingExportSheet: $showingExportSheet,
             exportedText: exportedText
         ))
-        .toolbar { toolbar }
+        .toolbar {
+            toolbar
+            SettingsToolbarItem()
+        }
     }
 
     private var content: some View {
@@ -117,7 +120,7 @@ struct SubscribersView: View {
             TribeTheme.bg.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                     HeaderView(totalVerified: totalVerified, totalNonVerified: totalNonVerified)
 
                     TopControlsView(filter: $filter, sort: $sort, search: $search)
@@ -127,7 +130,7 @@ struct SubscribersView: View {
                     }
 
                     if !subscribers.isEmpty {
-                        VStack(spacing: 10) {
+                        VStack(spacing: 12) {
                             ForEach(subscribers) { s in
                                 SubscriberRow(subscriber: s, onRemove: {
                                     Task { await remove(s) }
@@ -147,9 +150,7 @@ struct SubscribersView: View {
                         Task { await loadPage(min(totalPages, page + 1)) }
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 16)
-                .padding(.bottom, 32)
+                .pagePadding()
             }
         }
         .navigationTitle("")
@@ -327,7 +328,7 @@ private struct HeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Your tribe")
-                .font(.system(size: 26, weight: .semibold))
+                .font(TribeTheme.pageTitle())
                 .foregroundStyle(TribeTheme.textPrimary)
 
             Text("\(totalVerified) verified • \(totalNonVerified) unverified")

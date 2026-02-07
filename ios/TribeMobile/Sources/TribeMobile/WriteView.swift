@@ -43,7 +43,7 @@ struct WriteView: View {
                 TribeTheme.bg.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
                         header
 
                         editorCard
@@ -55,6 +55,7 @@ struct WriteView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar { SettingsToolbarItem() }
             .task { await loadMeta() }
             .sheet(isPresented: $showingTest) {
                 testEmailSheet
@@ -66,7 +67,7 @@ struct WriteView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Write")
-                .font(.system(size: 26, weight: .semibold))
+                .font(TribeTheme.pageTitle())
                 .foregroundStyle(TribeTheme.textPrimary)
         }
     }
