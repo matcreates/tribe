@@ -634,6 +634,8 @@ private struct SubscribersLifecycleModifier: ViewModifier {
     let search: String
     let reload: (_ resetPage: Bool) -> Void
 
+    @State private var searchDebounce: Task<Void, Never>?
+
     func body(content: Content) -> some View {
         content
             .task { reload(true) }
@@ -641,8 +643,10 @@ private struct SubscribersLifecycleModifier: ViewModifier {
             .onChange(of: filter) { _, _ in reload(true) }
             .onChange(of: sort) { _, _ in reload(true) }
             .onChange(of: search) { _, _ in
-                Task {
-                    try? await Task.sleep(nanoseconds: 250_000_000)
+                searchDebounce?.cancel()
+                searchDebounce = Task {
+                    try? await Task.sleep(nanoseconds: 350_000_000)
+                    guard !Task.isCancelled else { return }
                     reload(true)
                 }
             }

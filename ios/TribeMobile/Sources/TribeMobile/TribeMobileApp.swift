@@ -33,18 +33,9 @@ private struct AppRootView: View {
             }
         }
         .task {
-            // Brief splash while app loads; also gives time for initial network calls to start.
-            let start = Date()
-            if session.isAuthenticated {
-                async let dash = APIClient.shared.dashboard(token: session.token!, period: .sevenDays)
-                async let settings = APIClient.shared.settings(token: session.token!)
-                _ = try? await (dash, settings)
-            }
-            // minimum duration so it feels intentional
-            let elapsed = Date().timeIntervalSince(start)
-            if elapsed < 1.0 {
-                try? await Task.sleep(nanoseconds: UInt64((1.0 - elapsed) * 1_000_000_000))
-            }
+            // Show splash for a brief fixed duration so it feels intentional,
+            // then reveal the app. Individual views handle their own data loading.
+            try? await Task.sleep(nanoseconds: 800_000_000)
             withAnimation(.easeOut(duration: 0.25)) {
                 showSplash = false
             }

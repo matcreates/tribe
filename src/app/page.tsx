@@ -173,7 +173,7 @@ export default async function LandingPage() {
                   alt="Tribe app icon" 
                   width={96} 
                   height={96}
-                  className="w-[72px] h-[72px] sm:w-[96px] sm:h-[96px] rounded-[28px] mx-auto md:mx-0 border border-black/[0.08]"
+                  className="w-[72px] h-[72px] sm:w-[96px] sm:h-[96px] rounded-[16px] sm:rounded-[28px] mx-auto md:mx-0 border border-black/[0.08]"
                 />
               </div>
               
