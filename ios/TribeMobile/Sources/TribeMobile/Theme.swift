@@ -1,63 +1,62 @@
 import SwiftUI
 
-// Uses semantic system colors so the UI follows iOS Light/Dark mode automatically.
+/// Tribe design system – black & white only, stock-iOS feel.
 enum TribeTheme {
-    /// Warm off-white in light mode (matches web landing page), system dark in dark mode.
-    static let bg = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? .systemBackground
-            : UIColor(red: 252/255, green: 250/255, blue: 247/255, alpha: 1)
-    })
-    static let bgElevated = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? .secondarySystemBackground
-            : UIColor(red: 248/255, green: 246/255, blue: 243/255, alpha: 1)
-    })
+    // MARK: - Colors (pure black/white with opacity)
 
-    static let cardBg = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? .secondarySystemBackground
-            : UIColor(red: 255/255, green: 253/255, blue: 250/255, alpha: 1)
-    })
-    static let stroke = Color.primary.opacity(0.10)
+    static let bg = Color(uiColor: .systemBackground)
+    static let bgElevated = Color(uiColor: .secondarySystemBackground)
+    static let cardBg = Color.primary.opacity(0.04)
+    static let stroke = Color.primary.opacity(0.08)
+    static let divider = Color.primary.opacity(0.06)
 
     static let textPrimary = Color.primary
-    static let textSecondary = Color.secondary
-    static let textTertiary = Color.secondary.opacity(0.75)
+    static let textSecondary = Color.primary.opacity(0.50)
+    static let textTertiary = Color.primary.opacity(0.30)
 
-    static let accentGold = Color(red: 232/255, green: 184/255, blue: 74/255)
-    static let accentGreen = Color(red: 52/255, green: 211/255, blue: 153/255)
+    /// Sent-message bubble (medium grey – darker in light mode)
+    static let sentBubble = Color(uiColor: .systemGray4)
+    static let sentBubbleText = Color.primary
 
-    /// Adaptive overlay color that works in both light and dark mode.
-    /// In dark mode this is white-ish, in light mode this is black-ish.
-    static let overlaySubtle = Color.primary.opacity(0.06)
-    static let overlayLight = Color.primary.opacity(0.04)
-    static let overlayDivider = Color.primary.opacity(0.08)
+    /// Received-message bubble
+    static let receivedBubble = Color.primary.opacity(0.07)
+    static let receivedBubbleText = Color.primary
+
+    /// Light card/field background – transparent with subtle tint + blur
+    static let fieldBg = Color.black.opacity(0.05)
+    static let fieldStroke = Color.clear
+
+    // MARK: - Radius
+
+    static let cardRadius: CGFloat = 16
+    static let inputRadius: CGFloat = 22
+    static let bubbleRadius: CGFloat = 20
+
+    // MARK: - Spacing
+
+    static let contentSpacing: CGFloat = 16
 
     // MARK: - Fonts
 
-    /// Heritage Serif page title font (matches web branding).
-    /// The font file is HeritageSerif.ttf but its internal PostScript name is "AppleGaramond".
-    static func pageTitle(size: CGFloat = 26) -> Font {
+    /// Heritage Serif page title (PostScript name "AppleGaramond").
+    static func pageTitle(size: CGFloat = 24) -> Font {
         .custom("AppleGaramond", size: size)
     }
-
-    /// Standard spacing constants for consistent layout.
-    static let contentSpacing: CGFloat = 16
-
-    /// Consistent corner radius used for cards, buttons, and inputs.
-    static let cardRadius: CGFloat = 14
-    static let inputRadius: CGFloat = 12
 }
+
+// MARK: - View Modifiers
 
 struct TribeCard: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(16)
-            .background(TribeTheme.cardBg)
-            .overlay(
-                RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
-                    .stroke(TribeTheme.stroke)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                    RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
+                        .fill(Color.black.opacity(0.05))
+                }
             )
             .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
     }
@@ -67,26 +66,46 @@ extension View {
     func tribeCard() -> some View { modifier(TribeCard()) }
 }
 
+/// Applies liquid glass (iOS 26+) or falls back to ultraThinMaterial + subtle tint.
+struct LiquidGlassModifier<S: Shape>: ViewModifier {
+    let shape: S
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.clear.interactive(), in: AnyShape(shape))
+        } else {
+            content
+                .background(
+                    ZStack {
+                        shape.fill(.ultraThinMaterial)
+                        shape.fill(Color.black.opacity(0.05))
+                    }
+                )
+                .clipShape(shape)
+        }
+    }
+}
+
+extension LiquidGlassModifier where S == Capsule {
+    init() {
+        self.shape = Capsule()
+    }
+}
+
+extension View {
+    func liquidGlass<S: Shape>(in shape: S) -> some View {
+        modifier(LiquidGlassModifier(shape: shape))
+    }
+    func liquidGlass() -> some View {
+        modifier(LiquidGlassModifier(shape: Capsule()))
+    }
+}
 
 extension View {
     func pagePadding() -> some View {
         self.padding(.horizontal, 18)
-            .padding(.top, 16)
-            .padding(.bottom, 32)
-    }
-}
-
-/// Reusable settings gear toolbar item (NavigationLink to SettingsView).
-struct SettingsToolbarItem: ToolbarContent {
-    var body: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            NavigationLink {
-                SettingsView()
-            } label: {
-                Image(systemName: "gearshape")
-                    .foregroundStyle(TribeTheme.textSecondary)
-            }
-            .accessibilityLabel("Settings")
-        }
+            .padding(.top, 12)
+            .padding(.bottom, 24)
     }
 }

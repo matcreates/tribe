@@ -3,12 +3,15 @@ import Foundation
 final class APIClient {
     static let shared = APIClient()
 
-    /// Configured session with sensible timeouts.
+    /// Configured session with sensible timeouts and no caching so we always
+    /// get fresh data from the API (prevents stale 304 responses).
     private let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
         config.waitsForConnectivity = true
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
         return URLSession(configuration: config)
     }()
 
@@ -401,6 +404,17 @@ final class APIClient {
         try Self.assertOK(resp, data)
     }
 
+    func feed(token: String) async throws -> FeedResponse {
+        let url = Config.baseURL.appending(path: "/api/mobile/feed")
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await session.data(for: req)
+        try Self.assertOK(resp, data)
+        return try Self.decoder.decode(FeedResponse.self, from: data)
+    }
+
     func emailReplies(token: String, id: String, page: Int, pageSize: Int) async throws -> EmailRepliesResponse {
         var comps = URLComponents(url: Config.baseURL.appending(path: "/api/mobile/email/\(id)/replies"), resolvingAgainstBaseURL: false)!
         comps.queryItems = [
@@ -416,6 +430,17 @@ final class APIClient {
         return try Self.decoder.decode(EmailRepliesResponse.self, from: data)
     }
 
+
+    func deleteReply(token: String, emailId: String, replyId: String) async throws {
+        var comps = URLComponents(url: Config.baseURL.appending(path: "/api/mobile/email/\(emailId)/replies"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "replyId", value: replyId)]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, resp) = try await session.data(for: req)
+        try Self.assertOK(resp, data)
+    }
 
     func emailDetails(token: String, id: String) async throws -> EmailDetailResponse {
         let url = Config.baseURL.appending(path: "/api/mobile/email/\(id)")

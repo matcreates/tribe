@@ -51,10 +51,11 @@ struct EmailDetailView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     Text(data?.subject ?? "Email")
                         .font(TribeTheme.pageTitle())
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .foregroundStyle(.primary)
 
                     if let data {
-                        HStack(spacing: 12) {
+                        // Metrics row
+                        HStack(spacing: 10) {
                             metric("Recipients", "\(data.recipient_count)")
                             metric("Opens", "\(data.open_count)")
                             metric("Open rate", openRate(data))
@@ -62,14 +63,13 @@ struct EmailDetailView: View {
 
                         if let body = data.body, !body.isEmpty {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("Body")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(TribeTheme.textTertiary)
-                                    .textCase(.uppercase)
+                                Text("BODY")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(.primary.opacity(0.25))
 
                                 Text(body)
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(TribeTheme.textSecondary)
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.primary.opacity(0.6))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .tribeCard()
@@ -77,15 +77,12 @@ struct EmailDetailView: View {
 
                         repliesSection
                     } else if let error {
-                        Text("Couldn’t load email")
-                            .font(.headline)
-                            .foregroundStyle(TribeTheme.textPrimary)
                         Text(error)
-                            .font(.subheadline)
-                            .foregroundStyle(TribeTheme.textSecondary)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.primary.opacity(0.5))
                     } else {
                         ProgressView("Loading…")
-                            .tint(TribeTheme.textPrimary)
+                            .tint(.primary.opacity(0.3))
                             .padding(.top, 24)
                     }
                 }
@@ -99,25 +96,24 @@ struct EmailDetailView: View {
 
     private var repliesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Replies")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(TribeTheme.textTertiary)
-                .textCase(.uppercase)
+            Text("REPLIES")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.primary.opacity(0.25))
 
             if replies.isEmpty {
                 Text("No replies yet")
                     .font(.system(size: 13))
-                    .foregroundStyle(TribeTheme.textSecondary)
+                    .foregroundStyle(.primary.opacity(0.35))
             } else {
-                VStack(spacing: 10) {
+                VStack(spacing: 8) {
                     ForEach(replies) { r in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(r.subscriber_email)
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(TribeTheme.textPrimary)
+                                .foregroundStyle(.primary.opacity(0.6))
                             Text(r.reply_text)
-                                .font(.system(size: 13))
-                                .foregroundStyle(TribeTheme.textSecondary)
+                                .font(.system(size: 14))
+                                .foregroundStyle(.primary.opacity(0.5))
                         }
                         .tribeCard()
                     }
@@ -126,7 +122,8 @@ struct EmailDetailView: View {
                         Button("Load more") {
                             Task { await loadMoreReplies() }
                         }
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary.opacity(0.5))
                         .padding(.top, 4)
                     }
                 }
@@ -137,20 +134,20 @@ struct EmailDetailView: View {
     private func metric(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.system(size: 12))
-                .foregroundStyle(TribeTheme.textSecondary)
+                .font(.system(size: 11))
+                .foregroundStyle(.primary.opacity(0.35))
             Text(value)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(TribeTheme.textPrimary)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.primary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(TribeTheme.cardBg)
+        .background(TribeTheme.fieldBg)
+        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
-                .stroke(TribeTheme.stroke)
+                .stroke(TribeTheme.fieldStroke)
         )
-        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
     }
 
     private func openRate(_ data: EmailDetail) -> String {
@@ -165,7 +162,6 @@ struct EmailDetailView: View {
             error = nil
             let resp = try await APIClient.shared.emailDetails(token: token, id: id)
             data = resp.email
-            // first page replies
             let rep = try await APIClient.shared.emailReplies(token: token, id: id, page: 1, pageSize: 10)
             replies = rep.replies
             repliesPage = rep.page
@@ -184,8 +180,6 @@ struct EmailDetailView: View {
             replies.append(contentsOf: rep.replies)
             repliesPage = rep.page
             repliesTotalPages = rep.totalPages
-        } catch {
-            // ignore
-        }
+        } catch { }
     }
 }

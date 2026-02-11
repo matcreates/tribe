@@ -6,7 +6,7 @@
 	<integer>11</integer>
 	<key>logs</key>
 	<dict>
-		<key>179C2E53-7FA0-4692-80AE-1373007B6D50</key>
+		<key>205180F7-04AE-4312-949E-A15DC01B27C1</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>179C2E53-7FA0-4692-80AE-1373007B6D50.xcactivitylog</string>
+			<string>205180F7-04AE-4312-949E-A15DC01B27C1.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -40,15 +40,15 @@
 			<key>signature</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>timeStartedRecording</key>
-			<real>792179958.51233995</real>
+			<real>792186243.343997</real>
 			<key>timeStoppedRecording</key>
-			<real>792179964.95768595</real>
+			<real>792186247.11420298</real>
 			<key>title</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>uniqueIdentifier</key>
-			<string>179C2E53-7FA0-4692-80AE-1373007B6D50</string>
+			<string>205180F7-04AE-4312-949E-A15DC01B27C1</string>
 		</dict>
-		<key>3097F77D-8789-430E-9AD2-4D5373AC7324</key>
+		<key>21AE1FAC-64D1-4C81-A6DE-0D99BD751BCC</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -57,7 +57,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>3097F77D-8789-430E-9AD2-4D5373AC7324.xcactivitylog</string>
+			<string>21AE1FAC-64D1-4C81-A6DE-0D99BD751BCC.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -82,13 +82,97 @@
 			<key>signature</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>timeStartedRecording</key>
-			<real>792178721.04658902</real>
+			<real>792185767.69194901</real>
 			<key>timeStoppedRecording</key>
-			<real>792178724.04809105</real>
+			<real>792185770.81588697</real>
 			<key>title</key>
 			<string>Building project TribeMobile with scheme TribeMobile</string>
 			<key>uniqueIdentifier</key>
-			<string>3097F77D-8789-430E-9AD2-4D5373AC7324</string>
+			<string>21AE1FAC-64D1-4C81-A6DE-0D99BD751BCC</string>
+		</dict>
+		<key>28A67F1A-7B3B-4004-8CFA-A80E2F113A52</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>28A67F1A-7B3B-4004-8CFA-A80E2F113A52.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>W</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>5</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>TribeMobile project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>TribeMobile</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>timeStartedRecording</key>
+			<real>792185867.05611897</real>
+			<key>timeStoppedRecording</key>
+			<real>792185869.60255003</real>
+			<key>title</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>uniqueIdentifier</key>
+			<string>28A67F1A-7B3B-4004-8CFA-A80E2F113A52</string>
+		</dict>
+		<key>E36C083E-CD5D-454E-8C2F-DF967B8CE25B</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>E36C083E-CD5D-454E-8C2F-DF967B8CE25B.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>W</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>5</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>TribeMobile project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>TribeMobile</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>timeStartedRecording</key>
+			<real>792185993.53315997</real>
+			<key>timeStoppedRecording</key>
+			<real>792185996.16618502</real>
+			<key>title</key>
+			<string>Building project TribeMobile with scheme TribeMobile</string>
+			<key>uniqueIdentifier</key>
+			<string>E36C083E-CD5D-454E-8C2F-DF967B8CE25B</string>
 		</dict>
 	</dict>
 </dict>

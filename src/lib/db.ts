@@ -954,6 +954,14 @@ export async function getEmailRepliesByEmailId(emailId: string): Promise<DbEmail
   );
 }
 
+export async function getRepliesForEmailIds(emailIds: string[]): Promise<DbEmailReply[]> {
+  if (emailIds.length === 0) return [];
+  return await query<DbEmailReply>(
+    `SELECT * FROM email_replies WHERE email_id = ANY($1) ORDER BY received_at ASC`,
+    [emailIds]
+  );
+}
+
 export async function getReplyCountByEmailId(emailId: string): Promise<number> {
   const rows = await query<{ count: string }>(
     `SELECT COUNT(*) as count FROM email_replies WHERE email_id = $1`,

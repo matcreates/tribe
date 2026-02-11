@@ -176,6 +176,16 @@
     "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeMobileApp.swiftdeps",
     "swiftmodule" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeMobileApp~partial.swiftmodule"
   },
+  "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/TribeSphereView.swift" : {
+    "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.swiftconstvalues",
+    "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.d",
+    "diagnostics" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.dia",
+    "index-unit-output-path" : "/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.o",
+    "llvm-bc" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.bc",
+    "object" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.o",
+    "swift-dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView.swiftdeps",
+    "swiftmodule" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/TribeSphereView~partial.swiftmodule"
+  },
   "/Users/mat/Documents/Tribe/ios/TribeMobile/Sources/TribeMobile/WriteView.swift" : {
     "const-values" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/WriteView.swiftconstvalues",
     "dependencies" : "/Users/mat/Documents/Tribe/ios/TribeMobile/build/Build/Intermediates.noindex/TribeMobile.build/Debug-iphonesimulator/TribeMobile.build/Objects-normal/arm64/WriteView.d",

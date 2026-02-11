@@ -41,6 +41,8 @@ enum SubscriberSortMode: String, CaseIterable {
 }
 
 struct SubscribersView: View {
+    var embedded: Bool = false
+
     @EnvironmentObject var session: SessionStore
     @EnvironmentObject var toast: ToastCenter
 
@@ -77,82 +79,91 @@ struct SubscribersView: View {
     private let pageSize = 50
 
     var body: some View {
-        NavigationStack {
-            content
+        if embedded {
+            scrollContent
+                .modifier(SubscribersLifecycleModifier(filter: filter, sort: sort, search: search, reload: { reset in
+                    Task { await reload(resetPage: reset) }
+                }))
+                .modifier(SubscribersOverlaysModifier(
+                    showingAdd: $showingAdd,
+                    addSheet: { addSheet },
+                    showingImportChooser: $showingImportChooser,
+                    showingFileImporter: $showingFileImporter,
+                    importPreview: $importPreview,
+                    importSendVerification: $importSendVerification,
+                    isImporting: $isImporting,
+                    onPasteEmails: { if let p = UIPasteboard.general.string { Task { await previewImport(from: p) } } },
+                    onFileImport: { handleFileImport($0) },
+                    onRunImport: { preview in Task { await runImport(preview) } },
+                    showingDeleteUnverifiedConfirm: $showingDeleteUnverifiedConfirm,
+                    onDeleteUnverified: { Task { await deleteUnverified() } },
+                    showingExportSheet: $showingExportSheet,
+                    exportedText: exportedText
+                ))
+        } else {
+            NavigationStack {
+                scrollContent
+                    .navigationTitle("")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar { toolbar }
+            }
+            .modifier(SubscribersLifecycleModifier(filter: filter, sort: sort, search: search, reload: { reset in
+                Task { await reload(resetPage: reset) }
+            }))
+            .modifier(SubscribersOverlaysModifier(
+                showingAdd: $showingAdd,
+                addSheet: { addSheet },
+                showingImportChooser: $showingImportChooser,
+                showingFileImporter: $showingFileImporter,
+                importPreview: $importPreview,
+                importSendVerification: $importSendVerification,
+                isImporting: $isImporting,
+                onPasteEmails: { if let p = UIPasteboard.general.string { Task { await previewImport(from: p) } } },
+                onFileImport: { handleFileImport($0) },
+                onRunImport: { preview in Task { await runImport(preview) } },
+                showingDeleteUnverifiedConfirm: $showingDeleteUnverifiedConfirm,
+                onDeleteUnverified: { Task { await deleteUnverified() } },
+                showingExportSheet: $showingExportSheet,
+                exportedText: exportedText
+            ))
         }
-        .modifier(SubscribersLifecycleModifier(filter: filter, sort: sort, search: search, reload: { reset in
-            Task { await reload(resetPage: reset) }
-        }))
-        .modifier(SubscribersOverlaysModifier(
-            showingAdd: $showingAdd,
-            addSheet: { addSheet },
-            showingImportChooser: $showingImportChooser,
-            showingFileImporter: $showingFileImporter,
-            importPreview: $importPreview,
-            importSendVerification: $importSendVerification,
-            isImporting: $isImporting,
-            onPasteEmails: {
-                if let pasted = UIPasteboard.general.string {
-                    Task { await previewImport(from: pasted) }
-                }
-            },
-            onFileImport: { result in
-                handleFileImport(result)
-            },
-            onRunImport: { preview in
-                Task { await runImport(preview) }
-            },
-            showingDeleteUnverifiedConfirm: $showingDeleteUnverifiedConfirm,
-            onDeleteUnverified: {
-                Task { await deleteUnverified() }
-            },
-            showingExportSheet: $showingExportSheet,
-            exportedText: exportedText
-        ))
-        .toolbar { toolbar }
     }
 
-    private var content: some View {
-        ZStack {
-            TribeTheme.bg.ignoresSafeArea()
+    @ViewBuilder
+    private var scrollContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
+                SubscriberHeaderView(totalVerified: totalVerified, totalNonVerified: totalNonVerified)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
-                    HeaderView(totalVerified: totalVerified, totalNonVerified: totalNonVerified)
+                TopControlsView(filter: $filter, sort: $sort, search: $search)
 
-                    TopControlsView(filter: $filter, sort: $sort, search: $search)
-
-                    if let error {
-                        ErrorBlockView(error: error)
-                    }
-
-                    if !subscribers.isEmpty {
-                        VStack(spacing: 12) {
-                            ForEach(subscribers) { s in
-                                SubscriberRow(subscriber: s, onRemove: {
-                                    Task { await remove(s) }
-                                }, toast: toast)
-                            }
-                        }
-                    } else if !isLoading && error == nil {
-                        Text("No subscribers")
-                            .font(.system(size: 13))
-                            .foregroundStyle(TribeTheme.textSecondary)
-                            .padding(.top, 12)
-                    }
-
-                    PaginationView(page: page, totalPages: totalPages, isLoading: isLoading) {
-                        Task { await loadPage(max(1, page - 1)) }
-                    } onNext: {
-                        Task { await loadPage(min(totalPages, page + 1)) }
-                    }
+                if let error {
+                    ErrorBlockView(error: error)
                 }
-                .pagePadding()
+
+                if !subscribers.isEmpty {
+                    VStack(spacing: 10) {
+                        ForEach(subscribers) { s in
+                            SubscriberRow(subscriber: s, onRemove: {
+                                Task { await remove(s) }
+                            }, toast: toast)
+                        }
+                    }
+                } else if !isLoading && error == nil {
+                    Text("No subscribers")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.primary.opacity(0.3))
+                        .padding(.top, 12)
+                }
+
+                PaginationView(page: page, totalPages: totalPages, isLoading: isLoading) {
+                    Task { await loadPage(max(1, page - 1)) }
+                } onNext: {
+                    Task { await loadPage(min(totalPages, page + 1)) }
+                }
             }
+            .pagePadding()
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar { SettingsToolbarItem() }
     }
 
     @ToolbarContentBuilder
@@ -166,7 +177,7 @@ struct SubscribersView: View {
                 Button(role: .destructive) { showingDeleteUnverifiedConfirm = true } label: { Text("Delete all unverified") }
             } label: {
                 Image(systemName: "ellipsis.circle")
-                    .foregroundStyle(TribeTheme.textSecondary)
+                    .foregroundStyle(.primary.opacity(0.4))
             }
         }
     }
@@ -211,12 +222,8 @@ struct SubscribersView: View {
         do {
             error = nil
             let resp = try await APIClient.shared.subscribersPaged(
-                token: token,
-                page: p,
-                pageSize: pageSize,
-                filter: filter.rawValue,
-                sort: sort.rawValue,
-                search: search
+                token: token, page: p, pageSize: pageSize,
+                filter: filter.rawValue, sort: sort.rawValue, search: search
             )
             subscribers = resp.subscribers
             totalVerified = resp.totalVerified
@@ -241,11 +248,7 @@ struct SubscribersView: View {
     private func addManual() async {
         guard let token = session.token else { return }
         do {
-            try await APIClient.shared.addSubscriberManual(
-                token: token,
-                email: addEmail,
-                name: addName.isEmpty ? nil : addName
-            )
+            try await APIClient.shared.addSubscriberManual(token: token, email: addEmail, name: addName.isEmpty ? nil : addName)
             addEmail = ""
             addName = ""
             showingAdd = false
@@ -264,10 +267,7 @@ struct SubscribersView: View {
     private func previewImport(from text: String) async {
         guard let token = session.token else { return }
         let emails = extractEmails(from: text)
-        if emails.isEmpty {
-            self.error = "No emails found"
-            return
-        }
+        if emails.isEmpty { self.error = "No emails found"; return }
         do {
             error = nil
             importPreview = try await APIClient.shared.previewImport(token: token, emails: emails)
@@ -280,16 +280,9 @@ struct SubscribersView: View {
         guard let token = session.token else { return }
         isImporting = true
         defer { isImporting = false }
-
         do {
-            let resp = try await APIClient.shared.importSubscribers(
-                token: token,
-                emails: preview.emails,
-                sendVerification: importSendVerification
-            )
-            if !resp.errors.isEmpty {
-                self.error = resp.errors.prefix(3).joined(separator: "\n")
-            }
+            let resp = try await APIClient.shared.importSubscribers(token: token, emails: preview.emails, sendVerification: importSendVerification)
+            if !resp.errors.isEmpty { self.error = resp.errors.prefix(3).joined(separator: "\n") }
             importPreview = nil
             await reload(resetPage: true)
         } catch {
@@ -319,20 +312,16 @@ struct SubscribersView: View {
     }
 }
 
-private struct HeaderView: View {
+// MARK: - Sub-views
+
+private struct SubscriberHeaderView: View {
     let totalVerified: Int
     let totalNonVerified: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Your tribe")
-                .font(TribeTheme.pageTitle())
-                .foregroundStyle(TribeTheme.textPrimary)
-
-            Text("\(totalVerified) verified • \(totalNonVerified) unverified")
-                .font(.system(size: 13))
-                .foregroundStyle(TribeTheme.textSecondary)
-        }
+        Text("\(totalVerified) verified · \(totalNonVerified) unverified")
+            .font(.system(size: 13))
+            .foregroundStyle(.primary.opacity(0.4))
     }
 }
 
@@ -344,7 +333,7 @@ private struct TopControlsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Picker("Filter", selection: $filter) {
-                ForEach(SubscriberFilterMode.allCases, id: \ .self) { f in
+                ForEach(SubscriberFilterMode.allCases, id: \.self) { f in
                     Text(f.label).tag(f)
                 }
             }
@@ -352,37 +341,33 @@ private struct TopControlsView: View {
 
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundStyle(TribeTheme.textTertiary)
+                    .foregroundStyle(.primary.opacity(0.3))
 
                 TextField("Search email/name", text: $search)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 if !search.isEmpty {
                     Button { search = "" } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(TribeTheme.textTertiary)
+                            .foregroundStyle(.primary.opacity(0.3))
                     }
                     .buttonStyle(.plain)
                 }
 
                 Menu {
-                    ForEach(SubscriberSortMode.allCases, id: \ .self) { s in
+                    ForEach(SubscriberSortMode.allCases, id: \.self) { s in
                         Button { sort = s } label: { Text(s.label) }
                     }
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
-                        .foregroundStyle(TribeTheme.textTertiary)
+                        .foregroundStyle(.primary.opacity(0.3))
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(TribeTheme.cardBg)
-            .overlay(
-                RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous)
-                    .stroke(TribeTheme.stroke)
-            )
+            .background(.primary.opacity(0.04))
             .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
         }
     }
@@ -390,16 +375,10 @@ private struct TopControlsView: View {
 
 private struct ErrorBlockView: View {
     let error: String
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Couldn’t load subscribers")
-                .font(.headline)
-                .foregroundStyle(TribeTheme.textPrimary)
-            Text(error)
-                .font(.subheadline)
-                .foregroundStyle(TribeTheme.textSecondary)
-        }
+        Text(error)
+            .font(.system(size: 13))
+            .foregroundStyle(.primary.opacity(0.5))
     }
 }
 
@@ -417,37 +396,32 @@ private struct PaginationView: View {
                     Button(action: onPrev) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(page <= 1 ? TribeTheme.textTertiary.opacity(0.3) : TribeTheme.textPrimary)
+                            .foregroundStyle(page <= 1 ? Color.primary.opacity(0.15) : Color.primary)
                             .frame(width: 36, height: 36)
-                            .background(TribeTheme.cardBg)
+                            .background(.primary.opacity(0.05))
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(TribeTheme.stroke))
                     }
                     .disabled(page <= 1 || isLoading)
 
                     if isLoading {
-                        ProgressView()
-                            .tint(TribeTheme.textSecondary)
-                            .scaleEffect(0.8)
+                        ProgressView().tint(.primary.opacity(0.3)).scaleEffect(0.8)
                     } else {
                         Text("\(page) of \(totalPages)")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(TribeTheme.textSecondary)
+                            .foregroundStyle(.primary.opacity(0.4))
                     }
 
                     Button(action: onNext) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(page >= totalPages ? TribeTheme.textTertiary.opacity(0.3) : TribeTheme.textPrimary)
+                            .foregroundStyle(page >= totalPages ? Color.primary.opacity(0.15) : Color.primary)
                             .frame(width: 36, height: 36)
-                            .background(TribeTheme.cardBg)
+                            .background(.primary.opacity(0.05))
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(TribeTheme.stroke))
                     }
                     .disabled(page >= totalPages || isLoading)
                 } else if isLoading {
-                    ProgressView()
-                        .tint(TribeTheme.textSecondary)
+                    ProgressView().tint(.primary.opacity(0.3))
                 }
             }
             .frame(maxWidth: .infinity)
@@ -465,39 +439,35 @@ private struct AddSubscriberSheet: View {
     var body: some View {
         ZStack {
             TribeTheme.bg.ignoresSafeArea()
-
             VStack(alignment: .leading, spacing: 14) {
                 Text("Add subscriber")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 TextField("Email", text: $email)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
+                    .background(.primary.opacity(0.05))
+                    .clipShape(Capsule())
 
                 TextField("Name (optional)", text: $name)
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
+                    .background(.primary.opacity(0.05))
+                    .clipShape(Capsule())
 
                 HStack {
                     Button("Cancel", action: onCancel)
-                        .foregroundStyle(TribeTheme.textSecondary)
-
+                        .foregroundStyle(.primary.opacity(0.4))
                     Spacer()
-
                     Button("Add", action: onAdd)
                         .disabled(email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .foregroundStyle(.primary)
                 }
                 .padding(.top, 6)
-
                 Spacer()
             }
             .padding(18)
@@ -515,11 +485,10 @@ private struct ImportPreviewSheet: View {
     var body: some View {
         ZStack {
             TribeTheme.bg.ignoresSafeArea()
-
             VStack(alignment: .leading, spacing: 14) {
                 Text("Import preview")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Total in file: \(preview.totalInFile)")
@@ -528,22 +497,19 @@ private struct ImportPreviewSheet: View {
                     Text("Will import: \(preview.toImport)")
                 }
                 .font(.system(size: 13))
-                .foregroundStyle(TribeTheme.textSecondary)
+                .foregroundStyle(.primary.opacity(0.5))
 
                 Toggle("Send verification emails", isOn: $sendVerification)
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
+                    .tint(.primary.opacity(0.6))
 
                 HStack {
-                    Button("Cancel", action: onCancel)
-                        .foregroundStyle(TribeTheme.textSecondary)
-
+                    Button("Cancel", action: onCancel).foregroundStyle(.primary.opacity(0.4))
                     Spacer()
-
                     Button(isImporting ? "Importing…" : "Import", action: onImport)
                         .disabled(isImporting || preview.emails.isEmpty)
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .foregroundStyle(.primary)
                 }
-
                 Spacer()
             }
             .padding(18)
@@ -559,23 +525,21 @@ private struct SubscriberRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Circle()
-                .fill(subscriber.verified ? TribeTheme.accentGreen.opacity(0.9) : TribeTheme.textTertiary.opacity(0.5))
+                .fill(subscriber.verified ? Color.green : Color.primary.opacity(0.15))
                 .frame(width: 8, height: 8)
                 .padding(.top, 6)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(subscriber.email)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 HStack(spacing: 8) {
                     if let name = subscriber.name, !name.isEmpty {
-                        Text(name)
-                            .foregroundStyle(TribeTheme.textSecondary)
+                        Text(name).foregroundStyle(.primary.opacity(0.5))
                     }
-
                     Text(subscriber.verified ? "Verified" : "Unverified")
-                        .foregroundStyle(subscriber.verified ? TribeTheme.accentGreen.opacity(0.9) : TribeTheme.textTertiary)
+                        .foregroundStyle(subscriber.verified ? Color.green : Color.primary.opacity(0.3))
                 }
                 .font(.system(size: 12))
             }
@@ -587,15 +551,13 @@ private struct SubscriberRow: View {
                 toast.show("Email copied")
             } label: {
                 Image(systemName: "doc.on.doc")
-                    .foregroundStyle(TribeTheme.textTertiary)
+                    .foregroundStyle(.primary.opacity(0.3))
             }
             .buttonStyle(.plain)
 
-            Button(role: .destructive) {
-                onRemove()
-            } label: {
+            Button(role: .destructive, action: onRemove) {
                 Image(systemName: "trash")
-                    .foregroundStyle(Color.red.opacity(0.8))
+                    .foregroundStyle(.primary.opacity(0.3))
             }
             .buttonStyle(.plain)
         }
@@ -609,42 +571,37 @@ private struct ExportSheet: View {
     var body: some View {
         ZStack {
             TribeTheme.bg.ignoresSafeArea()
-
             VStack(alignment: .leading, spacing: 12) {
                 Text("Export")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(TribeTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 Text("Copied to clipboard")
                     .font(.system(size: 12))
-                    .foregroundStyle(TribeTheme.textSecondary)
+                    .foregroundStyle(.primary.opacity(0.4))
 
                 ScrollView {
                     Text(text)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(TribeTheme.textSecondary)
+                        .foregroundStyle(.primary.opacity(0.5))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(12)
-                        .background(TribeTheme.cardBg)
-                        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
+                        .background(.primary.opacity(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
 
-                Button("Copy") {
-                    UIPasteboard.general.string = text
-                }
-                .foregroundStyle(TribeTheme.textPrimary)
-                .padding(.top, 6)
-
+                Button("Copy") { UIPasteboard.general.string = text }
+                    .foregroundStyle(.primary)
+                    .padding(.top, 6)
                 Spacer()
             }
             .padding(18)
         }
-        .onAppear {
-            UIPasteboard.general.string = text
-        }
+        .onAppear { UIPasteboard.general.string = text }
     }
 }
 
+// MARK: - Lifecycle & Overlays Modifiers
 
 private struct SubscribersLifecycleModifier: ViewModifier {
     let filter: SubscriberFilterMode
@@ -674,67 +631,44 @@ private struct SubscribersLifecycleModifier: ViewModifier {
 private struct SubscribersOverlaysModifier<AddSheet: View>: ViewModifier {
     @Binding var showingAdd: Bool
     let addSheet: () -> AddSheet
-
     @Binding var showingImportChooser: Bool
     @Binding var showingFileImporter: Bool
-
     @Binding var importPreview: ImportPreviewResponse?
     @Binding var importSendVerification: Bool
     @Binding var isImporting: Bool
-
     let onPasteEmails: () -> Void
     let onFileImport: (Result<[URL], Error>) -> Void
     let onRunImport: (ImportPreviewResponse) -> Void
-
     @Binding var showingDeleteUnverifiedConfirm: Bool
     let onDeleteUnverified: () -> Void
-
     @Binding var showingExportSheet: Bool
     let exportedText: String
 
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showingAdd) {
-                addSheet()
-                    .presentationDetents([.medium])
+                addSheet().presentationDetents([.medium])
             }
-            .confirmationDialog(
-                "Import subscribers",
-                isPresented: $showingImportChooser,
-                titleVisibility: .visible
-            ) {
+            .confirmationDialog("Import subscribers", isPresented: $showingImportChooser, titleVisibility: .visible) {
                 Button("Choose file (CSV/TXT)") { showingFileImporter = true }
                 Button("Paste emails") { onPasteEmails() }
                 Button("Cancel", role: .cancel) {}
             }
-            .fileImporter(
-                isPresented: $showingFileImporter,
-                allowedContentTypes: [UTType.commaSeparatedText, UTType.plainText],
-                allowsMultipleSelection: false
-            ) { result in
-                onFileImport(result)
-            }
+            .fileImporter(isPresented: $showingFileImporter, allowedContentTypes: [UTType.commaSeparatedText, UTType.plainText], allowsMultipleSelection: false) { onFileImport($0) }
             .sheet(item: $importPreview) { preview in
                 ImportPreviewSheet(
-                    preview: preview,
-                    sendVerification: $importSendVerification,
+                    preview: preview, sendVerification: $importSendVerification,
                     isImporting: $isImporting,
                     onCancel: { importPreview = nil },
                     onImport: { onRunImport(preview) }
-                )
-                .presentationDetents([.medium])
+                ).presentationDetents([.medium])
             }
-            .confirmationDialog(
-                "Delete all unverified subscribers?",
-                isPresented: $showingDeleteUnverifiedConfirm,
-                titleVisibility: .visible
-            ) {
+            .confirmationDialog("Delete all unverified?", isPresented: $showingDeleteUnverifiedConfirm, titleVisibility: .visible) {
                 Button("Delete", role: .destructive) { onDeleteUnverified() }
                 Button("Cancel", role: .cancel) {}
             }
             .sheet(isPresented: $showingExportSheet) {
-                ExportSheet(text: exportedText)
-                    .presentationDetents([.medium, .large])
+                ExportSheet(text: exportedText).presentationDetents([.medium, .large])
             }
     }
 }

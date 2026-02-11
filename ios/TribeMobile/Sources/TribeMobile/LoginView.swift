@@ -14,24 +14,28 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            TribeTheme.bgElevated.ignoresSafeArea()
+            TribeTheme.bg.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
 
-                VStack(spacing: 22) {
+                VStack(spacing: 24) {
+                    // Logo
                     Image("TribeLogo")
                         .resizable()
                         .renderingMode(.template)
-                        .foregroundStyle(TribeTheme.textPrimary)
+                        .foregroundStyle(Color(uiColor: .systemBackground))
                         .scaledToFit()
-                        .frame(height: 26)
+                        .frame(width: 24, height: 24)
+                        .padding(14)
+                        .background(Color.primary)
+                        .clipShape(Circle())
 
                     VStack(spacing: 0) {
                         Text(isSignup ? "Create your account" : "Welcome back")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundStyle(TribeTheme.textPrimary)
-                            .padding(.bottom, 18)
+                            .foregroundStyle(.primary)
+                            .padding(.bottom, 20)
 
                         VStack(spacing: 14) {
                             if isSignup {
@@ -56,7 +60,7 @@ struct LoginView: View {
                             if let error {
                                 Text(error)
                                     .font(.system(size: 12))
-                                    .foregroundStyle(Color.red.opacity(0.85))
+                                    .foregroundStyle(.primary.opacity(0.5))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
@@ -65,18 +69,18 @@ struct LoginView: View {
                             } label: {
                                 HStack {
                                     Spacer()
-                                    Text(isLoading ? (isSignup ? "CREATING..." : "SIGNING IN...") : (isSignup ? "CREATE ACCOUNT" : "SIGN IN"))
+                                    Text(isLoading ? (isSignup ? "CREATING…" : "SIGNING IN…") : (isSignup ? "CREATE ACCOUNT" : "SIGN IN"))
                                         .font(.system(size: 11, weight: .semibold))
                                         .tracking(2)
                                         .foregroundStyle(Color(uiColor: .systemBackground))
                                         .padding(.vertical, 14)
                                     Spacer()
                                 }
-                                .background(TribeTheme.textPrimary)
-                                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
+                                .background(Color.primary)
+                                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
                             }
                             .disabled(isLoading || !canSubmit)
-                            .opacity(isLoading ? 0.7 : 1)
+                            .opacity(isLoading ? 0.6 : 1)
 
                             Button {
                                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -84,21 +88,21 @@ struct LoginView: View {
                                     error = nil
                                 }
                             } label: {
-                                Text(isSignup ? "Already have an account? Sign in" : "Don’t have an account? Create one")
+                                Text(isSignup ? "Already have an account? Sign in" : "Don't have an account? Create one")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(TribeTheme.textSecondary)
+                                    .foregroundStyle(.primary.opacity(0.4))
                             }
                             .buttonStyle(.plain)
                             .padding(.top, 4)
                         }
                     }
                     .padding(24)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(TribeTheme.stroke)
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(.primary.opacity(0.06))
                     )
-                    .background(TribeTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .frame(maxWidth: 360)
                 }
                 .padding(.horizontal, 24)
@@ -111,8 +115,8 @@ struct LoginView: View {
     private var canSubmit: Bool {
         if isSignup {
             return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !password.isEmpty
+                && !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && !password.isEmpty
         }
         return !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
     }
@@ -122,14 +126,14 @@ struct LoginView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.system(size: 12))
-                .foregroundStyle(TribeTheme.textSecondary)
+                .foregroundStyle(.primary.opacity(0.4))
 
             content()
-                .font(.system(size: 13))
-                .foregroundStyle(TribeTheme.textPrimary)
-                .padding(.horizontal, 14)
+                .font(.system(size: 14))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background(TribeTheme.textPrimary.opacity(0.06))
+                .background(.primary.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: TribeTheme.inputRadius, style: .continuous))
         }
     }
@@ -151,4 +155,3 @@ struct LoginView: View {
         isLoading = false
     }
 }
-

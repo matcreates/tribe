@@ -14,7 +14,6 @@ final class ToastCenter: ObservableObject {
     }
 }
 
-// Environment-backed toast to avoid runtime crashes if an EnvironmentObject isn't wired correctly.
 private struct ToastCenterKey: EnvironmentKey {
     static var defaultValue: ToastCenter = ToastCenter()
 }
@@ -36,11 +35,11 @@ struct ToastOverlay: View {
                     Spacer()
                     Text(message)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(Color.white)
-                        .padding(.horizontal, 14)
+                        .foregroundStyle(Color(uiColor: .systemBackground))
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        .background(Color.black.opacity(0.85))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(.primary)
+                        .clipShape(Capsule())
                         .padding(.bottom, 22)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		06A0F5BD24C4E75B70266802 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EBB55C258BF4F1732AB41A /* Keychain.swift */; };
+		16D5B035CC4EC621EE9D8B75 /* TribeSettingsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D482BA23463B3AFE2596C7F /* TribeSettingsOverlay.swift */; };
 		1972358696DB78709029203A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */; };
 		3354D6A7C1FDDC2B4A633471 /* EmailDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */; };
 		41D3391705A325EE13F6BA42 /* JoinPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9954785828361C5B3D4596DC /* JoinPageView.swift */; };
@@ -17,29 +18,31 @@
 		642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B3089B62279AC0940E7B9 /* Config.swift */; };
 		6BE678C6CF68A025D3593C30 /* TribeSphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77EA08D85A3530C0A17424F /* TribeSphereView.swift */; };
 		75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4743326CDB9FEA49310AE968 /* SessionStore.swift */; };
+		N0T1F1C4710NMGR00000001 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = N0T1F1C4710NMGR00000002 /* NotificationManager.swift */; };
 		7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CBD123C9DD86E8B936F1E1 /* RootView.swift */; };
-		8C01F6DBB0943D5D6F649ECC /* WriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */; };
 		8EBE11082F18AC5A53235B73 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */; };
 		AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9257A2DF291377E800E77F46 /* SubscribersView.swift */; };
-		B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */; };
 		BF42BAFCD00628F4A39798EB /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A361BC2280F8653A5EC542C /* SplashView.swift */; };
 		D1424B6B96303ECB8A328974 /* HeritageSerif.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */; };
 		D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12DAA6C65703FF7090C827E /* APIClient.swift */; };
 		E71E0AF97118863D5FD19A6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */; };
 		EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48140FCADF742D7F0388B258 /* Models.swift */; };
+		F36E36CBB590A7D68AB20685 /* ComposeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CA3BD53CE10C60578AA876 /* ComposeSheet.swift */; };
 		F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */; };
+		FC3663AEE2725B2AEBC7ACEF /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A9CEE17D2FCEF4F99409698 /* ConversationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0A9CEE17D2FCEF4F99409698 /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
+		0D482BA23463B3AFE2596C7F /* TribeSettingsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TribeSettingsOverlay.swift; sourceTree = "<group>"; };
 		154BD58BB8C197D78F6BF617 /* TribeMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TribeMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailDetailView.swift; sourceTree = "<group>"; };
 		3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TribeMobileApp.swift; sourceTree = "<group>"; };
 		41CBD123C9DD86E8B936F1E1 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		4743326CDB9FEA49310AE968 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		N0T1F1C4710NMGR00000002 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		48140FCADF742D7F0388B258 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		4A361BC2280F8653A5EC542C /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteView.swift; sourceTree = "<group>"; };
 		6117780DCB6D382D4A467AFC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		85EBB55C258BF4F1732AB41A /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
@@ -53,6 +56,7 @@
 		ADF11278C4822C5E95AACE95 /* HeritageSerif.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeritageSerif.ttf; sourceTree = "<group>"; };
 		CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftsView.swift; sourceTree = "<group>"; };
+		D3CA3BD53CE10C60578AA876 /* ComposeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -69,8 +73,9 @@
 			children = (
 				A12DAA6C65703FF7090C827E /* APIClient.swift */,
 				7A842C6BC29D3A9A1A9CAA87 /* Assets.xcassets */,
+				D3CA3BD53CE10C60578AA876 /* ComposeSheet.swift */,
 				934B3089B62279AC0940E7B9 /* Config.swift */,
-				15572CA8DA0D9CF7A44DA02B /* DashboardView.swift */,
+				0A9CEE17D2FCEF4F99409698 /* ConversationView.swift */,
 				1F4848ADEC2B8C85320B2DAA /* EmailDetailView.swift */,
 				D2CBC8C668C7AFE21B98BD74 /* GiftsView.swift */,
 				9954785828361C5B3D4596DC /* JoinPageView.swift */,
@@ -78,6 +83,7 @@
 				CC7FD6B46CBDD66F01163FF2 /* LoginView.swift */,
 				48140FCADF742D7F0388B258 /* Models.swift */,
 				41CBD123C9DD86E8B936F1E1 /* RootView.swift */,
+				N0T1F1C4710NMGR00000002 /* NotificationManager.swift */,
 				4743326CDB9FEA49310AE968 /* SessionStore.swift */,
 				6117780DCB6D382D4A467AFC /* SettingsView.swift */,
 				4A361BC2280F8653A5EC542C /* SplashView.swift */,
@@ -85,8 +91,8 @@
 				A9B9FE6E1DF7F0C9FEB60DEA /* Theme.swift */,
 				A0FCB20DC49D9BD1F54B2D22 /* Toast.swift */,
 				3EDC0351CF1E728A9A5EE65B /* TribeMobileApp.swift */,
+				0D482BA23463B3AFE2596C7F /* TribeSettingsOverlay.swift */,
 				A77EA08D85A3530C0A17424F /* TribeSphereView.swift */,
-				526C5DE80E6FF8DA32A6BF76 /* WriteView.swift */,
 			);
 			name = TribeMobile;
 			path = Sources/TribeMobile;
@@ -181,8 +187,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D2F2A245760EC4FC0EB83C65 /* APIClient.swift in Sources */,
+				F36E36CBB590A7D68AB20685 /* ComposeSheet.swift in Sources */,
 				642C9023F6B9EF0C1F7149B7 /* Config.swift in Sources */,
-				B9E62ABC172FB65012B847A1 /* DashboardView.swift in Sources */,
+				FC3663AEE2725B2AEBC7ACEF /* ConversationView.swift in Sources */,
 				3354D6A7C1FDDC2B4A633471 /* EmailDetailView.swift in Sources */,
 				609C495ABD07F85EDEE30939 /* GiftsView.swift in Sources */,
 				41D3391705A325EE13F6BA42 /* JoinPageView.swift in Sources */,
@@ -191,14 +198,15 @@
 				EDF34DFBB27A953B1591AE2F /* Models.swift in Sources */,
 				7BE07C2A6CD715A9F51C33EB /* RootView.swift in Sources */,
 				75BD842E0D35AA76E1744536 /* SessionStore.swift in Sources */,
+				N0T1F1C4710NMGR00000001 /* NotificationManager.swift in Sources */,
 				482E90926D259A04839D4E4C /* SettingsView.swift in Sources */,
 				BF42BAFCD00628F4A39798EB /* SplashView.swift in Sources */,
 				AD85E1BAB1A629857FF3C0DE /* SubscribersView.swift in Sources */,
 				1972358696DB78709029203A /* Theme.swift in Sources */,
 				4992A13AA339D6754FC4DAF2 /* Toast.swift in Sources */,
 				F705562B795816F7170217B1 /* TribeMobileApp.swift in Sources */,
+				16D5B035CC4EC621EE9D8B75 /* TribeSettingsOverlay.swift in Sources */,
 				6BE678C6CF68A025D3593C30 /* TribeSphereView.swift in Sources */,
-				8C01F6DBB0943D5D6F649ECC /* WriteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
