@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         body: stripHtml(e.body),
         recipientCount: e.recipient_count ?? 0,
         openCount: e.open_count ?? 0,
-        sentAt: e.sent_at ?? e.created_at ?? new Date().toISOString(),
+        sentAt: e.sent_at ?? new Date().toISOString(),
       }));
 
     // Get all replies for these emails in a single query
