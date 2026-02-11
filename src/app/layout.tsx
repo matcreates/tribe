@@ -59,8 +59,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${instrumentSerif.variable} antialiased`} style={{ fontFamily: 'var(--font-geist-sans), system-ui, sans-serif' }}>
+    <html lang="en" style={{ backgroundColor: 'rgb(252, 250, 247)' }}>
+      <head>
+        <meta name="theme-color" content="rgb(252, 250, 247)" />
+      </head>
+      <body className={`${inter.variable} ${instrumentSerif.variable} antialiased`} style={{ fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', backgroundColor: 'rgb(252, 250, 247)' }}>
         <SessionProvider>
         {children}
         </SessionProvider>
