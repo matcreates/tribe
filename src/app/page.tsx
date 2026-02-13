@@ -154,11 +154,10 @@ export default async function LandingPage() {
             {/* iPhone mockup */}
             <div className="flex justify-center md:justify-end order-2 md:order-1">
               <div className="relative w-[280px] sm:w-[320px] md:w-[400px]">
-                <Image 
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
                   src="/iphone-mockup.png" 
                   alt="Tribe iPhone app" 
-                  width={400} 
-                  height={500}
                   className="w-full h-auto"
                 />
               </div>
