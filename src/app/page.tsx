@@ -156,7 +156,7 @@ export default async function LandingPage() {
               <div className="relative w-[280px] sm:w-[320px] md:w-[400px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="/iphone-mockup.png" 
+                  src="/iphone-mockup.png?v=2" 
                   alt="Tribe iPhone app" 
                   className="w-full h-auto"
                 />
