@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBearerToken, verifyMobileToken } from "@/lib/mobileAuth";
-import { sendTestEmailAction } from "@/lib/actions";
+import { getTribeById } from "@/lib/db";
+import { sendTestEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
     const token = getBearerToken(request.headers.get("authorization"));
     if (!token) return NextResponse.json({ error: "Missing token" }, { status: 401 });
 
-    await verifyMobileToken(token);
+    const payload = await verifyMobileToken(token);
 
     const body = (await request.json()) as {
       to?: string;
@@ -20,7 +21,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing to/subject/body" }, { status: 400 });
     }
 
-    const result = await sendTestEmailAction(body.to, body.subject, body.body, body.allowReplies ?? true);
+    // Get tribe directly using mobile token payload instead of NextAuth session
+    const tribe = await getTribeById(payload.tribeId);
+    if (!tribe) {
+      return NextResponse.json({ error: "Tribe not found" }, { status: 404 });
+    }
+
+    const ownerName = tribe.owner_name || "Anonymous";
+    const emailSignature = tribe.email_signature || undefined;
+
+    const result = await sendTestEmail(
+      body.to,
+      body.subject,
+      body.body,
+      ownerName,
+      emailSignature,
+      body.allowReplies ?? true
+    );
+
     if (!result.success) {
       return NextResponse.json({ error: result.error || "Failed to send test email" }, { status: 500 });
     }
