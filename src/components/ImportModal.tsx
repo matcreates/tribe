@@ -65,7 +65,7 @@ export function ImportModal({
           />
           <div 
             className={`relative w-full max-w-[420px] mx-4 rounded-2xl border p-8 ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
-            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+            style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
           >
             <div className="text-center">
               <div 
@@ -125,7 +125,7 @@ export function ImportModal({
       {/* Modal */}
       <div 
         className={`relative w-full max-w-[520px] mx-4 rounded-2xl border p-8 ${isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'}`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         {/* Header - Show NEW people count */}
         <p className={`text-center text-[16px] mb-6 ${isLight ? 'text-black/80' : 'text-white/80'}`}>

@@ -91,7 +91,7 @@ export default function PublicJoinPage({ params }: PageProps) {
 
   if (!tribeSettings && !error) {
     return (
-      <div data-theme="light" className="min-h-screen flex items-center justify-center" style={{ background: 'rgb(252, 250, 247)' }}>
+      <div data-theme="light" className="min-h-screen flex items-center justify-center" style={{ background: '#EFEDE7' }}>
         <p className="text-[13px] text-black/30">Loading...</p>
       </div>
     );
@@ -99,7 +99,7 @@ export default function PublicJoinPage({ params }: PageProps) {
 
   if (error && !tribeSettings) {
     return (
-      <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
+      <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: '#EFEDE7' }}>
         <div 
           className="w-full max-w-[360px] rounded-[16px] border border-black/[0.08] p-8 text-center bg-white/80"
         >
@@ -132,7 +132,7 @@ export default function PublicJoinPage({ params }: PageProps) {
   const ownerAvatar = tribeSettings?.ownerAvatar ?? null;
 
   return (
-    <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: 'rgb(252, 250, 247)' }}>
+    <div data-theme="light" className="min-h-screen flex items-center justify-center p-6" style={{ background: '#EFEDE7' }}>
       <div 
         className="w-full max-w-[320px] rounded-[16px] border border-black/[0.08] p-7 bg-white/80"
       >

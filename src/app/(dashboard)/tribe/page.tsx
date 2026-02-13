@@ -627,7 +627,7 @@ export default function TribePage() {
             className={`relative w-full max-w-[360px] rounded-[14px] border p-6 ${
               isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
             }`}
-            style={{ background: isLight ? 'rgba(252, 250, 247, 0.98)' : 'rgba(18, 18, 18, 0.98)' }}
+            style={{ background: isLight ? 'rgba(239, 237, 231, 0.98)' : 'rgba(18, 18, 18, 0.98)' }}
           >
             <div className="flex items-center gap-3 mb-4">
               <div 

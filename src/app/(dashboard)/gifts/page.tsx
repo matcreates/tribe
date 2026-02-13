@@ -475,7 +475,7 @@ function UpdateFileModal({
         className={`relative w-full max-w-[420px] rounded-[16px] border p-6 ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         {/* Close button */}
         <button
@@ -747,7 +747,7 @@ function UploadModal({
         className={`relative w-full max-w-[420px] mx-4 rounded-[16px] p-6 border ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         <button 
           onClick={handleClose} 

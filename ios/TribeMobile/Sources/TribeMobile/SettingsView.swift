@@ -91,12 +91,9 @@ struct SettingsView: View {
                             ) {
                                 Text(isUploading ? "Uploading…" : "Upload")
                                     .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(Color(uiColor: .systemBackground))
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(Color(uiColor: .label))
-                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(.bordered)
+                            .tint(TribeTheme.buttonTint)
                             .disabled(isUploading)
 
                             Spacer()
@@ -132,41 +129,25 @@ struct SettingsView: View {
 
                     // Save
                     Button { Task { await save() } } label: {
-                        HStack {
-                            Spacer()
-                            Text(isSaving ? "SAVING…" : "SAVE")
-                                .font(.system(size: 12, weight: .semibold))
-                                .tracking(2)
-                                .foregroundStyle(Color(uiColor: .systemBackground))
-                            Spacer()
-                        }
-                        .padding(.vertical, 14)
-                        .background(Color.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
+                        Text(isSaving ? "Saving…" : "Save")
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(TribeTheme.buttonTint)
+                    .controlSize(.large)
                     .disabled(isSaving)
 
                     // Log out
-                    Button {
+                    Button(role: .destructive) {
                         session.logout()
                     } label: {
-                        HStack {
-                            Spacer()
-                            Text("LOG OUT")
-                                .font(.system(size: 12, weight: .semibold))
-                                .tracking(2)
-                            Spacer()
-                        }
-                        .foregroundStyle(.red)
-                        .padding(.vertical, 14)
-                        .background(Color.red.opacity(0.10))
-                        .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous)
-                                .stroke(Color.red, lineWidth: 1)
-                        )
+                        Text("Log out")
+                            .frame(maxWidth: .infinity)
                     }
-                    .padding(.top, 8)
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                    .controlSize(.large)
+                    .padding(.top, 4)
                 } else {
                     ProgressView("Loading…")
                         .tint(.primary.opacity(0.3))
@@ -281,26 +262,20 @@ struct SettingsView: View {
 
                 HStack(spacing: 8) {
                     Button { Task { await syncSubscription() } } label: {
-                        Text("SYNC")
-                            .font(.system(size: 10, weight: .semibold))
-                            .tracking(2)
-                            .foregroundStyle(.primary)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 14)
-                            .background(.primary.opacity(0.06))
-                            .clipShape(Capsule())
+                        Text("Sync")
+                            .font(.system(size: 13, weight: .medium))
                     }
+                    .buttonStyle(.bordered)
+                    .tint(TribeTheme.buttonTint)
+                    .controlSize(.small)
 
                     Button { Task { await openPortal() } } label: {
-                        Text(isLoadingPortal ? "OPENING…" : "MANAGE")
-                            .font(.system(size: 10, weight: .semibold))
-                            .tracking(2)
-                            .foregroundStyle(.primary)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 14)
-                            .background(.primary.opacity(0.06))
-                            .clipShape(Capsule())
+                        Text(isLoadingPortal ? "Opening…" : "Manage")
+                            .font(.system(size: 13, weight: .medium))
                     }
+                    .buttonStyle(.bordered)
+                    .tint(TribeTheme.buttonTint)
+                    .controlSize(.small)
                     .disabled(isLoadingPortal)
 
                     Spacer()

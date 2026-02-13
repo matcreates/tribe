@@ -26,6 +26,12 @@ enum TribeTheme {
     static let fieldBg = Color.black.opacity(0.05)
     static let fieldStroke = Color.clear
 
+    /// Button tint that ensures proper contrast in both light and dark mode.
+    /// `.borderedProminent` uses this as fill and auto-picks a contrasting label.
+    static let buttonTint = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? .white : .black
+    })
+
     // MARK: - Radius
 
     static let cardRadius: CGFloat = 16

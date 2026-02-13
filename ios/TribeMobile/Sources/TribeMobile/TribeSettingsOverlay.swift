@@ -13,8 +13,8 @@ struct TribeSettingsOverlay: View {
 
     @EnvironmentObject var session: SessionStore
     @State private var selectedTab: SettingsTab = .members
-    @State private var dragOffset: CGFloat = 0
     @State private var resolvedMemberCount: Int?
+    @State private var contentVisible = false
 
     /// The count to display – prefer the freshly loaded value from the API.
     private var displayMemberCount: Int { resolvedMemberCount ?? memberCount }
@@ -25,17 +25,18 @@ struct TribeSettingsOverlay: View {
             Color.clear
                 .background(.ultraThinMaterial)
                 .ignoresSafeArea()
-                .onTapGesture { dismiss() }
 
             VStack(spacing: 0) {
-                // Drag indicator
-                dragHandle
-                    .padding(.top, 12)
-
                 overlayHeader
+                    .padding(.top, 12)
+                    .opacity(contentVisible ? 1 : 0)
+                    .offset(y: contentVisible ? 0 : 10)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: contentVisible)
                 tabBar
                     .padding(.top, 10)
                     .padding(.bottom, 8)
+                    .opacity(contentVisible ? 1 : 0)
+                    .animation(.easeOut(duration: 0.3).delay(0.05), value: contentVisible)
 
                 // Swipeable tab content
                 TabView(selection: $selectedTab) {
@@ -53,36 +54,19 @@ struct TribeSettingsOverlay: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(response: 0.35, dampingFraction: 0.82), value: selectedTab)
+                .opacity(contentVisible ? 1 : 0)
+                .offset(y: contentVisible ? 0 : 20)
+                .animation(.spring(response: 0.45, dampingFraction: 0.8).delay(0.1), value: contentVisible)
             }
             .ignoresSafeArea(edges: .bottom)
         }
-        .task { await loadVerifiedCount() }
-        .offset(y: dragOffset)
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    if value.translation.height > 0 {
-                        dragOffset = value.translation.height
-                    }
-                }
-                .onEnded { value in
-                    if value.translation.height > 120 || value.predictedEndTranslation.height > 300 {
-                        dismiss()
-                    } else {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                            dragOffset = 0
-                        }
-                    }
-                }
-        )
-    }
-
-    // MARK: - Drag Handle
-
-    private var dragHandle: some View {
-        RoundedRectangle(cornerRadius: 3)
-            .fill(.primary.opacity(0.15))
-            .frame(width: 36, height: 5)
+        .withToastOverlay()
+        .task {
+            await loadVerifiedCount()
+            // Delay content fade-in so tabs don't flash empty
+            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+            withAnimation { contentVisible = true }
+        }
     }
 
     // MARK: - Header
@@ -93,10 +77,12 @@ struct TribeSettingsOverlay: View {
             VStack(spacing: 10) {
                 TribeSphereView(memberCount: displayMemberCount)
                     .frame(height: 200)
+                    .animation(.none, value: displayMemberCount)
 
                 Text("Your Tribe is made of \(displayMemberCount) members")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.primary.opacity(0.4))
+                    .animation(.none, value: displayMemberCount)
             }
             .padding(.vertical, 20)
             .padding(.horizontal, 12)
@@ -106,9 +92,9 @@ struct TribeSettingsOverlay: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(Color(uiColor: .systemGray))
-                    .frame(width: 32, height: 32)
+                    .frame(width: 40, height: 40)
                     .background(Color(uiColor: .systemGray5))
                     .clipShape(Circle())
             }
@@ -152,7 +138,6 @@ struct TribeSettingsOverlay: View {
 
     private func loadVerifiedCount() async {
         guard let token = session.token else { return }
-        // Use the same source as the Members tab (subscribers endpoint)
         if let resp = try? await APIClient.shared.subscribersPaged(
             token: token, page: 1, pageSize: 1,
             filter: "verified", sort: "newest", search: ""

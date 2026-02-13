@@ -98,7 +98,7 @@ export function EmailSentSuccess({ campaignId, totalRecipients, onClose }: Email
       className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
-      style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(12, 12, 12)' }}
+      style={{ background: isLight ? '#EFEDE7' : 'rgb(12, 12, 12)' }}
     >
       {/* Animated background gradient */}
       <div className="absolute inset-0 overflow-hidden">

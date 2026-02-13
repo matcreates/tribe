@@ -43,12 +43,12 @@ export function InteractiveDemo() {
         <div 
           className="hidden lg:block rounded-2xl border border-black/[0.1] overflow-hidden shadow-xl"
           style={{ 
-            background: "rgb(252, 250, 247)",
+            background: "#EFEDE7",
             aspectRatio: "16/10",
           }}
         >
           {/* Browser toolbar */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]" style={{ background: "rgb(252, 250, 247)" }}>
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]" style={{ background: "#EFEDE7" }}>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
               <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
@@ -72,7 +72,7 @@ export function InteractiveDemo() {
             {/* Sidebar */}
             <div 
               className="w-[180px] border-r border-black/[0.06] flex flex-col"
-              style={{ background: "rgb(252, 250, 247)" }}
+              style={{ background: "#EFEDE7" }}
             >
               {/* Logo */}
               <div className="px-8 pt-8 pb-6">
@@ -134,7 +134,7 @@ export function InteractiveDemo() {
             </div>
 
             {/* Main content */}
-            <div className="flex-1 overflow-auto" style={{ background: "rgb(252, 250, 247)" }}>
+            <div className="flex-1 overflow-auto" style={{ background: "#EFEDE7" }}>
               <div className="pt-10 px-6 pb-8 flex justify-center">
                 <div className="w-full max-w-[480px]">
                   {activeTab === "dashboard" && <DemoDashboard />}

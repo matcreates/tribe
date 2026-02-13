@@ -16,6 +16,9 @@ struct JoinPageView: View {
     @State private var isSaving = false
     @State private var error: String?
     @State private var saveTask: Task<Void, Never>?
+    @State private var isEditingDescription = false
+    @State private var keyboardHeight: CGFloat = 0
+    @FocusState private var descriptionFocused: Bool
 
     var body: some View {
         if embedded {
@@ -32,45 +35,72 @@ struct JoinPageView: View {
     }
 
     private var scrollContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
-                if !embedded {
-                    HStack {
-                        Text("Join page")
-                            .font(TribeTheme.pageTitle())
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        if isSaving {
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: TribeTheme.contentSpacing) {
+                    if !embedded {
+                        HStack {
+                            Text("Join page")
+                                .font(TribeTheme.pageTitle())
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if isSaving {
+                                Text("Saving…")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.primary.opacity(0.25))
+                            }
+                        }
+                    } else if isSaving {
+                        HStack {
+                            Spacer()
                             Text("Saving…")
                                 .font(.system(size: 11))
                                 .foregroundStyle(.primary.opacity(0.25))
                         }
                     }
-                } else if isSaving {
-                    HStack {
-                        Spacer()
-                        Text("Saving…")
-                            .font(.system(size: 11))
-                            .foregroundStyle(.primary.opacity(0.25))
+
+                    if let join {
+                        joinPreviewCard(join)
+                    } else if let error {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.primary.opacity(0.5))
+                    } else {
+                        ProgressView("Loading…")
+                            .tint(.primary.opacity(0.3))
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 24)
+                    }
+
+                    // Extra space when keyboard is showing so content can scroll above it
+                    if keyboardHeight > 0 {
+                        Color.clear.frame(height: keyboardHeight)
                     }
                 }
-
-                if let join {
-                    joinPreviewCard(join)
-                } else if let error {
-                    Text(error)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.primary.opacity(0.5))
-                } else {
-                    ProgressView("Loading…")
-                        .tint(.primary.opacity(0.3))
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 24)
+                .padding(.horizontal, 18)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
+                if let frame = notif.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        keyboardHeight = frame.height
+                        isEditingDescription = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            proxy.scrollTo("description-editor", anchor: .center)
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    keyboardHeight = 0
+                    isEditingDescription = false
+                }
+            }
         }
     }
 
@@ -134,18 +164,38 @@ struct JoinPageView: View {
                     .foregroundStyle(.primary)
 
                 // Editable description
-                TextEditor(text: $description)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.primary.opacity(0.5))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 60, maxHeight: 120)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 28)
-                    .onChange(of: description) { _, newValue in
-                        debouncedSave(newValue)
-                    }
+                VStack(spacing: 2) {
+                    TextField("Describe your tribe…", text: $description, axis: .vertical)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.primary.opacity(0.5))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(3)
+                        .lineLimit(2...6)
+                        .focused($descriptionFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            descriptionFocused = false
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                        .onChange(of: description) { oldValue, newValue in
+                            // Intercept newline from "Done" key – dismiss keyboard instead
+                            if newValue.hasSuffix("\n") && !oldValue.hasSuffix("\n") {
+                                description = String(newValue.dropLast())
+                                descriptionFocused = false
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                return
+                            }
+                            debouncedSave(newValue)
+                        }
+
+                    // Underline hint to show it's editable
+                    Rectangle()
+                        .fill(.primary.opacity(descriptionFocused ? 0.3 : 0.12))
+                        .frame(height: 1)
+                        .padding(.horizontal, 8)
+                }
+                .id("description-editor")
+                .padding(.horizontal, 28)
 
                 // Email field
                 HStack {

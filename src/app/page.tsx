@@ -16,7 +16,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen landing-paper-bg">
       {/* Navigation with gradient background */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5" style={{ background: 'linear-gradient(180deg, rgba(252, 250, 247, 0.98) 0%, rgba(252, 250, 247, 0.9) 60%, rgba(252, 250, 247, 0) 100%)' }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5" style={{ background: 'linear-gradient(180deg, rgba(239, 237, 231, 0.98) 0%, rgba(239, 237, 231, 0.9) 60%, rgba(239, 237, 231, 0) 100%)' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <TribeLogo className="h-[18px] sm:h-[22px] w-auto text-black/80" />
           <div className="flex items-center gap-1 sm:gap-3">
@@ -102,32 +102,32 @@ export default async function LandingPage() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
-                icon: "🎁",
+                icon: <svg className="w-5 h-5" viewBox="0 0 22 21" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M3 3.5C3 4.02384 3.11743 4.53557 3.33772 5H1C0.44772 5 0 5.44772 0 6V11C0 11.5523 0.44772 12 1 12H2V20C2 20.5523 2.44772 21 3 21H19C19.5523 21 20 20.5523 20 20V12H21C21.5523 12 22 11.5523 22 11V6C22 5.44772 21.5523 5 21 5H18.6623C18.8826 4.53557 19 4.02384 19 3.5C19 2.57174 18.6313 1.6815 17.9749 1.02513C17.3185 0.36875 16.4283 0 15.5 0C14.1769 0 13.1209 0.37202 12.3032 0.97769C11.7384 1.39606 11.316 1.90438 11 2.42396C10.684 1.90438 10.2616 1.39606 9.6968 0.97769C8.87913 0.37202 7.82309 0 6.5 0C5.57174 0 4.6815 0.36875 4.02513 1.02513C3.36875 1.6815 3 2.57174 3 3.5ZM6.5 2C6.10218 2 5.72064 2.15804 5.43934 2.43934C5.15804 2.72064 5 3.10218 5 3.5C5 3.89782 5.15804 4.27936 5.43934 4.56066C5.72064 4.84196 6.10218 5 6.5 5H10V7H2V10H10V19H4V12H2V10H10V7H2V5H6.5ZM12 5H15.5C15.8978 5 16.2794 4.84196 16.5607 4.56066C16.842 4.27936 17 3.89782 17 3.5C17 3.10218 16.842 2.72064 16.5607 2.43934C16.2794 2.15804 15.8978 2 15.5 2C14.5731 2 13.9416 2.25298 13.4937 2.58481C13.034 2.92528 12.7063 3.39508 12.4744 3.91036C12.3066 4.2833 12.1968 4.66322 12.1255 5H12ZM12 7V10H20V7H12ZM12 19V12H18V19H12Z" /></svg>,
                 title: "Gift downloads",
                 description: "Reward new subscribers with exclusive downloads. PDFs, wallpapers, anything you want to share."
               },
               {
-                icon: "👥",
+                icon: <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="5" r="2.5" /><path d="M3 14c0-2.5 2.5-4 5-4s5 1.5 5 4" /></svg>,
                 title: "Grow your tribe",
                 description: "Get a custom join page. Share the link and watch your community grow organically."
               },
               {
-                icon: "📊",
+                icon: <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="2" /><path d="M1.5 8c0 0 2.5-4.5 6.5-4.5s6.5 4.5 6.5 4.5-2.5 4.5-6.5 4.5-6.5-4.5-6.5-4.5z" /></svg>,
                 title: "Real insights",
                 description: "See who is reading, track opens, and understand your audience with clear analytics."
               },
               {
-                icon: "✅",
+                icon: <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13.5 4.5l-7 7L3 8" /></svg>,
                 title: "Verified members",
                 description: "Double opt in keeps your list clean and your engagement rates high."
               },
               {
-                icon: "🔗",
+                icon: <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 8.5a3 3 0 0 0 4.2.4l2-2a3 3 0 0 0-4.2-4.2l-1.1 1.1" /><path d="M9.5 7.5a3 3 0 0 0-4.2-.4l-2 2a3 3 0 0 0 4.2 4.2l1.1-1.1" /></svg>,
                 title: "Your own URL",
                 description: "Every creator gets a unique @username page. Professional and memorable."
               },
               {
-                icon: "💬",
+                icon: <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 5L2 8l4 3" /><path d="M2 8h8a4 4 0 0 1 4 4v1" /></svg>,
                 title: "Replies enabled",
                 description: "Let your tribe reply directly to your emails. Every response lands in your dashboard."
               },
@@ -136,7 +136,7 @@ export default async function LandingPage() {
                 key={i}
                 className="p-5 sm:p-6 rounded-2xl border border-black/[0.06] transition-colors hover:border-black/[0.12] bg-white/60"
               >
-                <span className="text-xl sm:text-2xl mb-3 sm:mb-4 block">{feature.icon}</span>
+                <div className="w-9 h-9 rounded-[10px] flex items-center justify-center mb-3 sm:mb-4 text-black/50" style={{ background: 'rgba(0, 0, 0, 0.05)' }}>{feature.icon}</div>
                 <h3 className="text-[14px] sm:text-[15px] font-medium text-black/80 mb-2">{feature.title}</h3>
                 <p className="text-[12px] sm:text-[13px] text-black/45 leading-relaxed">{feature.description}</p>
               </div>
@@ -169,7 +169,7 @@ export default async function LandingPage() {
               {/* App icon */}
               <div className="mb-4 sm:mb-6">
                 <Image 
-                  src="/apple-touch-icon.png" 
+                  src="/app-icon-light.png" 
                   alt="Tribe app icon" 
                   width={96} 
                   height={96}

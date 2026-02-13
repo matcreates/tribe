@@ -67,18 +67,12 @@ struct LoginView: View {
                             Button {
                                 Task { await submit() }
                             } label: {
-                                HStack {
-                                    Spacer()
-                                    Text(isLoading ? (isSignup ? "CREATING…" : "SIGNING IN…") : (isSignup ? "CREATE ACCOUNT" : "SIGN IN"))
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .tracking(2)
-                                        .foregroundStyle(Color(uiColor: .systemBackground))
-                                        .padding(.vertical, 14)
-                                    Spacer()
-                                }
-                                .background(Color.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: TribeTheme.cardRadius, style: .continuous))
+                                Text(isLoading ? (isSignup ? "Creating…" : "Signing in…") : (isSignup ? "Create account" : "Sign in"))
+                                    .frame(maxWidth: .infinity)
                             }
+                            .buttonStyle(.borderedProminent)
+                            .tint(TribeTheme.buttonTint)
+                            .controlSize(.large)
                             .disabled(isLoading || !canSubmit)
                             .opacity(isLoading ? 0.6 : 1)
 

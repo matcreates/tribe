@@ -437,40 +437,33 @@ private struct AddSubscriberSheet: View {
     let onAdd: () -> Void
 
     var body: some View {
-        ZStack {
-            TribeTheme.bg.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Add subscriber")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.primary)
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Email", text: $email)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .textContentType(.emailAddress)
 
-                TextField("Email", text: $email)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(.primary.opacity(0.05))
-                    .clipShape(Capsule())
-
-                TextField("Name (optional)", text: $name)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(.primary.opacity(0.05))
-                    .clipShape(Capsule())
-
-                HStack {
-                    Button("Cancel", action: onCancel)
-                        .foregroundStyle(.primary.opacity(0.4))
-                    Spacer()
-                    Button("Add", action: onAdd)
-                        .disabled(email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .foregroundStyle(.primary)
+                    TextField("Name (optional)", text: $name)
                 }
-                .padding(.top, 6)
-                Spacer()
+
+                Section {
+                    Button(action: onAdd) {
+                        Text("Add subscriber")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
             }
-            .padding(18)
+            .navigationTitle("Add subscriber")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+            }
         }
     }
 }
@@ -483,36 +476,42 @@ private struct ImportPreviewSheet: View {
     let onImport: () -> Void
 
     var body: some View {
-        ZStack {
-            TribeTheme.bg.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Import preview")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.primary)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Total in file: \(preview.totalInFile)")
-                    Text("Duplicates: \(preview.duplicates)")
-                    Text("Invalid: \(preview.invalid)")
-                    Text("Will import: \(preview.toImport)")
+        NavigationStack {
+            Form {
+                Section {
+                    LabeledContent("Total in file", value: "\(preview.totalInFile)")
+                    LabeledContent("Duplicates", value: "\(preview.duplicates)")
+                    LabeledContent("Invalid", value: "\(preview.invalid)")
+                    LabeledContent("Will import", value: "\(preview.toImport)")
                 }
-                .font(.system(size: 13))
-                .foregroundStyle(.primary.opacity(0.5))
 
-                Toggle("Send verification emails", isOn: $sendVerification)
-                    .foregroundStyle(.primary)
-                    .tint(.primary.opacity(0.6))
-
-                HStack {
-                    Button("Cancel", action: onCancel).foregroundStyle(.primary.opacity(0.4))
-                    Spacer()
-                    Button(isImporting ? "Importing…" : "Import", action: onImport)
-                        .disabled(isImporting || preview.emails.isEmpty)
-                        .foregroundStyle(.primary)
+                Section {
+                    Toggle("Send verification emails", isOn: $sendVerification)
+                        .tint(.primary.opacity(0.6))
                 }
-                Spacer()
+
+                Section {
+                    Button(action: onImport) {
+                        HStack {
+                            Spacer()
+                            if isImporting {
+                                ProgressView()
+                            } else {
+                                Text("Import")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isImporting || preview.emails.isEmpty)
+                }
             }
-            .padding(18)
+            .navigationTitle("Import preview")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+            }
         }
     }
 }
@@ -569,33 +568,27 @@ private struct ExportSheet: View {
     let text: String
 
     var body: some View {
-        ZStack {
-            TribeTheme.bg.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Export")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.primary)
-
-                Text("Copied to clipboard")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.primary.opacity(0.4))
-
-                ScrollView {
+        NavigationStack {
+            List {
+                Section {
                     Text(text)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.primary.opacity(0.5))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(.primary.opacity(0.04))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .foregroundStyle(.secondary)
+                } footer: {
+                    Text("Automatically copied to clipboard.")
+                        .font(.caption)
                 }
 
-                Button("Copy") { UIPasteboard.general.string = text }
-                    .foregroundStyle(.primary)
-                    .padding(.top, 6)
-                Spacer()
+                Section {
+                    Button {
+                        UIPasteboard.general.string = text
+                    } label: {
+                        Label("Copy to clipboard", systemImage: "doc.on.doc")
+                    }
+                }
             }
-            .padding(18)
+            .navigationTitle("Export")
+            .navigationBarTitleDisplayMode(.inline)
         }
         .onAppear { UIPasteboard.general.string = text }
     }

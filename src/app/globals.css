@@ -59,7 +59,7 @@
 
 /* Landing page dotted notebook background */
 .landing-paper-bg {
-  background-color: rgb(252, 250, 247);
+  background-color: #EFEDE7;
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
 }
@@ -87,9 +87,9 @@
 
 /* Light mode overrides */
 [data-theme="light"] {
-  --bg-base: 252, 250, 247;
+  --bg-base: 239, 237, 231;
   --bg-elevated: 255, 255, 255;
-  --bg-surface: 252, 250, 247;
+  --bg-surface: 239, 237, 231;
   --text-primary: 28, 28, 28;
   --text-secondary: 28, 28, 28;
   --border-color: 28, 28, 28;

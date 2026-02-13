@@ -19,13 +19,22 @@ struct ConversationView: View {
     // Weekly send limit
     @State private var canSendEmail: Bool = true
     @State private var nextResetDate: Date?
+    @State private var ownerName: String = ""
 
     // Inline compose state
     @State private var composeBody = ""
     @State private var composeSubject = ""
-    @State private var showSubjectPrompt = false
     @State private var isSending = false
-    @FocusState private var isComposeFocused: Bool
+    @FocusState private var focusedField: ComposeField?
+
+    enum ComposeField: Hashable {
+        case body, subject
+    }
+
+    /// Whether the compose area is active (either field focused).
+    private var isComposeActive: Bool {
+        focusedField != nil
+    }
 
     // Schedule
     @State private var showSchedulePicker = false
@@ -35,6 +44,8 @@ struct ConversationView: View {
     @State private var showTestSheet = false
     @State private var testEmail = ""
     @State private var isSendingTest = false
+    @State private var testSendError: String?
+    @State private var testSendSuccessEmail: String?
 
     var body: some View {
         ZStack {
@@ -43,26 +54,32 @@ struct ConversationView: View {
                 .scaleEffect(showSettings ? 0.96 : 1)
                 .allowsHitTesting(!showSettings)
 
+            // Header gradient always on top, never animated with blur/scale
+            VStack(spacing: 0) {
+                headerGradient
+                Spacer()
+            }
+            .allowsHitTesting(false)
+
+            // Header content (tappable)
+            if !showSettings {
+                VStack(spacing: 0) {
+                    headerContent
+                    Spacer()
+                }
+            }
+
             if showSettings {
                 TribeSettingsOverlay(
-                    dismiss: { withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { showSettings = false } },
+                    dismiss: { withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { showSettings = false } },
                     memberCount: verifiedCount
                 )
-                .transition(.asymmetric(
-                    insertion: .scale(scale: 0.85, anchor: .top).combined(with: .opacity),
-                    removal: .scale(scale: 0.85, anchor: .top).combined(with: .opacity)
-                ))
-                .zIndex(1)
+                .ignoresSafeArea(.keyboard) // keyboard handled manually inside the overlay
+                .transition(.opacity.animation(.easeInOut(duration: 0.25)))
+                .zIndex(2)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.78), value: showSettings)
-        .alert("Subject", isPresented: $showSubjectPrompt) {
-            TextField("Hello Tribe", text: $composeSubject)
-            Button("Send") { Task { await sendMessage() } }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Enter a subject for your email")
-        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.85), value: showSettings)
         .sheet(isPresented: $showTestSheet) { testEmailSheet }
         .fullScreenCover(isPresented: $showSchedulePicker) { scheduleSheet }
         .task { await loadFeed() }
@@ -83,7 +100,6 @@ struct ConversationView: View {
 
             // Content layer
             VStack(spacing: 0) {
-                // Spacer for header clearance
                 Color.clear.frame(height: 0)
 
                 if isLoading && feedItems.isEmpty {
@@ -101,22 +117,52 @@ struct ConversationView: View {
                         }
                 }
             }
-
-            // Header overlay (floats on top with blur)
-            VStack(spacing: 0) {
-                headerBar
-                Spacer()
-            }
         }
     }
 
-    // MARK: - Header (gradient + blur, member count)
+    // MARK: - Header
 
-    private var headerBar: some View {
+    /// Static gradient + blur background – never animated, always visible
+    private var headerGradient: some View {
+        Color.clear
+            .frame(height: 160)
+            .background(
+                ZStack {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white, location: 0),
+                                    .init(color: .white, location: 0.6),
+                                    .init(color: .clear, location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+
+                    LinearGradient(
+                        stops: [
+                            .init(color: TribeTheme.bg, location: 0),
+                            .init(color: TribeTheme.bg.opacity(0.5), location: 0.5),
+                            .init(color: .clear, location: 1.0)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+                .ignoresSafeArea(edges: .top)
+            )
+    }
+
+    /// Tappable header content – liquid glass pill with avatar slightly overlapping top
+    private var headerContent: some View {
         Button {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { showSettings = true }
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { showSettings = true }
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: 0) {
+                // Profile image – slight overlap with the pill
                 Image("TribeLogo")
                     .resizable()
                     .renderingMode(.template)
@@ -126,52 +172,35 @@ struct ConversationView: View {
                     .padding(12)
                     .background(Color(uiColor: .label))
                     .clipShape(Circle())
+                    .zIndex(1)
+                    .offset(y: 10) // slight overlap into the pill
 
-                Text("Your Tribe")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color(uiColor: .label))
+                // Liquid glass pill
+                HStack(spacing: 5) {
+                    VStack(spacing: 1) {
+                        Text("Your Tribe")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Color(uiColor: .label))
 
-                Text("\(verifiedCount) members")
-                    .font(.system(size: 11))
-                    .foregroundColor(Color(uiColor: .secondaryLabel))
+                        Text("\(verifiedCount) members")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(uiColor: .secondaryLabel))
+                    }
+
+                    // Native Apple disclosure indicator style
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(uiColor: .tertiaryLabel))
+                }
+                .padding(.top, 14) // just enough for the slight overlap
+                .padding(.bottom, 9)
+                .padding(.horizontal, 20)
+                .liquidGlass(in: Capsule())
             }
-            .opacity(showSettings ? 0 : 1)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        // Extra space below so the gradient+blur extends further down
-        .padding(.bottom, 70)
-        .background(
-            ZStack {
-                // Blur layer: full blur at top, fading to no blur at bottom
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .mask(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white, location: 0),
-                                .init(color: .white, location: 0.6),
-                                .init(color: .clear, location: 1.0)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-
-                // Color gradient: opaque bg at top → transparent at bottom
-                LinearGradient(
-                    stops: [
-                        .init(color: TribeTheme.bg, location: 0),
-                        .init(color: TribeTheme.bg.opacity(0.5), location: 0.5),
-                        .init(color: .clear, location: 1.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .ignoresSafeArea(edges: .top)
-        )
+        .padding(.top, 4)
     }
 
     // MARK: - Empty State
@@ -225,13 +254,26 @@ struct ConversationView: View {
             .scrollDismissesKeyboard(.interactively)
             .scrollBounceBehavior(.always)
             .refreshable { await loadFeed() }
-            .onTapGesture { isComposeFocused = false }
+            .onTapGesture {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    focusedField = nil
+                }
+                // Re-anchor to bottom after keyboard dismisses
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        proxy.scrollTo("bottom-anchor", anchor: .bottom)
+                    }
+                }
+            }
             .onChange(of: feedItems.count) { _, _ in
                 scrollToBottom(proxy: proxy, delay: 0.15)
             }
             .onChange(of: showSettings) { old, new in
                 if old == true && new == false {
-                    scrollToBottom(proxy: proxy, delay: 0.4)
+                    // Scroll without animation to avoid visual jump
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        proxy.scrollTo("bottom-anchor", anchor: .bottom)
+                    }
                 }
             }
         }
@@ -400,6 +442,11 @@ struct ConversationView: View {
         }
     }
 
+    /// Whether the body has non-empty text (drives subject row visibility).
+    private var hasBodyText: Bool {
+        !composeBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var composeBar: some View {
         VStack(spacing: 0) {
             // Weekly limit countdown
@@ -414,34 +461,45 @@ struct ConversationView: View {
 
             HStack(alignment: .bottom, spacing: 8) {
                 // Text input – capsule when idle, rounded rect when active
-                HStack(alignment: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    // Subject row – inside the glass container, appears when typing
+                    if hasBodyText && isComposeActive {
+                        HStack(spacing: 8) {
+                            Text("Subject")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(.primary.opacity(0.35))
+                            TextField("Hello Tribe", text: $composeSubject)
+                                .font(.system(size: 15))
+                                .textInputAutocapitalization(.sentences)
+                                .focused($focusedField, equals: .subject)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 10)
+                        .padding(.bottom, 6)
+
+                        Divider().opacity(0.2).padding(.horizontal, 12)
+                    }
+
+                    // Message body
                     TextField("Your message", text: $composeBody, axis: .vertical)
                         .font(.system(size: 16))
                         .lineLimit(1...6)
-                        .focused($isComposeFocused)
+                        .focused($focusedField, equals: .body)
                         .disabled(!canSendEmail)
-                        .padding(.horizontal, isComposeFocused ? 16 : 14)
+                        .padding(.horizontal, isComposeActive ? 16 : 14)
                         .padding(.vertical, 10)
                 }
                 .modifier(LiquidGlassModifier(
                     shape: RoundedRectangle(
-                        cornerRadius: isComposeFocused ? 18 : 50,
+                        cornerRadius: isComposeActive ? 18 : 50,
                         style: .continuous
                     )
                 ))
                 .opacity(canSendEmail ? 1 : 0.4)
 
                 // Send button (only visible when typing and allowed)
-                if canSendEmail && !composeBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Button {
-                        showSubjectPrompt = true
-                    } label: {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 36))
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .blue)
-                    }
-                    .contextMenu {
+                if canSendEmail && hasBodyText {
+                    Menu {
                         Button {
                             showTestSheet = true
                         } label: {
@@ -452,15 +510,23 @@ struct ConversationView: View {
                         } label: {
                             Label("Schedule", systemImage: "clock")
                         }
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 36))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .blue)
+                    } primaryAction: {
+                        Task { await sendMessage() }
                     }
                     .transition(.scale.combined(with: .opacity))
                 }
             }
         }
-        .padding(.horizontal, isComposeFocused ? 16 : 34)
+        .padding(.horizontal, isComposeActive ? 16 : 34)
         .padding(.top, 8)
         .padding(.bottom, 8)
-        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isComposeFocused)
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isComposeActive)
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: hasBodyText)
         .background(
             ZStack {
                 // Blur layer that fades out (masked so blur goes from full to none, bottom→top)
@@ -498,48 +564,73 @@ struct ConversationView: View {
 
     private var testEmailSheet: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Send a test email to yourself")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.primary.opacity(0.5))
-
-                TextField("Your email", text: $testEmail)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(TribeTheme.fieldBg)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.primary.opacity(0.08)))
-
-                Button {
-                    Task { await sendTest() }
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text(isSendingTest ? "SENDING…" : "SEND TEST")
-                            .font(.system(size: 12, weight: .semibold))
-                            .tracking(2)
-                            .foregroundStyle(Color(uiColor: .systemBackground))
-                        Spacer()
-                    }
-                    .padding(.vertical, 14)
-                    .background(Color.primary)
-                    .clipShape(Capsule())
+            Form {
+                Section {
+                    TextField("Email address", text: $testEmail)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .textContentType(.emailAddress)
+                        .autocorrectionDisabled()
+                } header: {
+                    Text("Send a test to")
+                } footer: {
+                    Text("The test email will be sent only to this address.")
+                        .font(.caption)
                 }
-                .disabled(isSendingTest || testEmail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
-                Spacer()
+                if let errorMsg = testSendError {
+                    Section {
+                        Text(errorMsg)
+                            .foregroundStyle(.red)
+                            .font(.subheadline)
+                    }
+                }
+
+                Section {
+                    Button {
+                        Task { await sendTest() }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isSendingTest {
+                                ProgressView()
+                            } else {
+                                Text("Send test")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isSendingTest || testEmail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || composeBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
             }
-            .padding(18)
             .navigationTitle("Send test")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { showTestSheet = false }
-                        .foregroundStyle(.primary.opacity(0.5))
+                }
+            }
+            .task {
+                testSendError = nil
+                // Pre-fill with user's email if empty
+                if testEmail.isEmpty {
+                    if let token = session.token,
+                       let settings = try? await APIClient.shared.settings(token: token) {
+                        testEmail = settings.settings.userEmail
+                    }
+                }
+            }
+            .alert("Test email sent!", isPresented: Binding(
+                get: { testSendSuccessEmail != nil },
+                set: { if !$0 { testSendSuccessEmail = nil } }
+            )) {
+                Button("OK") {
+                    testSendSuccessEmail = nil
+                    showTestSheet = false
+                }
+            } message: {
+                if let email = testSendSuccessEmail {
+                    Text("Your test email was sent to \(email). Check your inbox!")
                 }
             }
         }
@@ -555,22 +646,16 @@ struct ConversationView: View {
                     .datePickerStyle(.graphical)
 
                 Button {
-                    composeSubject = ""
-                    showSchedulePicker = false
-                    showSubjectPrompt = true
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("SCHEDULE")
-                            .font(.system(size: 12, weight: .semibold))
-                            .tracking(2)
-                            .foregroundStyle(Color(uiColor: .systemBackground))
-                        Spacer()
+                    Task {
+                        await scheduleMessage()
                     }
-                    .padding(.vertical, 14)
-                    .background(Color.primary)
-                    .clipShape(Capsule())
+                } label: {
+                    Text("Schedule")
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(TribeTheme.buttonTint)
+                .controlSize(.large)
                 .padding(.horizontal, 18)
 
                 Spacer()
@@ -757,13 +842,14 @@ struct ConversationView: View {
         let subject = composeSubject.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !body.isEmpty else { return }
 
-        let finalSubject = subject.isEmpty ? "Update" : subject
+        let name = ownerName.isEmpty ? "your tribe" : ownerName
+        let finalSubject = subject.isEmpty ? "You got a message from \(name)" : subject
 
         // Immediately add a local bubble with bouncy animation (like Messages)
         let tempId = "temp-\(UUID().uuidString)"
         let localEmail = FeedSentEmail(
             id: tempId,
-            subject: finalSubject == "Update" ? nil : finalSubject,
+            subject: subject.isEmpty ? nil : finalSubject,
             body: body,
             recipientCount: verifiedCount,
             openCount: 0,
@@ -774,7 +860,7 @@ struct ConversationView: View {
         // Clear input first for snappy feel
         composeBody = ""
         composeSubject = ""
-        isComposeFocused = false
+        focusedField = nil
 
         // Animate the new bubble in with a bouncy spring
         withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
@@ -799,21 +885,62 @@ struct ConversationView: View {
         }
     }
 
-    private func sendTest() async {
+    private func scheduleMessage() async {
         guard let token = session.token else { return }
         let body = composeBody.trimmingCharacters(in: .whitespacesAndNewlines)
-        let email = testEmail.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !body.isEmpty, !email.isEmpty else { return }
+        let subject = composeSubject.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !body.isEmpty else { return }
 
+        let name = ownerName.isEmpty ? "your tribe" : ownerName
+        let finalSubject = subject.isEmpty ? "You got a message from \(name)" : subject
+
+        showSchedulePicker = false
+        composeBody = ""
+        composeSubject = ""
+        focusedField = nil
+
+        do {
+            try await APIClient.shared.scheduleEmail(token: token, subject: finalSubject, body: body, scheduledAt: scheduledAt, allowReplies: true)
+            toast.show("Scheduled")
+        } catch {
+            toast.show("Failed to schedule")
+        }
+    }
+
+    private func sendTest() async {
+        guard let token = session.token else {
+            print("[SendTest] No token available")
+            testSendError = "Not logged in. Please restart the app."
+            return
+        }
+        let body = composeBody.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = testEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !body.isEmpty else {
+            testSendError = "Please write a message first."
+            return
+        }
+        guard !email.isEmpty else {
+            testSendError = "Please enter an email address."
+            return
+        }
+
+        testSendError = nil
         isSendingTest = true
         defer { isSendingTest = false }
 
+        let subject = composeSubject.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = ownerName.isEmpty ? "your tribe" : ownerName
+        let finalSubject = subject.isEmpty ? "You got a message from \(name)" : subject
+
+        print("[SendTest] Sending test email to \(email), subject: \(finalSubject), body length: \(body.count)")
+
         do {
-            try await APIClient.shared.sendTestEmail(token: token, to: email, subject: composeSubject.isEmpty ? "Test" : composeSubject, body: body, allowReplies: true)
-            toast.show("Test sent")
-            showTestSheet = false
+            try await APIClient.shared.sendTestEmail(token: token, to: email, subject: finalSubject, body: body, allowReplies: true)
+            print("[SendTest] Success!")
+            testSendSuccessEmail = email
         } catch {
-            toast.show("Failed to send test")
+            print("[SendTest] Error: \(error)")
+            testSendError = "Failed to send: \(error.localizedDescription)"
         }
     }
 
@@ -965,6 +1092,11 @@ struct ConversationView: View {
             filter: "verified", sort: "newest", search: ""
         ) {
             verifiedCount = resp.totalVerified
+        }
+
+        // Load owner name for subject fallback
+        if let settings = try? await APIClient.shared.settings(token: token) {
+            ownerName = settings.settings.ownerName
         }
     }
 }

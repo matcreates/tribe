@@ -20,7 +20,7 @@ export function Shell({ children, sentEmails, user }: ShellProps) {
     <div 
       className="min-h-screen transition-colors duration-300" 
       style={{ 
-        backgroundColor: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)',
+        backgroundColor: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)',
       }}
     >
       <Sidebar sentEmails={sentEmails} user={user} />
