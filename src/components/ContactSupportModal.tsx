@@ -82,7 +82,7 @@ export function ContactSupportModal({ isOpen, onClose, reason }: ContactSupportM
         className={`relative w-full max-w-[420px] mx-4 rounded-[16px] overflow-hidden border ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         {/* Header */}
         <div className="p-6 pb-0">

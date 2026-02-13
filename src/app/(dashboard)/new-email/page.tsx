@@ -452,7 +452,7 @@ export default function NewEmailPage() {
             className={`relative w-full max-w-[400px] mx-4 rounded-[16px] p-6 border ${
               isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
             }`}
-            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+            style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
           >
             <button
               onClick={closeTestModal}
@@ -778,7 +778,7 @@ export default function NewEmailPage() {
                       className={`absolute right-0 bottom-full mb-2 w-44 rounded-[10px] border overflow-hidden shadow-xl z-10 ${
                         isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
                       }`}
-                      style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(28, 28, 28)' }}
+                      style={{ background: isLight ? '#EFEDE7' : 'rgb(28, 28, 28)' }}
                     >
                       <button
                         onClick={() => {

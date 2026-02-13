@@ -45,7 +45,7 @@ export function ImportChooserModal({
         className={`relative w-full max-w-[400px] mx-4 rounded-2xl border p-8 ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         {/* Icon */}
         <div className="flex justify-center mb-5">
@@ -181,7 +181,7 @@ export function ManualEntryModal({
         className={`relative w-full max-w-[400px] mx-4 rounded-2xl border p-8 ${
           isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
         }`}
-        style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+        style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
       >
         {/* Header */}
         <h2 className={`text-[18px] font-medium text-center mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>

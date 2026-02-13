@@ -49,7 +49,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
       {/* Mobile Header */}
       <header 
         className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4 transition-colors duration-300" 
-        style={{ background: theme === 'light' ? 'rgb(252, 250, 247)' : 'rgb(18, 18, 18)' }}
+        style={{ background: theme === 'light' ? '#EFEDE7' : 'rgb(18, 18, 18)' }}
       >
         <Link href="/dashboard" className="hover:opacity-100 transition-opacity">
           <TribeLogo className="h-[18px] w-auto opacity-90" />
@@ -85,7 +85,7 @@ export function Sidebar({ sentEmails, user }: SidebarProps) {
           ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
           ${theme === 'light' ? 'lg:border-black/[0.06]' : 'lg:border-white/[0.06]'}
         `}
-        style={{ background: theme === 'light' ? 'rgb(252, 250, 247)' : 'rgb(18, 18, 18)' }}
+        style={{ background: theme === 'light' ? '#EFEDE7' : 'rgb(18, 18, 18)' }}
       >
         {/* Logo - Hidden on mobile (shown in header instead) */}
         <div className="hidden lg:block px-10 pt-12 pb-8">

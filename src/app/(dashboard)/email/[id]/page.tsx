@@ -476,7 +476,7 @@ export default function EmailInsightsPage({ params }: EmailInsightsPageProps) {
             className={`relative w-full max-w-[360px] mx-4 rounded-[16px] p-6 border ${
               isLight ? 'border-black/[0.08]' : 'border-white/[0.08]'
             }`}
-            style={{ background: isLight ? 'rgb(252, 250, 247)' : 'rgb(24, 24, 24)' }}
+            style={{ background: isLight ? '#EFEDE7' : 'rgb(24, 24, 24)' }}
           >
             <h3 className={`text-[16px] font-medium mb-2 ${isLight ? 'text-black/85' : 'text-white/90'}`}>Delete this email?</h3>
             <p className={`text-[13px] mb-6 leading-relaxed ${isLight ? 'text-black/50' : 'text-white/50'}`}>

@@ -50,7 +50,7 @@ export default function AdminPage() {
   // Show nothing useful to non-admins
   if (error === "not_found") {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "rgb(252, 250, 247)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#EFEDE7" }}>
         <p className="text-[14px] text-black/40">This page doesn&apos;t exist.</p>
       </div>
     );
@@ -58,7 +58,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "rgb(252, 250, 247)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#EFEDE7" }}>
         <p className="text-[13px] text-black/30">Loading...</p>
       </div>
     );
@@ -66,7 +66,7 @@ export default function AdminPage() {
 
   if (error || !stats) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "rgb(252, 250, 247)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#EFEDE7" }}>
         <p className="text-[14px] text-black/40">{error || "Something went wrong"}</p>
       </div>
     );
@@ -108,7 +108,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "rgb(252, 250, 247)" }}>
+    <div className="min-h-screen" style={{ background: "#EFEDE7" }}>
       <div className="max-w-3xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
