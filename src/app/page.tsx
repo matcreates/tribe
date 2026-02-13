@@ -159,6 +159,7 @@ export default async function LandingPage() {
                   src="/iphone-mockup.png" 
                   alt="Tribe iPhone app" 
                   className="w-full h-auto"
+                  style={{ mixBlendMode: 'multiply' }}
                 />
               </div>
             </div>
