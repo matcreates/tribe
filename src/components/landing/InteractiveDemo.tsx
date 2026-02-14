@@ -311,6 +311,117 @@ function DemoWrite() {
   const [body, setBody] = useState("Hey,\n\nI wanted to share something with you that I've been quietly building for the past few months.\n\nIt's still early, but your feedback means everything to me. I'd love to hear what you think.\n\nMore details coming soon.");
   const [allowReplies, setAllowReplies] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [sendState, setSendState] = useState<"idle" | "sending" | "done">("idle");
+  const [progress, setProgress] = useState(0);
+
+  const handleSend = () => {
+    if (sendState !== "idle") return;
+    setSendState("sending");
+    setProgress(0);
+    
+    // Animate progress
+    const duration = 3000;
+    const start = Date.now();
+    const animate = () => {
+      const elapsed = Date.now() - start;
+      const p = Math.min(elapsed / duration, 1);
+      // Ease out curve for natural feel
+      const eased = 1 - Math.pow(1 - p, 3);
+      setProgress(eased * 100);
+      
+      if (p < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setSendState("done");
+        // Reset after showing success
+        setTimeout(() => {
+          setSendState("idle");
+          setProgress(0);
+        }, 2500);
+      }
+    };
+    requestAnimationFrame(animate);
+  };
+
+  // Sending overlay
+  if (sendState !== "idle") {
+    return (
+      <div className="space-y-5">
+        <h1 className="text-[18px] font-normal text-black/85" style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}>Write</h1>
+        
+        <div className="rounded-[14px] border border-black/[0.08] overflow-hidden bg-white/70 relative">
+          <div className="flex flex-col items-center justify-center py-16 px-6 relative">
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 transition-opacity duration-1000"
+              style={{
+                background: sendState === "done"
+                  ? 'radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 70%)'
+                  : 'radial-gradient(circle at center, rgba(0, 0, 0, 0.03) 0%, transparent 70%)',
+                opacity: 1,
+              }}
+            />
+            
+            {/* Icon */}
+            <div className="relative mb-5">
+              {sendState === "done" ? (
+                <div 
+                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500"
+                  style={{ background: 'rgba(16, 185, 129, 0.12)' }}
+                >
+                  <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13.5 4.5l-7 7L3 8" />
+                  </svg>
+                </div>
+              ) : (
+                <div 
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(0, 0, 0, 0.04)' }}
+                >
+                  <svg className="w-6 h-6 text-black/40 animate-pulse" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
+                    <path d="M2 5.5l6 3.5 6-3.5" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Status text */}
+            <p className="text-[14px] font-medium text-black/80 mb-1">
+              {sendState === "done" ? "Email sent!" : "Sending to your tribe..."}
+            </p>
+            <p className="text-[11px] text-black/40 mb-6">
+              {sendState === "done" 
+                ? "1,247 members received your email" 
+                : `${Math.round(progress * 12.47)} of 1,247 members`
+              }
+            </p>
+
+            {/* Progress bar */}
+            <div className="w-full max-w-[240px] relative">
+              <div 
+                className="h-[3px] rounded-full overflow-hidden"
+                style={{ background: 'rgba(0, 0, 0, 0.06)' }}
+              >
+                <div 
+                  className="h-full rounded-full transition-all duration-100 ease-out"
+                  style={{ 
+                    width: `${progress}%`,
+                    background: sendState === "done" 
+                      ? 'rgb(16, 185, 129)' 
+                      : 'rgba(0, 0, 0, 0.35)',
+                    boxShadow: sendState === "done"
+                      ? '0 0 12px rgba(16, 185, 129, 0.5)'
+                      : '0 0 8px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -383,6 +494,7 @@ function DemoWrite() {
         {/* Actions */}
         <div className="px-4 py-3 flex items-center gap-2">
           <button 
+            onClick={handleSend}
             className="px-5 py-2 rounded-[8px] text-[10px] font-medium tracking-wider uppercase text-black/80 bg-black/[0.06] border border-black/[0.1] hover:bg-black/[0.1] transition-colors"
           >
             Send
