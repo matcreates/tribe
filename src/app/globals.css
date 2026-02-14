@@ -427,3 +427,22 @@ select option {
   -webkit-background-clip: text;
   background-clip: text;
 }
+
+/* Interactive demo glowing shadow */
+@keyframes demo-glow {
+  0%, 100% {
+    box-shadow: 
+      0 4px 30px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+  50% {
+    box-shadow: 
+      0 8px 60px rgba(0, 0, 0, 0.1),
+      0 0 40px rgba(232, 184, 74, 0.08),
+      0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.demo-glow-shadow {
+  animation: demo-glow 4s ease-in-out infinite;
+}

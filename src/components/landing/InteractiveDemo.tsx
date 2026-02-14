@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 type DemoTab = "dashboard" | "write" | "tribe" | "gifts" | "join";
@@ -41,7 +41,7 @@ export function InteractiveDemo() {
 
         {/* Desktop: Interactive demo */}
         <div 
-          className="hidden lg:block rounded-2xl border border-black/[0.1] overflow-hidden shadow-xl"
+          className="hidden lg:block rounded-2xl border border-black/[0.1] overflow-hidden demo-glow-shadow"
           style={{ 
             background: "#ffffff",
             aspectRatio: "16/10",
@@ -149,7 +149,13 @@ export function InteractiveDemo() {
         </div>
 
         <p className="hidden lg:block text-center text-[13px] text-black/35 mt-6">
-          Interactive demo · Click around to explore Tribe
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            Live demo · Click around and try it yourself
+          </span>
         </p>
       </div>
     </section>
@@ -305,14 +311,83 @@ function DemoChart() {
   );
 }
 
+const FULL_SUBJECT = "Something I've been working on";
+const FULL_BODY = "Hey,\n\nI wanted to share something with you that I've been quietly building for the past few months.\n\nIt's still early, but your feedback means everything to me. I'd love to hear what you think.\n\nMore details coming soon.";
+
 // Demo Write
 function DemoWrite() {
-  const [subject, setSubject] = useState("Something I've been working on");
-  const [body, setBody] = useState("Hey,\n\nI wanted to share something with you that I've been quietly building for the past few months.\n\nIt's still early, but your feedback means everything to me. I'd love to hear what you think.\n\nMore details coming soon.");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
   const [allowReplies, setAllowReplies] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [sendState, setSendState] = useState<"idle" | "sending" | "done">("idle");
   const [progress, setProgress] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+  const [showCursor, setShowCursor] = useState(true);
+  const [cursorField, setCursorField] = useState<"subject" | "body">("subject");
+  const hasTyped = useRef(false);
+  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Typing animation
+  useEffect(() => {
+    if (hasTyped.current) return;
+    hasTyped.current = true;
+
+    let subjectIdx = 0;
+    let bodyIdx = 0;
+    let cancelled = false;
+
+    const typeSubject = () => {
+      if (cancelled) return;
+      if (subjectIdx <= FULL_SUBJECT.length) {
+        setSubject(FULL_SUBJECT.slice(0, subjectIdx));
+        subjectIdx++;
+        setTimeout(typeSubject, 40 + Math.random() * 30);
+      } else {
+        // Brief pause, then type body
+        setCursorField("body");
+        setTimeout(typeBody, 400);
+      }
+    };
+
+    const typeBody = () => {
+      if (cancelled) return;
+      if (bodyIdx <= FULL_BODY.length) {
+        setBody(FULL_BODY.slice(0, bodyIdx));
+        bodyIdx++;
+        // Faster for body since it's longer
+        const char = FULL_BODY[bodyIdx - 1];
+        const delay = char === '\n' ? 120 : (20 + Math.random() * 15);
+        setTimeout(typeBody, delay);
+      } else {
+        // Done typing
+        setIsTyping(false);
+        setShowCursor(false);
+      }
+    };
+
+    // Start after a small delay
+    setTimeout(typeSubject, 600);
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // Blinking cursor
+  useEffect(() => {
+    if (!isTyping) return;
+    const interval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 530);
+    return () => clearInterval(interval);
+  }, [isTyping]);
+
+  // Auto-resize body textarea
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.style.height = 'auto';
+      bodyRef.current.style.height = bodyRef.current.scrollHeight + 'px';
+    }
+  }, [body]);
 
   const handleSend = () => {
     if (sendState !== "idle") return;
@@ -439,35 +514,53 @@ function DemoWrite() {
         
         {/* Subject */}
         <div className="px-4 py-3 border-b border-black/[0.06]">
-          <input
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full text-[16px] text-black/80 bg-transparent focus:outline-none"
-            style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
-            placeholder="Subject..."
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => { setSubject(e.target.value); setIsTyping(false); setShowCursor(false); }}
+              className="w-full text-[16px] text-black/80 bg-transparent focus:outline-none"
+              style={{ fontFamily: 'HeritageSerif, Georgia, serif' }}
+              placeholder="Subject..."
+            />
+            {isTyping && cursorField === "subject" && (
+              <span 
+                className="absolute top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ 
+                  left: `${subject.length * 8.8}px`,
+                  opacity: showCursor ? 1 : 0,
+                  transition: 'opacity 0.1s',
+                }}
+              >
+                <span className="inline-block w-[2px] h-[18px] bg-black/70 rounded-full" />
+              </span>
+            )}
+          </div>
         </div>
         
         {/* Message */}
         <div className="px-4 py-3 border-b border-black/[0.06]">
-          <textarea
-            value={body}
-            onChange={(e) => {
-              setBody(e.target.value);
-              // Auto-resize
-              e.target.style.height = 'auto';
-              e.target.style.height = e.target.scrollHeight + 'px';
-            }}
-            ref={(el) => {
-              if (el) {
-                el.style.height = 'auto';
-                el.style.height = el.scrollHeight + 'px';
-              }
-            }}
-            className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed overflow-hidden"
-            placeholder="Write your message..."
-          />
+          <div className="relative">
+            <textarea
+              value={body}
+              onChange={(e) => {
+                setBody(e.target.value);
+                setIsTyping(false);
+                setShowCursor(false);
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              ref={(el) => {
+                bodyRef.current = el;
+                if (el) {
+                  el.style.height = 'auto';
+                  el.style.height = el.scrollHeight + 'px';
+                }
+              }}
+              className="w-full text-[12px] text-black/70 bg-transparent focus:outline-none resize-none leading-relaxed overflow-hidden"
+              placeholder="Write your message..."
+            />
+          </div>
         </div>
 
         {/* Signature preview */}
