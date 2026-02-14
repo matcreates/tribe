@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { HeroVisualization } from "@/components/landing/HeroVisualization";
+import { IPhoneMockup } from "@/components/landing/IPhoneMockup";
 
 export default async function LandingPage() {
   // If user is already logged in, redirect to dashboard
@@ -153,14 +154,7 @@ export default async function LandingPage() {
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* iPhone mockup */}
             <div className="flex justify-center md:justify-end order-2 md:order-1">
-              <div className="relative w-[280px] sm:w-[320px] md:w-[400px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="/iphone-mockup.png?v=2" 
-                  alt="Tribe iPhone app" 
-                  className="w-full h-auto"
-                />
-              </div>
+              <IPhoneMockup />
             </div>
             
             {/* Text content */}
