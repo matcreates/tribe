@@ -42,7 +42,7 @@ export function IPhoneMockup() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [sendBtnScale, setSendBtnScale] = useState(1);
   const [newMsgVisible, setNewMsgVisible] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
   // Start typing animation after a delay
@@ -113,10 +113,10 @@ export function IPhoneMockup() {
     return () => clearTimeout(startDelay);
   }, [phase]);
 
-  // Scroll to bottom when new message appears
+  // Scroll chat container to bottom when new message appears (without affecting page scroll)
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -193,7 +193,7 @@ export function IPhoneMockup() {
           className="flex flex-col overflow-hidden"
           style={{ height: "calc(100% - clamp(44px, 6%, 54px) - 90px - clamp(82px, 12%, 100px))" }}
         >
-          <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 sm:py-3 space-y-1.5 sm:space-y-2">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 sm:py-3 space-y-1.5 sm:space-y-2">
             {messages.map((msg, i) => (
               <div key={msg.id}>
                 {/* Timestamp / email label */}
@@ -242,7 +242,7 @@ export function IPhoneMockup() {
                 )}
               </div>
             ))}
-            <div ref={chatEndRef} />
+            <div />
           </div>
         </div>
 
