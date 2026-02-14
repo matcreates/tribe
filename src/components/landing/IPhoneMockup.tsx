@@ -126,7 +126,7 @@ export function IPhoneMockup() {
     <div className="relative w-[280px] sm:w-[320px] md:w-[380px]">
       {/* iPhone frame */}
       <div
-        className="relative rounded-[44px] sm:rounded-[52px] border-[6px] sm:border-[8px] border-[#1a1a1a] overflow-hidden"
+        className="relative rounded-[50px] sm:rounded-[60px] border-[6px] sm:border-[8px] border-[#1a1a1a] overflow-hidden"
         style={{
           background: "#f8f8f8",
           boxShadow:
@@ -249,9 +249,9 @@ export function IPhoneMockup() {
         {/* Input area */}
         <div className="absolute bottom-0 left-0 right-0" style={{ background: '#f8f8f8' }}>
           <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 border-t border-black/[0.06]">
-            <div className="flex items-end gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Text field */}
-              <div className="flex-1 rounded-full border border-black/[0.1] bg-white px-3 sm:px-3.5 py-1.5 sm:py-2 min-h-[30px] sm:min-h-[34px] flex items-center">
+              <div className="flex-1 rounded-full border border-black/[0.1] bg-white px-3 sm:px-3.5 h-[30px] sm:h-[34px] flex items-center">
                 <span className={`text-[11px] sm:text-[13px] leading-snug ${typedText ? "text-black" : "text-black/30"}`}>
                   {typedText || "Your message"}
                   {phase === "typing" && (
@@ -260,10 +260,10 @@ export function IPhoneMockup() {
                 </span>
               </div>
 
-              {/* Send button */}
-              <div className="flex-shrink-0 relative" style={{ width: 28, height: 28 }}>
+              {/* Send button - same height as text field */}
+              <div className="flex-shrink-0 w-[30px] h-[30px] sm:w-[34px] sm:h-[34px] relative">
                 <button
-                  className="absolute inset-0 rounded-full flex items-center justify-center transition-all duration-200"
+                  className="w-full h-full rounded-full flex items-center justify-center transition-all duration-200"
                   style={{
                     background: showSendBtn ? "#007AFF" : "transparent",
                     transform: `scale(${showSendBtn ? sendBtnScale : 0.5})`,
@@ -271,7 +271,7 @@ export function IPhoneMockup() {
                   }}
                 >
                   <svg
-                    className="w-[13px] h-[13px] sm:w-[14px] sm:h-[14px] text-white"
+                    className="w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] text-white"
                     viewBox="0 0 16 16"
                     fill="currentColor"
                   >
